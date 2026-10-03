@@ -8,6 +8,13 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - **Never** add co-author trailers (`Co-Authored-By`) or any other attribution to commits.
 - Do not push unless explicitly asked.
 
+### Branching and pull requests
+
+- `main` is production. `dev` is the integration branch.
+- Implement every issue on a branch created from `dev`, named `section/<section-name>` (kebab-case, e.g. `section/statistics`).
+- When finished, open a pull request **into `dev`** (never directly into `main`).
+- Always link the PR to its issue with a closing keyword in the PR description (e.g. `Closes #1`), so the issue closes when the PR is merged.
+
 ## Stack
 
 - Next.js 16 (App Router, React Compiler), React 19, TypeScript
