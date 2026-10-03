@@ -6,7 +6,7 @@ import { Dialog } from "@base-ui/react/dialog"
 import { MenuIcon, XIcon } from "lucide-react"
 
 import { ThemeToggle } from "@/components/layout/theme-toggle"
-import { homeSections, siteConfig, sitePages } from "@/config/site"
+import { homeSections, siteConfig } from "@/config/site"
 
 const iconButton =
   "inline-flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
@@ -51,17 +51,6 @@ export function SiteMenu() {
                     className="py-2 hover:text-primary"
                   >
                     {section.label}
-                  </Link>
-                ))}
-                <hr className="my-2" />
-                {sitePages.map((page) => (
-                  <Link
-                    key={page.href}
-                    href={page.href}
-                    onClick={close}
-                    className="py-2 hover:text-primary"
-                  >
-                    {page.label}
                   </Link>
                 ))}
               </nav>

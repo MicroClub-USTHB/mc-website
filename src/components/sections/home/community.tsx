@@ -1,9 +1,5 @@
 import { SectionContainer } from "@/components/shared/section-container"
 
 export function Community() {
-  return (
-    <SectionContainer id="community" title="MC Community">
-      {/* TODO: community highlights and social links. */}
-    </SectionContainer>
-  )
+  return <SectionContainer id="community" title="MC Community" />
 }

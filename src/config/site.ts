@@ -24,9 +24,3 @@ export const homeSections = [
 ] as const
 
 export type HomeSectionId = (typeof homeSections)[number]["id"]
-
-/** Standalone pages reachable from the menu. */
-export const sitePages = [
-  { href: "/projects", label: "Projects" },
-  { href: "/events", label: "Events" },
-] as const

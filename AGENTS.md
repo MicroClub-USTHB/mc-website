@@ -24,7 +24,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - `src/components/shared/`: reusable building blocks (`SectionContainer`).
 - `src/components/sections/<page>/`: one component per page section (e.g. `sections/home/hero.tsx` exports `Hero`).
 - `src/config/`: site metadata, section anchors, menu links.
-- `src/data/`: static content (featured projects, events).
+- Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
 ## Conventions
 
@@ -34,7 +34,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
 - Semantic tokens adapt to light/dark automatically; use the `dark:` variant only for exceptions.
 - Server Components by default; add `"use client"` only where interactivity requires it.
-- Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/events" />}>`.
+- Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
 - Before committing, run `pnpm lint`, `pnpm typecheck` and `pnpm format`.
 
 <!-- BEGIN:nextjs-agent-rules -->

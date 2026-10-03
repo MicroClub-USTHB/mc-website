@@ -42,8 +42,11 @@ src/
 │   ├── layout.tsx            # Root layout: <html>, fonts, global metadata
 │   ├── globals.css           # mcoli-ui design tokens (colors, radius, shadows, typography)
 │   ├── robots.ts / sitemap.ts
+│   ├── not-found.tsx         # Global 404 page
+│   ├── global-error.tsx      # Fallback when the root layout fails
 │   └── (site)/               # Public site route group
 │       ├── layout.tsx        # Hamburger menu + footer
+│       ├── error.tsx         # Error boundary for site pages
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
@@ -52,7 +55,6 @@ src/
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── sections/home/        # One component per landing page section (hero.tsx, about.tsx, ...)
 ├── config/site.ts            # Site metadata, section anchors, menu links
-├── data/                     # Static content (featured projects, events)
 └── lib/utils.ts              # `cn` helper
 ```
 
@@ -60,19 +62,19 @@ src/
 
 Rendered in this order by `src/app/(site)/page.tsx`. Each section has an anchor id used by the hamburger menu.
 
-| #   | Section          | Component          | Anchor               | Status                                                       |
-| --- | ---------------- | ------------------ | -------------------- | ------------------------------------------------------------ |
-| 1   | Hero             | `Hero`             | `#hero`              | Scaffold                                                     |
-| 2   | About Us         | `About`            | `#about`             | Scaffold                                                     |
-| 3   | Statistics       | `Statistics`       | `#statistics`        | Waiting for data                                             |
-| 4   | Our Sections     | `ClubSections`     | `#club-sections`     | Scaffold                                                     |
-| 5   | What We've Built | `FeaturedProjects` | `#featured-projects` | Mcoli-UI, mAIcro + "Explore more" to `/projects`             |
-| 6   | Our Departments  | `Departments`      | `#departments`       | Scaffold                                                     |
-| 7   | Featured Events  | `FeaturedEvents`   | `#featured-events`   | Tatweer, MCTF, MGV, Micro Hack + "Explore more" to `/events` |
-| 8   | Trusted By       | `TrustedBy`        | `#trusted-by`        | Waiting for sponsors list                                    |
-| 9   | MC Community     | `Community`        | `#community`         | Scaffold                                                     |
-| 10  | Ask MicroBot     | `MicroBot`         | `#microbot`          | Chatbot that replaces the FAQ                                |
-| 11  | Contact Us       | `Contact`          | `#contact`           | Small contact form                                           |
+| #   | Section          | Component          | Anchor               | Status                        |
+| --- | ---------------- | ------------------ | -------------------- | ----------------------------- |
+| 1   | Hero             | `Hero`             | `#hero`              | Scaffold                      |
+| 2   | About Us         | `About`            | `#about`             | Scaffold                      |
+| 3   | Statistics       | `Statistics`       | `#statistics`        | Waiting for data              |
+| 4   | Our Sections     | `ClubSections`     | `#club-sections`     | Scaffold                      |
+| 5   | What We've Built | `FeaturedProjects` | `#featured-projects` | Scaffold                      |
+| 6   | Our Departments  | `Departments`      | `#departments`       | Scaffold                      |
+| 7   | Featured Events  | `FeaturedEvents`   | `#featured-events`   | Scaffold                      |
+| 8   | Trusted By       | `TrustedBy`        | `#trusted-by`        | Waiting for sponsors list     |
+| 9   | MC Community     | `Community`        | `#community`         | Scaffold                      |
+| 10  | Ask MicroBot     | `MicroBot`         | `#microbot`          | Chatbot that replaces the FAQ |
+| 11  | Contact Us       | `Contact`          | `#contact`           | Small contact form            |
 
 To add or reorder a section, update both `homeSections` in `src/config/site.ts` and `src/app/(site)/page.tsx`.
 
