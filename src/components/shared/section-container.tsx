@@ -5,6 +5,8 @@ type SectionContainerProps = React.ComponentProps<"section"> & {
   id: HomeSectionId
   title?: string
   description?: string
+  /** Light (default) or dark section. Dark applies the mcoli-ui dark tokens to the whole section. */
+  theme?: "light" | "dark"
 }
 
 /** Shared wrapper for every landing page section: anchor id, spacing, heading. */
@@ -12,6 +14,7 @@ export function SectionContainer({
   id,
   title,
   description,
+  theme = "light",
   className,
   children,
   ...props
@@ -20,7 +23,11 @@ export function SectionContainer({
     <section
       id={id}
       aria-labelledby={title ? `${id}-title` : undefined}
-      className={cn("scroll-mt-20 px-4 py-20 sm:px-6 lg:px-8", className)}
+      className={cn(
+        theme === "dark" && "dark",
+        "scroll-mt-20 bg-background px-4 py-20 text-foreground sm:px-6 lg:px-8",
+        className,
+      )}
       {...props}
     >
       <div className="mx-auto w-full max-w-6xl">

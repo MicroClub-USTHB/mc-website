@@ -2,7 +2,6 @@ import type { Metadata } from "next"
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google"
 
 import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider"
-import { ThemeProvider } from "@/components/providers/theme-provider"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import "lenis/dist/lenis.css"
@@ -36,16 +35,9 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    // next-themes sets the `dark` class on <html> before hydration.
-    <html
-      lang="en"
-      suppressHydrationWarning
-      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}
-    >
+    <html lang="en" className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}>
       <body className="flex min-h-full flex-col">
-        <ThemeProvider>
-          <SmoothScrollProvider>{children}</SmoothScrollProvider>
-        </ThemeProvider>
+        <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
     </html>
   )

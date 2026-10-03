@@ -10,7 +10,6 @@ Official MicroClub website. It replaces the current site at [microclub.info](htt
 - **mcoli-ui**, the MicroClub component library and design system (shadcn/ui registry on [Base UI](https://base-ui.com))
 - [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
 - [Motion](https://motion.dev) for animations
-- [next-themes](https://github.com/pacocoursey/next-themes) for light/dark mode
 - [lucide-react](https://lucide.dev) icons
 - [pnpm](https://pnpm.io) package manager
 
@@ -52,8 +51,8 @@ src/
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
-│   ├── providers/            # ThemeProvider (next-themes), SmoothScrollProvider (Lenis + Motion)
-│   ├── layout/               # SiteMenu (hamburger), ThemeToggle, SiteFooter
+│   ├── providers/            # SmoothScrollProvider (Lenis + Motion)
+│   ├── layout/               # SiteMenu (hamburger), SiteFooter
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── sections/home/        # One component per landing page section (hero.tsx, about.tsx, ...)
 ├── config/site.ts            # Site metadata, section anchors, menu links
@@ -86,13 +85,27 @@ All tokens live in `src/app/globals.css` and are exposed as Tailwind utilities.
 
 - **Fonts** (loaded with `next/font` in `src/app/layout.tsx`): DM Sans for body text (`font-sans`, default) and Plus Jakarta Sans for headings (`font-heading`, applied to `h1`-`h6` by default).
 - **Typography utilities**: `header-xl` / `header-lg` / `header-md` / `header-sm` / `header-xs` and `paragraph-xl` ... `paragraph-xs`.
-- **Semantic colors**: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `bg-success`, `bg-warning`, ... They switch automatically between light and dark.
+- **Semantic colors**: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `bg-success`, `bg-warning`, ... They resolve to the light or dark values depending on the section.
 - **Palette**: `baby-blue-*`, `blue-primary-*`, `purple-secondary-*`, `cyan-*`, `pink-*`, `orange-*`, `gray-*`, `gray-blue-*`, ...
 - **Other**: `shadow-xs` ... `shadow-3xl`, `blur-sm` ... `blur-xl`, `bg-it-gradient`.
 
-### Light / dark mode
+### Light and dark sections
 
-Handled by `next-themes` (`src/components/providers/theme-provider.tsx`). It follows the OS preference by default, toggles the `.dark` class on `<html>` and persists the choice in `localStorage`. Use the `dark:` variant only for exceptions; semantic tokens already adapt.
+There is no theme switcher: the site has a single theme. Each section is either light (default) or dark:
+
+```tsx
+<SectionContainer id="statistics" title="Statistics" theme="dark">
+```
+
+`theme="dark"` adds the `dark` class to the section, which swaps every semantic token (`bg-background`, `text-foreground`, `text-primary`, ...) to its dark value for that section and its children. Use the `dark:` variant only for exceptions.
+
+### Scrollbar
+
+Styled in `globals.css` with the standard `scrollbar-width` / `scrollbar-color` properties (thin, `primary` thumb on `muted` track), plus a `::-webkit-scrollbar` fallback for older browsers. Nested scroll areas inside dark sections follow the dark tokens.
+
+### Icons
+
+[lucide-react](https://lucide.dev/guide/packages/lucide-react): named imports with the `Icon` suffix (`import { MenuIcon } from "lucide-react"`), tree-shaken. Icons are `aria-hidden` by default; give icon-only buttons an `aria-label`.
 
 ## Animations and smooth scroll
 

@@ -332,6 +332,7 @@
   --surface-foreground: #000350;
 }
 
+/* Dark sections: add the `dark` class to a section (see SectionContainer `theme` prop). */
 .dark {
   color-scheme: dark;
   --background: #0a0a0a;
@@ -386,6 +387,12 @@
   }
   body {
     @apply bg-background text-foreground;
+  }
+  /* Scrollbar: standard properties (Chrome 121+, Firefox, Safari 26+), re-declared on .dark so nested scroll areas follow their section. */
+  :root,
+  .dark {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) var(--muted);
   }
   h1,
   h2,
@@ -457,4 +464,23 @@
 
 @utility bg-it-gradient {
   background: var(--it-gradient);
+}
+
+/* Scrollbar fallback for older WebKit/Blink browsers without `scrollbar-color` support. */
+@supports not (scrollbar-color: auto) {
+  ::-webkit-scrollbar {
+    width: 10px;
+    height: 10px;
+  }
+  ::-webkit-scrollbar-track {
+    background: var(--muted);
+  }
+  ::-webkit-scrollbar-thumb {
+    border: 2px solid var(--muted);
+    border-radius: var(--radius-xl);
+    background: var(--primary);
+  }
+  ::-webkit-scrollbar-thumb:hover {
+    background: var(--baby-blue-900);
+  }
 }

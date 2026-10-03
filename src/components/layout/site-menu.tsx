@@ -5,7 +5,6 @@ import Link from "next/link"
 import { Dialog } from "@base-ui/react/dialog"
 import { MenuIcon, XIcon } from "lucide-react"
 
-import { ThemeToggle } from "@/components/layout/theme-toggle"
 import { homeSections, siteConfig } from "@/config/site"
 
 const iconButton =
@@ -25,39 +24,36 @@ export function SiteMenu() {
         {siteConfig.name}
       </Link>
 
-      <div className="flex items-center gap-1">
-        <ThemeToggle />
-        <Dialog.Root open={open} onOpenChange={setOpen}>
-          <Dialog.Trigger aria-label="Open menu" className={iconButton}>
-            <MenuIcon className="size-5" />
-          </Dialog.Trigger>
-          <Dialog.Portal>
-            <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-sm" />
-            <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-3/4 flex-col gap-6 border-l bg-background p-6 shadow-lg transition duration-200 ease-in-out data-ending-style:translate-x-10 data-ending-style:opacity-0 data-starting-style:translate-x-10 data-starting-style:opacity-0 sm:max-w-sm">
-              <div className="flex items-center justify-between">
-                <Dialog.Title className="font-heading text-lg font-semibold">
-                  {siteConfig.name}
-                </Dialog.Title>
-                <Dialog.Close aria-label="Close menu" className={iconButton}>
-                  <XIcon className="size-5" />
-                </Dialog.Close>
-              </div>
-              <nav aria-label="Main" className="flex flex-col gap-1">
-                {homeSections.map((section) => (
-                  <Link
-                    key={section.id}
-                    href={`/#${section.id}`}
-                    onClick={close}
-                    className="py-2 hover:text-primary"
-                  >
-                    {section.label}
-                  </Link>
-                ))}
-              </nav>
-            </Dialog.Popup>
-          </Dialog.Portal>
-        </Dialog.Root>
-      </div>
+      <Dialog.Root open={open} onOpenChange={setOpen}>
+        <Dialog.Trigger aria-label="Open menu" className={iconButton}>
+          <MenuIcon className="size-5" />
+        </Dialog.Trigger>
+        <Dialog.Portal>
+          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-sm" />
+          <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-3/4 flex-col gap-6 border-l bg-background p-6 shadow-lg transition duration-200 ease-in-out data-ending-style:translate-x-10 data-ending-style:opacity-0 data-starting-style:translate-x-10 data-starting-style:opacity-0 sm:max-w-sm">
+            <div className="flex items-center justify-between">
+              <Dialog.Title className="font-heading text-lg font-semibold">
+                {siteConfig.name}
+              </Dialog.Title>
+              <Dialog.Close aria-label="Close menu" className={iconButton}>
+                <XIcon className="size-5" />
+              </Dialog.Close>
+            </div>
+            <nav aria-label="Main" className="flex flex-col gap-1">
+              {homeSections.map((section) => (
+                <Link
+                  key={section.id}
+                  href={`/#${section.id}`}
+                  onClick={close}
+                  className="py-2 hover:text-primary"
+                >
+                  {section.label}
+                </Link>
+              ))}
+            </nav>
+          </Dialog.Popup>
+        </Dialog.Portal>
+      </Dialog.Root>
     </header>
   )
 }
