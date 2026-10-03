@@ -392,7 +392,7 @@
   :root,
   .dark {
     scrollbar-width: thin;
-    scrollbar-color: var(--primary) var(--muted);
+    scrollbar-color: var(--foreground) var(--muted);
   }
   h1,
   h2,
@@ -478,9 +478,9 @@
   ::-webkit-scrollbar-thumb {
     border: 2px solid var(--muted);
     border-radius: var(--radius-xl);
-    background: var(--primary);
+    background: var(--foreground);
   }
   ::-webkit-scrollbar-thumb:hover {
-    background: var(--baby-blue-900);
+    background: var(--muted-foreground);
   }
 }

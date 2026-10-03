@@ -101,7 +101,7 @@ There is no theme switcher: the site has a single theme. Each section is either 
 
 ### Scrollbar
 
-Styled in `globals.css` with the standard `scrollbar-width` / `scrollbar-color` properties (thin, `primary` thumb on `muted` track), plus a `::-webkit-scrollbar` fallback for older browsers. Nested scroll areas inside dark sections follow the dark tokens.
+Styled in `globals.css` with the standard `scrollbar-width` / `scrollbar-color` properties (thin, `foreground` thumb on `muted` track), plus a `::-webkit-scrollbar` fallback for older browsers. Nested scroll areas inside dark sections follow the dark tokens.
 
 ### Icons
 
