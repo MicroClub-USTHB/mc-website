@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { featuredEvents } from "@/data/featured-events"
 
 /** 3-4 highlighted events + link to the full /events page. */
-export function FeaturedEventsSection() {
+export function FeaturedEvents() {
   return (
     <SectionContainer id="featured-events" title="Featured Events">
       {/* TODO: event card design. */}

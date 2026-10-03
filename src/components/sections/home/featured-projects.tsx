@@ -5,7 +5,7 @@ import { Button } from "@/components/ui/button"
 import { featuredProjects } from "@/data/featured-projects"
 
 /** "What we've built": 2-3 highlighted projects + link to the full /projects page. */
-export function FeaturedProjectsSection() {
+export function FeaturedProjects() {
   return (
     <SectionContainer id="featured-projects" title="What We've Built">
       {/* TODO: project card design. */}

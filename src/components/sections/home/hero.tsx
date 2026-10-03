@@ -1,7 +1,7 @@
 import { SectionContainer } from "@/components/shared/section-container"
 import { siteConfig } from "@/config/site"
 
-export function HeroSection() {
+export function Hero() {
   return (
     <SectionContainer id="hero" className="flex min-h-svh items-center">
       {/* TODO: hero visual, tagline and primary call to action. */}
