@@ -1,9 +1,11 @@
 import type { Metadata } from "next"
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google"
 
+import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider"
 import { ThemeProvider } from "@/components/providers/theme-provider"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
+import "lenis/dist/lenis.css"
 import "./globals.css"
 
 // mcoli-ui typography: DM Sans for body text, Plus Jakarta Sans for headings.
@@ -38,10 +40,12 @@ export default function RootLayout({ children }: LayoutProps<"/">) {
     <html
       lang="en"
       suppressHydrationWarning
-      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full scroll-smooth antialiased")}
+      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}
     >
       <body className="flex min-h-full flex-col">
-        <ThemeProvider>{children}</ThemeProvider>
+        <ThemeProvider>
+          <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        </ThemeProvider>
       </body>
     </html>
   )

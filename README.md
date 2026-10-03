@@ -8,6 +8,8 @@ Official MicroClub website. It replaces the current site at [microclub.info](htt
 - [React 19](https://react.dev) + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
 - **mcoli-ui**, the MicroClub component library and design system (shadcn/ui registry on [Base UI](https://base-ui.com))
+- [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
+- [Motion](https://motion.dev) for animations
 - [next-themes](https://github.com/pacocoursey/next-themes) for light/dark mode
 - [lucide-react](https://lucide.dev) icons
 - [pnpm](https://pnpm.io) package manager
@@ -50,7 +52,7 @@ src/
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
-│   ├── providers/            # ThemeProvider (next-themes)
+│   ├── providers/            # ThemeProvider (next-themes), SmoothScrollProvider (Lenis + Motion)
 │   ├── layout/               # SiteMenu (hamburger), ThemeToggle, SiteFooter
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── sections/home/        # One component per landing page section (hero.tsx, about.tsx, ...)
@@ -91,6 +93,13 @@ All tokens live in `src/app/globals.css` and are exposed as Tailwind utilities.
 ### Light / dark mode
 
 Handled by `next-themes` (`src/components/providers/theme-provider.tsx`). It follows the OS preference by default, toggles the `.dark` class on `<html>` and persists the choice in `localStorage`. Use the `dark:` variant only for exceptions; semantic tokens already adapt.
+
+## Animations and smooth scroll
+
+- Lenis is mounted once in `SmoothScrollProvider` and driven by Motion's frame loop (`autoRaf: false`), so scrolling and animations share one `requestAnimationFrame`.
+- Anchor links (`/#about`) scroll smoothly through Lenis. Access the instance with `useLenis()` from `lenis/react`.
+- Animate with `motion/react` in Client Components. In Server Components, use `import * as motion from "motion/react-client"`.
+- Motion respects the OS "reduce motion" setting (`MotionConfig reducedMotion="user"`).
 
 ## Adding components
 

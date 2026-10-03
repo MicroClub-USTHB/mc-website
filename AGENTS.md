@@ -13,6 +13,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Next.js 16 (App Router, React Compiler), React 19, TypeScript
 - Tailwind CSS v4, **mcoli-ui** (MicroClub component library and design system, shadcn registry on Base UI), lucide-react
 - next-themes for light/dark mode
+- Lenis (smooth scroll) and Motion (animations)
 - pnpm
 
 ## Project structure
@@ -33,6 +34,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
 - Semantic tokens adapt to light/dark automatically; use the `dark:` variant only for exceptions.
+- Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
 - Before committing, run `pnpm lint`, `pnpm typecheck` and `pnpm format`.
