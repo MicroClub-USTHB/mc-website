@@ -184,8 +184,8 @@
   --foreground: #000350;
   --card: #ffffff;
   --card-foreground: #1e1b4b;
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
+  --popover: #ffffff;
+  --popover-foreground: #000350;
   --primary: #0006b1;
   --primary-foreground: #ffffff;
   --secondary: #e6e9ff;
@@ -325,6 +325,11 @@
   --warning: #ff6900;
   --warning-foreground: #fff7ed;
   --destructive-foreground: #ffedee;
+  --error: #e7000b;
+  --info: #2563ef;
+  --info-foreground: #ffedee;
+  --surface: #ffffff;
+  --surface-foreground: #000350;
 }
 
 .dark {
@@ -333,8 +338,8 @@
   --foreground: #fafafa;
   --card: #171717;
   --card-foreground: #fafafa;
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
+  --popover: #0a0a0a;
+  --popover-foreground: #fafafa;
   --primary: #d9ddff;
   --primary-foreground: #000350;
   --secondary: #262626;
@@ -365,6 +370,11 @@
   --warning: #ff6900;
   --warning-foreground: #fff7ed;
   --destructive-foreground: #ffedee;
+  --error: #e7000b;
+  --info: #2563ef;
+  --info-foreground: #fafafa;
+  --surface: #0a0a0a;
+  --surface-foreground: #fafafa;
 }
 
 @layer base {

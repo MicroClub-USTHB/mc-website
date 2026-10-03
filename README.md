@@ -14,7 +14,7 @@ Official MicroClub website. It replaces the current site at [microclub.info](htt
 
 ## Getting started
 
-Requirements: Node.js 20.9+ and pnpm 10+.
+Requirements: Node.js 24 (see `.nvmrc`) and pnpm 10+.
 
 ```bash
 pnpm install
