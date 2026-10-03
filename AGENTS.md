@@ -11,13 +11,15 @@ Guidelines for AI coding agents working on the official MicroClub website.
 ## Stack
 
 - Next.js 16 (App Router, React Compiler), React 19, TypeScript
-- Tailwind CSS v4, shadcn/ui on **Base UI** (`base-nova` style), lucide-react
+- Tailwind CSS v4, **mcoli-ui** (MicroClub component library and design system, shadcn registry on Base UI), lucide-react
+- next-themes for light/dark mode
 - pnpm
 
 ## Project structure
 
 - `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer.
-- `src/components/ui/`: shadcn primitives. Add them with `pnpm dlx shadcn@latest add <name>`; avoid hand edits.
+- `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
+- `src/components/providers/`: client providers (`ThemeProvider`).
 - `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`).
 - `src/components/shared/`: reusable building blocks (`SectionContainer`).
 - `src/components/sections/<page>/`: one component per page section (e.g. `sections/home/hero.tsx` exports `Hero`).
@@ -29,6 +31,8 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Section components are named after their content, **without** a `Section` suffix (`Hero`, `FeaturedEvents`, `Contact`). Files are kebab-case.
 - Wrap every landing page section in `SectionContainer` with an id from `homeSections` in `src/config/site.ts`.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
+- Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
+- Semantic tokens adapt to light/dark automatically; use the `dark:` variant only for exceptions.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/events" />}>`.
 - Before committing, run `pnpm lint`, `pnpm typecheck` and `pnpm format`.

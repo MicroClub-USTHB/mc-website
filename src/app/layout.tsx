@@ -1,16 +1,20 @@
 import type { Metadata } from "next"
-import { Geist, Geist_Mono } from "next/font/google"
+import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google"
 
+import { ThemeProvider } from "@/components/providers/theme-provider"
 import { siteConfig } from "@/config/site"
+import { cn } from "@/lib/utils"
 import "./globals.css"
 
-const geistSans = Geist({
-  variable: "--font-sans",
+// mcoli-ui typography: DM Sans for body text, Plus Jakarta Sans for headings.
+// Mapped to `font-sans` / `font-heading` in globals.css.
+const dmSans = DM_Sans({
+  variable: "--font-dm-sans",
   subsets: ["latin"],
 })
 
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
+const plusJakartaSans = Plus_Jakarta_Sans({
+  variable: "--font-plus-jakarta-sans",
   subsets: ["latin"],
 })
 
@@ -30,11 +34,15 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
+    // next-themes sets the `dark` class on <html> before hydration.
     <html
       lang="en"
-      className={`${geistSans.variable} ${geistMono.variable} h-full scroll-smooth antialiased`}
+      suppressHydrationWarning
+      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full scroll-smooth antialiased")}
     >
-      <body className="flex min-h-full flex-col">{children}</body>
+      <body className="flex min-h-full flex-col">
+        <ThemeProvider>{children}</ThemeProvider>
+      </body>
     </html>
   )
 }

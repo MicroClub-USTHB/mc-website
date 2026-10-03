@@ -1,7 +1,6 @@
 import Link from "next/link"
 
 import { SectionContainer } from "@/components/shared/section-container"
-import { Button } from "@/components/ui/button"
 import { featuredEvents } from "@/data/featured-events"
 
 /** 3-4 highlighted events + link to the full /events page. */
@@ -14,9 +13,13 @@ export function FeaturedEvents() {
           <li key={event.slug}>{event.name}</li>
         ))}
       </ul>
-      <Button className="mt-10" nativeButton={false} render={<Link href="/events" />}>
+      {/* TODO: use the mcoli-ui button once available. */}
+      <Link
+        href="/events"
+        className="mt-10 inline-flex h-10 items-center rounded-lg bg-primary px-4 font-medium text-primary-foreground transition-opacity hover:opacity-90"
+      >
         Explore more
-      </Button>
+      </Link>
     </SectionContainer>
   )
 }

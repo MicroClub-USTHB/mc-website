@@ -26,10 +26,12 @@ export function SectionContainer({
       <div className="mx-auto w-full max-w-6xl">
         {title && (
           <header className="mb-10 space-y-2">
-            <h2 id={`${id}-title`} className="font-heading text-3xl font-semibold tracking-tight">
+            <h2 id={`${id}-title`} className="header-md font-semibold">
               {title}
             </h2>
-            {description && <p className="max-w-2xl text-muted-foreground">{description}</p>}
+            {description && (
+              <p className="max-w-2xl paragraph-lg text-muted-foreground">{description}</p>
+            )}
           </header>
         )}
         {children}

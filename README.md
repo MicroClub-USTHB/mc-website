@@ -7,7 +7,8 @@ Official MicroClub website. It replaces the current site at [microclub.info](htt
 - [Next.js 16](https://nextjs.org) (App Router, React Compiler, Turbopack)
 - [React 19](https://react.dev) + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
-- [shadcn/ui](https://ui.shadcn.com) on [Base UI](https://base-ui.com) (`base-nova` style)
+- **mcoli-ui**, the MicroClub component library and design system (shadcn/ui registry on [Base UI](https://base-ui.com))
+- [next-themes](https://github.com/pacocoursey/next-themes) for light/dark mode
 - [lucide-react](https://lucide.dev) icons
 - [pnpm](https://pnpm.io) package manager
 
@@ -39,14 +40,15 @@ Open [http://localhost:3000](http://localhost:3000).
 src/
 ├── app/
 │   ├── layout.tsx            # Root layout: <html>, fonts, global metadata
-│   ├── globals.css           # Tailwind + shadcn theme tokens
+│   ├── globals.css           # mcoli-ui design tokens (colors, radius, shadows, typography)
 │   ├── robots.ts / sitemap.ts
 │   └── (site)/               # Public site route group
 │       ├── layout.tsx        # Hamburger menu + footer
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
-│   ├── ui/                   # shadcn/ui primitives (generated, do not edit by hand)
-│   ├── layout/               # SiteMenu (hamburger), SiteFooter
+│   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
+│   ├── providers/            # ThemeProvider (next-themes)
+│   ├── layout/               # SiteMenu (hamburger), ThemeToggle, SiteFooter
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── sections/home/        # One component per landing page section (hero.tsx, about.tsx, ...)
 ├── config/site.ts            # Site metadata, section anchors, menu links
@@ -74,8 +76,20 @@ Rendered in this order by `src/app/(site)/page.tsx`. Each section has an anchor 
 
 To add or reorder a section, update both `homeSections` in `src/config/site.ts` and `src/app/(site)/page.tsx`.
 
-## Adding shadcn components
+## Design system (mcoli-ui)
 
-```bash
-pnpm dlx shadcn@latest add <component>
-```
+All tokens live in `src/app/globals.css` and are exposed as Tailwind utilities.
+
+- **Fonts** (loaded with `next/font` in `src/app/layout.tsx`): DM Sans for body text (`font-sans`, default) and Plus Jakarta Sans for headings (`font-heading`, applied to `h1`-`h6` by default).
+- **Typography utilities**: `header-xl` / `header-lg` / `header-md` / `header-sm` / `header-xs` and `paragraph-xl` ... `paragraph-xs`.
+- **Semantic colors**: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `bg-success`, `bg-warning`, ... They switch automatically between light and dark.
+- **Palette**: `baby-blue-*`, `blue-primary-*`, `purple-secondary-*`, `cyan-*`, `pink-*`, `orange-*`, `gray-*`, `gray-blue-*`, ...
+- **Other**: `shadow-xs` ... `shadow-3xl`, `blur-sm` ... `blur-xl`, `bg-it-gradient`.
+
+### Light / dark mode
+
+Handled by `next-themes` (`src/components/providers/theme-provider.tsx`). It follows the OS preference by default, toggles the `.dark` class on `<html>` and persists the choice in `localStorage`. Use the `dark:` variant only for exceptions; semantic tokens already adapt.
+
+## Adding components
+
+mcoli-ui components are installed into `src/components/ui/` with the shadcn CLI (configured in `components.json`).
