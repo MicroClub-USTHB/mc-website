@@ -51,10 +51,11 @@ src/
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
-│   ├── providers/            # SmoothScrollProvider (Lenis + Motion)
 │   ├── layout/               # SiteMenu (hamburger), SiteFooter
 │   ├── shared/               # Reusable building blocks (SectionContainer)
-│   └── sections/home/        # One component per landing page section (hero.tsx, about.tsx, ...)
+│   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
+├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
+├── providers/                # SmoothScrollProvider (Lenis + Motion)
 ├── config/site.ts            # Site metadata, section anchors, menu links
 └── lib/utils.ts              # `cn` helper
 ```

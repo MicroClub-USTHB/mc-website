@@ -1,7 +1,7 @@
 import type { Metadata } from "next"
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google"
 
-import { SmoothScrollProvider } from "@/components/providers/smooth-scroll-provider"
+import { SmoothScrollProvider } from "@/providers/smooth-scroll-provider"
 import { siteConfig } from "@/config/site"
 import { cn } from "@/lib/utils"
 import "lenis/dist/lenis.css"

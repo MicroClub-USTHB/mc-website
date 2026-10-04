@@ -26,10 +26,11 @@ Guidelines for AI coding agents working on the official MicroClub website.
 
 - `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer.
 - `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
-- `src/components/providers/`: client providers (`SmoothScrollProvider`).
 - `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`).
 - `src/components/shared/`: reusable building blocks (`SectionContainer`).
-- `src/components/sections/<page>/`: one component per page section (e.g. `sections/home/hero.tsx` exports `Hero`).
+- `src/components/<section>/`: sub-components of one section (cards, pills, counters), one folder per section, e.g. `src/components/statistics/metric-card.tsx`. Create the folder with the first sub-component.
+- `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.
+- `src/providers/`: global client providers (`SmoothScrollProvider`).
 - `src/config/`: site metadata, section anchors, menu links.
 - Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
