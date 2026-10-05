@@ -12,6 +12,10 @@
   --font-heading: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
   /* Site max width: Figma desktop frames are 1440px wide (`max-w-site`). */
   --container-site: 90rem;
+  /* Motion easings (`ease-out-expo`, ...), shared by CSS transitions and Motion animations. */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);

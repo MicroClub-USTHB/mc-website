@@ -51,7 +51,8 @@ src/
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
-│   ├── layout/               # SiteMenu (hamburger), SiteFooter
+│   ├── layout/               # SiteMenu (header + hamburger menu), SiteFooter
+│   ├── site-menu/            # Menu sub-components (bar, panel, links, context)
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
@@ -89,6 +90,7 @@ All tokens live in `src/app/globals.css` and are exposed as Tailwind utilities.
 - **Typography utilities**: `header-xl` / `header-lg` / `header-md` / `header-sm` / `header-xs` and `paragraph-xl` ... `paragraph-xs`.
 - **Semantic colors**: `bg-background`, `text-foreground`, `bg-primary`, `text-muted-foreground`, `border-border`, `bg-success`, `bg-warning`, ... They resolve to the light or dark values depending on the section.
 - **Palette**: `baby-blue-*`, `blue-primary-*`, `purple-secondary-*`, `cyan-*`, `pink-*`, `orange-*`, `gray-*`, `gray-blue-*`, ...
+- **Easings**: `ease-out-expo`, `ease-out-quart`, `ease-in-out-quart` (mirrored for Motion in `src/lib/easing.ts`).
 - **Layout**: `max-w-site` (1440px, the Figma desktop frame width) for content width; section backgrounds stay full-bleed.
 - **Other**: `shadow-xs` ... `shadow-3xl`, `blur-sm` ... `blur-xl`, `bg-it-gradient`.
 

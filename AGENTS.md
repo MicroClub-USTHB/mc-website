@@ -26,7 +26,8 @@ Guidelines for AI coding agents working on the official MicroClub website.
 
 - `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer.
 - `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
-- `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`).
+- `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`). `site-menu.tsx` is a Server Component composing the header from the client islands in `src/components/site-menu/`, which share state through `menu-context.tsx`.
+- Pattern for interactive UI: keep content in Server Components and pass it as children to narrow client islands (`"use client"`) that only hold state and animations.
 - `src/components/shared/`: reusable building blocks (`SectionContainer`).
 - `src/components/<section>/`: sub-components of one section (cards, pills, counters), one folder per section, e.g. `src/components/statistics/metric-card.tsx`. Create the folder with the first sub-component.
 - `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.
@@ -44,6 +45,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Max width: content never exceeds 1440px (Figma desktop frame). Use the `max-w-site` token (`--container-site: 90rem`) with `mx-auto`; keep section backgrounds full-bleed.
 - Single theme, no theme switcher. Sections are light by default; make a section dark with `<SectionContainer theme="dark">`, which scopes the mcoli-ui dark tokens to it. Never add a theme toggle or `next-themes`. Use the `dark:` variant only for exceptions.
 - Icons: `lucide-react` only, named imports with the `Icon` suffix (`MenuIcon`, `ArrowRightIcon`). Size them with Tailwind (`size-5`); icon-only buttons need an `aria-label`.
+- Easings: use the shared tokens, `ease-out-expo` / `ease-out-quart` / `ease-in-out-quart` in Tailwind and `EASE_*` from `src/lib/easing.ts` in Motion.
 - Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
