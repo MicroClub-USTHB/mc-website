@@ -31,20 +31,17 @@ type SlotNumberProps = {
 /** Number made of vertical digit reels that spin and settle with a spring. */
 export function SlotNumber({ digits, positions, className }: SlotNumberProps) {
   return (
-    <span
-      aria-hidden
-      className={cn("flex h-[1.22em] justify-center overflow-hidden tabular-nums", className)}
-    >
+    <span aria-hidden className={cn("flex h-[1.22em] justify-center overflow-hidden", className)}>
       {digits.map((digit, i) => (
         <motion.span
           key={i}
           className="block h-full overflow-hidden"
           initial={false}
-          animate={{ width: digit === null ? 0 : "1ch", opacity: digit === null ? 0 : 1 }}
+          animate={{ width: digit === null ? 0 : "auto", opacity: digit === null ? 0 : 1 }}
           transition={{ duration: 0.4, ease: "easeOut" }}
         >
           <motion.span
-            className="flex flex-col will-change-transform"
+            className="flex flex-col items-center will-change-transform"
             initial={false}
             animate={{ y: `${(-positions[i] / STRIP_LENGTH) * 100}%` }}
             transition={{ type: "spring", stiffness: 60, damping: 14, mass: 1, delay: i * 0.07 }}
