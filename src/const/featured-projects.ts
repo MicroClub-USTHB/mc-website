@@ -1,4 +1,5 @@
-const ORGANIZATION_URL = "https://github.com/MicroClub-USTHB"
+/** MicroClub GitHub organization, also used as placeholder link for projects without a public repo. */
+export const ORGANIZATION_URL = "https://github.com/MicroClub-USTHB"
 
 export type Project = {
   name: string
@@ -10,6 +11,8 @@ export type Project = {
 }
 
 export type ProjectCategory = {
+  /** DOM id fragment of the category heading. */
+  id: string
   name: string
   projects: Project[]
 }
@@ -17,6 +20,7 @@ export type ProjectCategory = {
 /** Hall of Projects, grouped by section, in display order. */
 export const PROJECT_CATEGORIES: ProjectCategory[] = [
   {
+    id: "it",
     name: "IT",
     projects: [
       {
@@ -54,6 +58,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
     ],
   },
   {
+    id: "robotics",
     name: "Robotics",
     projects: [
       {
@@ -99,6 +104,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
     ],
   },
   {
+    id: "game-dev",
     name: "Game Dev",
     projects: [
       {

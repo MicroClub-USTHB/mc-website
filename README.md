@@ -53,7 +53,7 @@ src/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
 │   ├── layout/               # SiteMenu (header + hamburger menu), SiteFooter
 │   ├── site-menu/            # Menu sub-components (bar, panel, links, context)
-│   ├── shared/               # Reusable building blocks (SectionContainer)
+│   ├── shared/               # Reusable building blocks (SectionContainer, JsonLd)
 │   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
 ├── providers/                # SmoothScrollProvider (Lenis + Motion)

@@ -28,12 +28,12 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
 - `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`). `site-menu.tsx` is a Server Component composing the header from the client islands in `src/components/site-menu/`, which share state through `menu-context.tsx`.
 - Pattern for interactive UI: keep content in Server Components and pass it as children to narrow client islands (`"use client"`) that only hold state and animations.
-- `src/components/shared/`: reusable building blocks (`SectionContainer`).
+- `src/components/shared/`: reusable building blocks (`SectionContainer`, `JsonLd` for schema.org structured data).
 - `src/components/<section>/`: sub-components of one section (cards, pills, counters), one folder per section, e.g. `src/components/statistics/metric-card.tsx`. Create the folder with the first sub-component.
 - `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.
 - `src/providers/`: global client providers (`SmoothScrollProvider`).
 - `src/config/`: site metadata, section anchors, menu links.
-- `src/const/`: static content constants, one file per section (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
+- `src/const/`: static content constants, one file per section named like the section file (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
 - Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
 ## Conventions
