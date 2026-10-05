@@ -45,8 +45,8 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
           onClick={toggle}
           className={cn(
             "size-14 lg:size-[85px]",
-            "relative z-10 grid place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
-            "group-data-open:hover:bg-accent group-data-open:hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
+            "relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
+            "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
           )}
         >
           <MenuToggleIcon className="size-6 lg:size-8" />
