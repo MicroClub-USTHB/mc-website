@@ -6,6 +6,11 @@ import { motion, useScroll, useSpring, useTransform, type MotionValue } from "mo
 import { RouletteNumber } from "@/components/statistics/roulette-number"
 import { cn } from "@/lib/utils"
 
+/** Scroll share of each stat's resting state (the rest is spent transitioning). */
+const HOLD = 0.08
+/** Scroll distance per transition, in viewport heights. */
+const SCREENS_PER_STEP = 0.7
+
 export type Stat = {
   label: string
   value: number
@@ -13,8 +18,8 @@ export type Stat = {
 }
 
 /**
- * Pinned statistics: the section is `stats.length` screens tall and its content sticks to the
- * viewport. Everything is scroll-linked: each stat holds for a while, then the next one rolls in
+ * Pinned statistics: the section is about 1 screen + 0.7 per stat tall and its content sticks to the
+ * viewport. Everything is scroll-linked: each stat rests briefly, then the next one rolls in
  * (3D drum for the number, bottom-to-top fade for the texts, background fade).
  */
 export function StatisticsScroller({ stats }: { stats: Stat[] }) {
@@ -22,9 +27,13 @@ export function StatisticsScroller({ stats }: { stats: Stat[] }) {
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] })
   const progress = useSpring(scrollYProgress, { stiffness: 180, damping: 32, restDelta: 0.0005 })
 
-  // Hold on each stat, transition between them: [0,0, 1,1, 2,2] for 3 stats.
+  // Short hold on each stat, most of the scroll is spent rolling: [0,0, 1,1, 2,2] for 3 stats.
   const last = stats.length - 1
-  const input = stats.flatMap((_, i) => [(i * 2) / (last * 2 + 1), (i * 2 + 1) / (last * 2 + 1)])
+  const move = (1 - HOLD * stats.length) / last
+  const input = stats.flatMap((_, i) => {
+    const start = i * (HOLD + move)
+    return [start, start + HOLD]
+  })
   const output = stats.flatMap((_, i) => [i, i])
   const step = useTransform(progress, input, output)
 
@@ -33,7 +42,11 @@ export function StatisticsScroller({ stats }: { stats: Stat[] }) {
   const darkOpacity = useTransform(step, [1, 2], [0, 1])
 
   return (
-    <div ref={ref} style={{ height: `${stats.length * 100}svh` }} className="relative">
+    <div
+      ref={ref}
+      style={{ height: `${100 + (stats.length - 1) * SCREENS_PER_STEP * 100}svh` }}
+      className="relative"
+    >
       <div className="sticky top-0 h-svh overflow-hidden">
         <div aria-hidden className="absolute inset-0 bg-background" />
         <motion.div
