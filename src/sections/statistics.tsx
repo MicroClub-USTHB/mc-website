@@ -39,7 +39,7 @@ export function Statistics() {
           />
         ))}
 
-        <div className="relative flex h-full flex-col items-center justify-center gap-10 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:px-20 lg:text-left">
+        <div className="relative mx-auto flex h-full max-w-site flex-col items-center justify-center gap-10 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:px-20 lg:text-left">
           <div className="grid items-center lg:w-60">
             {STATISTICS.map((stat, i) => (
               <StatText key={stat.label} index={i} dark={stat.tone === "dark"}>

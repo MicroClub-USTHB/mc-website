@@ -37,7 +37,7 @@ export function SectionContainer({
       {bleed ? (
         children
       ) : (
-        <div className="mx-auto w-full max-w-6xl">
+        <div className="mx-auto w-full max-w-site">
           {title && (
             <header className="mb-10 space-y-2">
               <h2 id={`${id}-title`} className="header-md font-semibold">

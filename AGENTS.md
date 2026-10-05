@@ -41,6 +41,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Wrap every landing page section in `SectionContainer` with an id from `homeSections` in `src/config/site.ts`.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
+- Max width: content never exceeds 1440px (Figma desktop frame). Use the `max-w-site` token (`--container-site: 90rem`) with `mx-auto`; keep section backgrounds full-bleed.
 - Single theme, no theme switcher. Sections are light by default; make a section dark with `<SectionContainer theme="dark">`, which scopes the mcoli-ui dark tokens to it. Never add a theme toggle or `next-themes`. Use the `dark:` variant only for exceptions.
 - Icons: `lucide-react` only, named imports with the `Icon` suffix (`MenuIcon`, `ArrowRightIcon`). Size them with Tailwind (`size-5`); icon-only buttons need an `aria-label`.
 - Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.

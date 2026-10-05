@@ -19,7 +19,7 @@ export function SiteMenu() {
   const close = () => setOpen(false)
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
+    <header className="fixed inset-x-0 top-0 z-40 mx-auto flex max-w-site items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
       <Link href="/" className="font-heading text-lg font-semibold">
         {siteConfig.name}
       </Link>
