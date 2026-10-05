@@ -1,9 +1,9 @@
 "use client"
 
-import { useRef, useState } from "react"
-import { AnimatePresence, motion, useMotionValueEvent, useScroll, useTransform } from "motion/react"
+import { useRef } from "react"
+import { motion, useScroll, useSpring, useTransform, type MotionValue } from "motion/react"
 
-import { REEL_START, SlotNumber, spinReel } from "@/components/statistics/slot-number"
+import { RouletteNumber } from "@/components/statistics/roulette-number"
 import { cn } from "@/lib/utils"
 
 export type Stat = {
@@ -12,59 +12,25 @@ export type Stat = {
   description: string
 }
 
-const REELS = 3
-
-function toDigits(value: number): (number | null)[] {
-  const digits = String(value).split("").map(Number)
-  return [...Array<null>(Math.max(0, REELS - digits.length)).fill(null), ...digits]
-}
-
-/** Spin every reel toward the digits of `value`; empty reels stay where they are. */
-function nextPositions(positions: number[], value: number, direction: 1 | -1) {
-  return toDigits(value).map((digit, i) =>
-    digit === null ? positions[i] : spinReel(positions[i], digit, direction),
-  )
-}
-
-const textMotion = {
-  initial: { opacity: 0, y: 40 },
-  animate: { opacity: 1, y: 0 },
-  exit: { opacity: 0, y: -40 },
-  transition: { duration: 0.5, ease: [0.22, 1, 0.36, 1] },
-} as const
-
 /**
  * Pinned statistics: the section is `stats.length` screens tall and its content sticks to the
- * viewport. Scroll progress picks the active stat, cross-fades the background
- * (light -> blue -> dark) and spins the number reels.
+ * viewport. Everything is scroll-linked: each stat holds for a while, then the next one rolls in
+ * (3D drum for the number, bottom-to-top fade for the texts, background fade).
  */
 export function StatisticsScroller({ stats }: { stats: Stat[] }) {
   const ref = useRef<HTMLDivElement>(null)
   const { scrollYProgress } = useScroll({ target: ref, offset: ["start start", "end end"] })
+  const progress = useSpring(scrollYProgress, { stiffness: 180, damping: 32, restDelta: 0.0005 })
 
-  const [state, setState] = useState(() => ({
-    step: 0,
-    positions: nextPositions(Array<number>(REELS).fill(REEL_START), stats[0].value, 1),
-  }))
-  const { step, positions } = state
+  // Hold on each stat, transition between them: [0,0, 1,1, 2,2] for 3 stats.
+  const last = stats.length - 1
+  const input = stats.flatMap((_, i) => [(i * 2) / (last * 2 + 1), (i * 2 + 1) / (last * 2 + 1)])
+  const output = stats.flatMap((_, i) => [i, i])
+  const step = useTransform(progress, input, output)
 
-  useMotionValueEvent(scrollYProgress, "change", (progress) => {
-    const next = Math.min(stats.length - 1, Math.floor(progress * stats.length))
-    if (next === step) return
-    setState((prev) => ({
-      step: next,
-      positions: nextPositions(prev.positions, stats[next].value, next > prev.step ? 1 : -1),
-    }))
-  })
-
-  // Background gradient fade: white -> light blue -> dark, centered on each step boundary.
-  const blueOpacity = useTransform(scrollYProgress, [0.2, 0.4], [0, 1])
-  const darkOpacity = useTransform(scrollYProgress, [0.53, 0.73], [0, 1])
-
-  const current = stats[step]
-  const previous = stats[step - 1]
-  const next = stats[step + 1]
-  const isDark = step === stats.length - 1
+  // Background gradient fade: white -> light blue -> dark (Figma note), driven by the same step.
+  const blueOpacity = useTransform(step, [0, 1], [0, 1])
+  const darkOpacity = useTransform(step, [1, 2], [0, 1])
 
   return (
     <div ref={ref} style={{ height: `${stats.length * 100}svh` }} className="relative">
@@ -82,66 +48,65 @@ export function StatisticsScroller({ stats }: { stats: Stat[] }) {
         />
 
         <div className="relative flex h-full flex-col items-center justify-center gap-10 px-4 text-center sm:px-6 lg:flex-row lg:justify-between lg:px-20 lg:text-left">
-          <div className={cn("grid lg:w-60", isDark && "dark")}>
-            <AnimatePresence initial={false}>
-              <motion.p
-                key={current.label}
-                {...textMotion}
-                className="col-start-1 row-start-1 header-md font-medium text-primary uppercase"
-              >
-                {current.label}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+          <TextStack className="lg:w-60">
+            {stats.map((stat, i) => (
+              <StatText key={stat.label} index={i} step={step} dark={i === last}>
+                <p className="header-md font-medium text-primary uppercase">{stat.label}</p>
+              </StatText>
+            ))}
+          </TextStack>
 
-          <div className="relative flex h-[2.18em] w-[4.17em] items-center justify-center rounded-full border-[1.5px] border-border bg-background text-center font-heading text-[4.5rem] font-medium tracking-[-0.02em] text-foreground sm:text-[6rem] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 xl:text-[8.25rem]">
+          <div className="relative h-[2.18em] w-[4.17em] shrink-0 overflow-hidden rounded-full border-[1.5px] border-border bg-background font-heading text-[4.5rem] font-medium tracking-[-0.02em] text-foreground sm:text-[6rem] lg:absolute lg:top-1/2 lg:left-1/2 lg:-translate-x-1/2 lg:-translate-y-1/2 xl:text-[8.25rem]">
             <motion.div
               aria-hidden
               style={{ opacity: darkOpacity }}
-              className="dark pointer-events-none absolute -inset-[1.5px] rounded-full border-[1.5px] border-border"
+              className="dark pointer-events-none absolute inset-0 rounded-full border-[1.5px] border-border"
             />
-            <div
-              aria-hidden
-              className="pointer-events-none absolute inset-0 overflow-hidden rounded-full mask-[linear-gradient(to_bottom,transparent,black_45%,black_55%,transparent)]"
-            >
-              <AnimatePresence initial={false}>
-                {previous && (
-                  <motion.span
-                    key={`prev-${previous.value}`}
-                    {...textMotion}
-                    className="absolute inset-x-0 top-1/2 mt-[-1.72em] leading-[1.22em]"
-                  >
-                    {previous.value}
-                  </motion.span>
-                )}
-                {next && (
-                  <motion.span
-                    key={`next-${next.value}`}
-                    {...textMotion}
-                    className="absolute inset-x-0 top-1/2 mt-[0.5em] leading-[1.22em]"
-                  >
-                    {next.value}
-                  </motion.span>
-                )}
-              </AnimatePresence>
-            </div>
-            <SlotNumber digits={toDigits(current.value)} positions={positions} />
-            <span className="sr-only">{current.value}</span>
+            <RouletteNumber values={stats.map((s) => s.value)} step={step} />
           </div>
 
-          <div className={cn("grid max-w-70 lg:text-right", isDark && "dark")}>
-            <AnimatePresence initial={false}>
-              <motion.p
-                key={current.description}
-                {...textMotion}
-                className="col-start-1 row-start-1 header-xs font-medium text-muted-foreground"
-              >
-                {current.description}
-              </motion.p>
-            </AnimatePresence>
-          </div>
+          <TextStack className="max-w-70 lg:text-right">
+            {stats.map((stat, i) => (
+              <StatText key={stat.label} index={i} step={step} dark={i === last}>
+                <p className="header-xs font-medium text-muted-foreground">{stat.description}</p>
+                <p className="sr-only">
+                  {stat.label}: {stat.value}
+                </p>
+              </StatText>
+            ))}
+          </TextStack>
         </div>
       </div>
     </div>
+  )
+}
+
+/** Stacks its children in the same grid cell so they can cross-fade. */
+function TextStack({ className, children }: { className?: string; children: React.ReactNode }) {
+  return <div className={cn("grid items-center", className)}>{children}</div>
+}
+
+/** Scroll-linked text: enters from below, leaves upward, fully visible while its stat holds. */
+function StatText({
+  index,
+  step,
+  dark,
+  children,
+}: {
+  index: number
+  step: MotionValue<number>
+  dark: boolean
+  children: React.ReactNode
+}) {
+  const y = useTransform(step, [index - 1, index, index + 1], [48, 0, -48])
+  const opacity = useTransform(step, [index - 0.6, index, index + 0.6], [0, 1, 0])
+
+  return (
+    <motion.div
+      style={{ y, opacity }}
+      className={cn("col-start-1 row-start-1 will-change-transform", dark && "dark")}
+    >
+      {children}
+    </motion.div>
   )
 }
