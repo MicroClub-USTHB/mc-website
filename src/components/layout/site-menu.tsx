@@ -4,12 +4,13 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useLenis } from "lenis/react"
-import { MenuIcon, PlusIcon } from "lucide-react"
-import { AnimatePresence, motion } from "motion/react"
+import { AnimatePresence, motion, useInView } from "motion/react"
 
 import { MenuLink } from "@/components/layout/menu-link"
+import { MenuToggleIcon } from "@/components/layout/menu-toggle-icon"
 import { menuLinks, siteConfig } from "@/config/site"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
+import { cn } from "@/lib/utils"
 
 /** Panel wipe from the left edge (open) and back to it (close), like wondermake.xyz. */
 const WIPE = {
@@ -21,16 +22,57 @@ const WIPE = {
 /** Square cells of the bar: Figma 85 px on desktop. */
 const CELL = "size-14 lg:size-[85px]"
 
+/** Bar origin: Figma x80 / y96 on desktop. */
+const BAR_POSITION = "top-4 left-4 lg:top-24 lg:left-20"
+
 /**
- * Hamburger menu (Figma "Menu Bar"): a toggle + logo bar fixed top-left and a full-screen panel
- * of section links that wipes in from the left. Hovering the bar (or opening the menu) expands
- * the logo into the "MICRO CLUB" wordmark.
+ * Fixed logo cell, driven by `data-logo` on the bar:
+ * - hidden: no width (the in-page wordmark is visible instead),
+ * - compact: MC mark, sliding out from behind the toggle; widens to the wordmark on hover,
+ * - expanded: "MICRO CLUB" wordmark (menu open).
+ */
+const LOGO_CELL = cn(
+  "relative h-14 w-0 overflow-hidden bg-foreground text-background outline-none lg:h-[85px] lg:w-0",
+  "transition-[width] duration-800 ease-out-expo",
+  "group-data-[logo=compact]:w-14 lg:group-data-[logo=compact]:w-[85px]",
+  "group-data-[logo=compact]:group-hover:w-42 lg:group-data-[logo=compact]:group-hover:w-[255px]",
+  "group-data-[logo=compact]:group-focus-within:w-42 lg:group-data-[logo=compact]:group-focus-within:w-[255px]",
+  "group-data-[logo=expanded]:w-42 lg:group-data-[logo=expanded]:w-[255px]",
+)
+
+/** MC mark: anchored right so it slides out from behind the toggle while the cell widens. */
+const LOGO_MARK = cn(
+  "absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none opacity-0 lg:w-[55px]",
+  "transition-opacity duration-400 ease-out-expo",
+  "group-data-[logo=compact]:opacity-100 group-data-[logo=compact]:group-focus-within:opacity-0 group-data-[logo=compact]:group-hover:opacity-0",
+)
+
+/** "MICRO CLUB" wordmark: fades in from the left when the cell is wide. */
+const LOGO_WORDMARK = cn(
+  "absolute inset-y-0 left-3 flex -translate-x-4 items-center opacity-0 lg:left-[18px]",
+  "transition duration-600 ease-out-expo",
+  "group-data-[logo=expanded]:translate-x-0 group-data-[logo=expanded]:opacity-100",
+  "group-data-[logo=compact]:group-hover:translate-x-0 group-data-[logo=compact]:group-hover:opacity-100",
+  "group-data-[logo=compact]:group-focus-within:translate-x-0 group-data-[logo=compact]:group-focus-within:opacity-100",
+)
+
+/** "MICRO CLUB" text style (Figma header-md medium). */
+const WORDMARK_TEXT = "header-xs font-medium whitespace-nowrap uppercase lg:header-md"
+
+/**
+ * Hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
+ * - a "MICRO CLUB" wordmark sits in the page next to the toggle and scrolls away with it,
+ * - once it leaves the viewport, a compact MC mark slides out from behind the fixed toggle,
+ * - the toggle opens a full-screen panel of section links that wipes in from the left.
  */
 export function SiteMenu() {
   const [open, setOpen] = useState(false)
   const lenis = useLenis()
   const rootRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
+  const wordmarkRef = useRef<HTMLAnchorElement>(null)
+  const wordmarkInView = useInView(wordmarkRef, { initial: true })
+  const logo = open ? "expanded" : wordmarkInView ? "hidden" : "compact"
 
   // While open: lock page scroll, close on Escape, keep keyboard focus inside the menu.
   useEffect(() => {
@@ -60,10 +102,30 @@ export function SiteMenu() {
 
   return (
     <div ref={rootRef}>
+      {/* In-page wordmark: scrolls away with the page (not sticky). */}
+      <div className="absolute inset-x-0 top-0 mx-auto max-w-site">
+        <Link
+          ref={wordmarkRef}
+          href="/"
+          aria-label={`${siteConfig.name} home`}
+          className={cn(
+            BAR_POSITION,
+            "absolute flex h-14 w-42 translate-x-14 items-center bg-foreground pl-3 text-background ring-1 ring-border lg:h-[85px] lg:w-[255px] lg:translate-x-[85px] lg:pl-[18px]",
+            WORDMARK_TEXT,
+          )}
+        >
+          MICRO CLUB
+        </Link>
+      </div>
+
       <header className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
         <div
           data-open={open || undefined}
-          className="group pointer-events-auto absolute top-4 left-4 flex ring-1 ring-border transition-shadow lg:top-24 lg:left-20 data-open:ring-2"
+          data-logo={logo}
+          className={cn(
+            BAR_POSITION,
+            "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
+          )}
         >
           <button
             ref={toggleRef}
@@ -72,32 +134,28 @@ export function SiteMenu() {
             aria-expanded={open}
             aria-controls="site-menu-panel"
             onClick={() => setOpen((value) => !value)}
-            className={`${CELL} relative grid place-items-center bg-background text-foreground transition-colors duration-300 outline-none group-data-open:hover:bg-accent group-data-open:hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground`}
+            className={cn(
+              CELL,
+              "relative z-10 grid place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
+              "group-data-open:hover:bg-accent group-data-open:hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
+            )}
           >
-            <MenuIcon className="col-start-1 row-start-1 size-6 transition duration-500 ease-out-expo group-data-open:rotate-90 group-data-open:opacity-0 lg:size-8" />
-            <PlusIcon className="col-start-1 row-start-1 size-6 -rotate-45 opacity-0 transition duration-500 ease-out-expo group-data-open:rotate-45 group-data-open:opacity-100 lg:size-8" />
+            <MenuToggleIcon className="size-6 lg:size-8" />
           </button>
 
           <Link
             href="/"
             aria-label={`${siteConfig.name} home`}
+            aria-hidden={logo === "hidden" || undefined}
+            tabIndex={logo === "hidden" ? -1 : undefined}
             onClick={(event) => {
               event.preventDefault()
               navigateTo(0)
             }}
-            className="relative h-14 w-14 overflow-hidden bg-foreground text-background transition-[width] duration-600 ease-out-expo outline-none group-focus-within:w-42 group-hover:w-42 group-data-open:w-42 lg:h-[85px] lg:w-[85px] lg:group-focus-within:w-[255px] lg:group-hover:w-[255px] lg:group-data-open:w-[255px]"
+            className={LOGO_CELL}
           >
-            <Image
-              src="/brand/mc-logo.svg"
-              alt=""
-              width={55}
-              height={39}
-              priority
-              className="absolute top-[27%] left-[17.6%] h-auto w-[65%] max-w-none transition duration-400 ease-out-expo group-focus-within:-translate-x-full group-focus-within:opacity-0 group-hover:-translate-x-full group-hover:opacity-0 group-data-open:-translate-x-full group-data-open:opacity-0 lg:w-[55px]"
-            />
-            <span className="absolute inset-y-0 left-3 flex -translate-x-4 items-center header-xs font-medium whitespace-nowrap opacity-0 transition duration-600 ease-out-expo group-focus-within:translate-x-0 group-focus-within:opacity-100 group-hover:translate-x-0 group-hover:opacity-100 group-data-open:translate-x-0 group-data-open:opacity-100 lg:left-[18px] lg:header-md">
-              MICRO CLUB
-            </span>
+            <Image src="/brand/mc-logo.svg" alt="" width={55} height={39} className={LOGO_MARK} />
+            <span className={cn(LOGO_WORDMARK, WORDMARK_TEXT)}>MICRO CLUB</span>
           </Link>
         </div>
       </header>
