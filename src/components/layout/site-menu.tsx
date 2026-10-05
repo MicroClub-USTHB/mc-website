@@ -26,34 +26,29 @@ const CELL = "size-14 lg:size-[85px]"
 const BAR_POSITION = "top-4 left-4 lg:top-24 lg:left-20"
 
 /**
- * Fixed logo cell, driven by `data-logo` on the bar:
+ * Fixed logo cell, driven by `data-logo` on the bar. Its content is anchored right, so it slides
+ * out from behind the toggle while the cell widens:
  * - hidden: no width (the in-page wordmark is visible instead),
- * - compact: MC mark, sliding out from behind the toggle; widens to the wordmark on hover,
+ * - compact: MC mark,
  * - expanded: "MICRO CLUB" wordmark (menu open).
  */
 const LOGO_CELL = cn(
   "relative h-14 w-0 overflow-hidden bg-foreground text-background outline-none lg:h-[85px] lg:w-0",
   "transition-[width] duration-800 ease-out-expo",
   "group-data-[logo=compact]:w-14 lg:group-data-[logo=compact]:w-[85px]",
-  "group-data-[logo=compact]:group-hover:w-42 lg:group-data-[logo=compact]:group-hover:w-[255px]",
-  "group-data-[logo=compact]:group-focus-within:w-42 lg:group-data-[logo=compact]:group-focus-within:w-[255px]",
   "group-data-[logo=expanded]:w-42 lg:group-data-[logo=expanded]:w-[255px]",
 )
 
-/** MC mark: anchored right so it slides out from behind the toggle while the cell widens. */
+/** MC mark: visible in the compact state only. */
 const LOGO_MARK = cn(
   "absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none opacity-0 lg:w-[55px]",
-  "transition-opacity duration-400 ease-out-expo",
-  "group-data-[logo=compact]:opacity-100 group-data-[logo=compact]:group-focus-within:opacity-0 group-data-[logo=compact]:group-hover:opacity-0",
+  "transition-opacity duration-400 ease-out-expo group-data-[logo=compact]:opacity-100",
 )
 
-/** "MICRO CLUB" wordmark: fades in from the left when the cell is wide. */
+/** "MICRO CLUB" wordmark: a full-width block pinned to the right edge of the cell. */
 const LOGO_WORDMARK = cn(
-  "absolute inset-y-0 left-3 flex -translate-x-4 items-center opacity-0 lg:left-[18px]",
-  "transition duration-600 ease-out-expo",
-  "group-data-[logo=expanded]:translate-x-0 group-data-[logo=expanded]:opacity-100",
-  "group-data-[logo=compact]:group-hover:translate-x-0 group-data-[logo=compact]:group-hover:opacity-100",
-  "group-data-[logo=compact]:group-focus-within:translate-x-0 group-data-[logo=compact]:group-focus-within:opacity-100",
+  "absolute inset-y-0 right-0 flex w-42 items-center pl-3 opacity-0 lg:w-[255px] lg:pl-[18px]",
+  "transition-opacity duration-400 ease-out-expo group-data-[logo=expanded]:opacity-100",
 )
 
 /** "MICRO CLUB" text style (Figma header-md medium). */
@@ -63,6 +58,7 @@ const WORDMARK_TEXT = "header-xs font-medium whitespace-nowrap uppercase lg:head
  * Hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
  * - a "MICRO CLUB" wordmark sits in the page next to the toggle and scrolls away with it,
  * - once it leaves the viewport, a compact MC mark slides out from behind the fixed toggle,
+ * - opening the menu slides the wordmark out from behind the toggle in the same way,
  * - the toggle opens a full-screen panel of section links that wipes in from the left.
  */
 export function SiteMenu() {
@@ -111,6 +107,9 @@ export function SiteMenu() {
           className={cn(
             BAR_POSITION,
             "absolute flex h-14 w-42 translate-x-14 items-center bg-foreground pl-3 text-background ring-1 ring-border lg:h-[85px] lg:w-[255px] lg:translate-x-[85px] lg:pl-[18px]",
+            // Hidden while the menu is open (the fixed cell takes over), back once it has slid away.
+            "visible transition-[visibility] duration-0 delay-800",
+            open && "invisible delay-0",
             WORDMARK_TEXT,
           )}
         >
