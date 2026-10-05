@@ -26,7 +26,8 @@ Guidelines for AI coding agents working on the official MicroClub website.
 
 - `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer.
 - `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
-- `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`).
+- `src/components/layout/`: site chrome. `site-menu/` holds the header menu: `site-menu.tsx` (Server Component composing it) plus small client islands sharing state through `menu-context.tsx`.
+- Pattern for interactive UI: keep content in Server Components and pass it as children to narrow client islands (`"use client"`) that only hold state and animations.
 - `src/components/shared/`: reusable building blocks (`SectionContainer`).
 - `src/components/<section>/`: sub-components of one section (cards, pills, counters), one folder per section, e.g. `src/components/statistics/metric-card.tsx`. Create the folder with the first sub-component.
 - `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.

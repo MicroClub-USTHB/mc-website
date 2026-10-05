@@ -1,5 +1,7 @@
 "use client"
 
+import { useMenu } from "@/components/layout/site-menu/menu-context"
+
 /**
  * Sets the hover fill origin to the edge the pointer crossed, so the fill grows from where the
  * pointer enters and shrinks toward where it leaves.
@@ -10,20 +12,25 @@ function setFillOrigin(event: React.PointerEvent<HTMLAnchorElement>) {
   event.currentTarget.style.setProperty("--fill-origin", fromTop ? "top" : "bottom")
 }
 
-type MenuLinkProps = {
-  href: string
-  onNavigate: () => void
+/**
+ * Full-width menu row with a directional primary fill on hover / focus. A real `#section` link
+ * for crawlers; on click it closes the menu and jumps to the section while the panel covers it.
+ */
+export function MenuLink({
+  sectionId,
+  children,
+}: {
+  sectionId: string
   children: React.ReactNode
-}
+}) {
+  const { navigateTo } = useMenu()
 
-/** Full-width menu row with a directional primary fill on hover / focus. */
-export function MenuLink({ href, onNavigate, children }: MenuLinkProps) {
   return (
     <a
-      href={href}
+      href={`/#${sectionId}`}
       onClick={(event) => {
         event.preventDefault()
-        onNavigate()
+        navigateTo(`#${sectionId}`, { immediate: true })
       }}
       onPointerEnter={setFillOrigin}
       onPointerLeave={setFillOrigin}

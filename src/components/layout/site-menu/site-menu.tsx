@@ -1,0 +1,35 @@
+import { MenuBar } from "@/components/layout/site-menu/menu-bar"
+import { MenuProvider } from "@/components/layout/site-menu/menu-context"
+import { MenuLink } from "@/components/layout/site-menu/menu-link"
+import { MenuPanel } from "@/components/layout/site-menu/menu-panel"
+import { PageWordmark } from "@/components/layout/site-menu/page-wordmark"
+import { menuLinks, siteConfig } from "@/config/site"
+
+/**
+ * Site header with the hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
+ * - a "MICRO CLUB" wordmark sits in the page next to the toggle and scrolls away with it,
+ * - once it has passed the toggle, a compact MC mark slides out from behind the fixed toggle,
+ * - the toggle opens a full-screen panel of section links that wipes in from the left.
+ *
+ * Server Component: the header, home links and navigation are in the server-rendered HTML;
+ * only state and animations live in the client islands.
+ */
+export function SiteMenu() {
+  const homeLabel = `${siteConfig.name} home`
+
+  return (
+    <MenuProvider>
+      <PageWordmark label={homeLabel} />
+      <MenuBar homeLabel={homeLabel} />
+      <MenuPanel>
+        <ul className="mx-auto max-w-site px-4 pt-18 pb-10 lg:px-20 lg:pt-[181px]">
+          {menuLinks.map((link) => (
+            <li key={link.id}>
+              <MenuLink sectionId={link.id}>{link.label}</MenuLink>
+            </li>
+          ))}
+        </ul>
+      </MenuPanel>
+    </MenuProvider>
+  )
+}
