@@ -3,13 +3,13 @@ import type { HomeSectionId } from "@/config/site"
 
 type SectionContainerProps = React.ComponentProps<"section"> & {
   id: HomeSectionId
-  title?: string
-  description?: string
   /** Light (default) or dark section. Dark applies the mcoli-ui dark tokens to the whole section. */
   theme?: "light" | "dark"
-  /** Full-bleed section: no padding, no max-width wrapper, no heading (for custom layouts). */
-  bleed?: boolean
-}
+} & (
+    | { bleed?: false; title?: string; description?: string }
+    /** Full-bleed section: no padding, no max-width wrapper and no heading (custom layouts). */
+    | { bleed: true; title?: never; description?: never }
+  )
 
 /** Shared wrapper for every landing page section: anchor id, spacing, heading. */
 export function SectionContainer({

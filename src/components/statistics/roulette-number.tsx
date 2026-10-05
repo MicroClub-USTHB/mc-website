@@ -2,9 +2,16 @@
 
 import { motion, useTransform, type MotionValue } from "motion/react"
 
+import { cn } from "@/lib/utils"
+
 /** Angle between two faces of the drum and drum radius (in em of the number font size). */
 const FACE_ANGLE = 36
 const RADIUS = "1.7em"
+/** Opacity lost per face away from the front one. */
+const FADE_PER_FACE = 0.45
+
+/** One face: Figma line height (161 px for a 132 px number), vertically centered on the drum. */
+const FACE = "top-1/2 -mt-[0.61em] leading-[1.22em]"
 
 type RouletteNumberProps = {
   values: number[]
@@ -36,12 +43,15 @@ function Face({ value, index, step }: { value: number; index: number; step: Moti
     step,
     (s) => `translateZ(-${RADIUS}) rotateX(${(s - index) * FACE_ANGLE}deg) translateZ(${RADIUS})`,
   )
-  const opacity = useTransform(step, (s) => Math.max(0, 1 - Math.abs(s - index) * 0.45))
+  const opacity = useTransform(step, (s) => Math.max(0, 1 - Math.abs(s - index) * FADE_PER_FACE))
 
   return (
     <motion.span
       style={{ transform, opacity }}
-      className="absolute inset-x-0 top-1/2 -mt-[0.61em] block text-center leading-[1.22em] will-change-transform backface-hidden"
+      className={cn(
+        FACE,
+        "absolute inset-x-0 block text-center will-change-transform backface-hidden",
+      )}
     >
       {value}
     </motion.span>
