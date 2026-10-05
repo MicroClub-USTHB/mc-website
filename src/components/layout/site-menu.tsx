@@ -4,7 +4,7 @@ import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { useLenis } from "lenis/react"
-import { AnimatePresence, motion, useInView } from "motion/react"
+import { AnimatePresence, motion, useMotionValueEvent, useScroll } from "motion/react"
 
 import { MenuLink } from "@/components/layout/menu-link"
 import { MenuToggleIcon } from "@/components/layout/menu-toggle-icon"
@@ -26,15 +26,15 @@ const CELL = "size-14 lg:size-[85px]"
 const BAR_POSITION = "top-4 left-4 lg:top-24 lg:left-20"
 
 /**
- * Fixed logo cell, driven by `data-logo` on the bar. Its content is anchored right, so it slides
- * out from behind the toggle while the cell widens:
+ * Fixed logo cell, driven by `data-logo` on the bar:
  * - hidden: no width (the in-page wordmark is visible instead),
- * - compact: MC mark,
+ * - compact: MC mark, sliding out from behind the toggle (content anchored right, cell widens),
  * - expanded: "MICRO CLUB" wordmark (menu open).
+ * Only scroll-driven changes animate (`data-animate`); opening / closing the menu swaps instantly.
  */
 const LOGO_CELL = cn(
   "relative h-14 w-0 overflow-hidden bg-foreground text-background outline-none lg:h-[85px] lg:w-0",
-  "transition-[width] duration-800 ease-out-expo",
+  "group-data-animate:transition-[width] group-data-animate:duration-800 group-data-animate:ease-out-expo",
   "group-data-[logo=compact]:w-14 lg:group-data-[logo=compact]:w-[85px]",
   "group-data-[logo=expanded]:w-42 lg:group-data-[logo=expanded]:w-[255px]",
 )
@@ -42,13 +42,13 @@ const LOGO_CELL = cn(
 /** MC mark: visible in the compact state only. */
 const LOGO_MARK = cn(
   "absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none opacity-0 lg:w-[55px]",
-  "transition-opacity duration-400 ease-out-expo group-data-[logo=compact]:opacity-100",
+  "group-data-[logo=compact]:opacity-100",
 )
 
 /** "MICRO CLUB" wordmark: a full-width block pinned to the right edge of the cell. */
 const LOGO_WORDMARK = cn(
   "absolute inset-y-0 right-0 flex w-42 items-center pl-3 opacity-0 lg:w-[255px] lg:pl-[18px]",
-  "transition-opacity duration-400 ease-out-expo group-data-[logo=expanded]:opacity-100",
+  "group-data-[logo=expanded]:opacity-100",
 )
 
 /** "MICRO CLUB" text style (Figma header-md medium). */
@@ -58,7 +58,7 @@ const WORDMARK_TEXT = "header-xs font-medium whitespace-nowrap uppercase lg:head
  * Hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
  * - a "MICRO CLUB" wordmark sits in the page next to the toggle and scrolls away with it,
  * - once it leaves the viewport, a compact MC mark slides out from behind the fixed toggle,
- * - opening the menu slides the wordmark out from behind the toggle in the same way,
+ * - opening the menu swaps that mark for the "MICRO CLUB" wordmark,
  * - the toggle opens a full-screen panel of section links that wipes in from the left.
  */
 export function SiteMenu() {
@@ -67,8 +67,26 @@ export function SiteMenu() {
   const rootRef = useRef<HTMLDivElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const wordmarkRef = useRef<HTMLAnchorElement>(null)
-  const wordmarkInView = useInView(wordmarkRef, { initial: true })
-  const logo = open ? "expanded" : wordmarkInView ? "hidden" : "compact"
+  // `animate`: whether the last logo change came from scrolling (animated) or the menu (instant).
+  const [wordmark, setWordmark] = useState({ attached: true, animate: false })
+  const logo = wordmark.attached ? "hidden" : open ? "expanded" : "compact"
+
+  // The in-page wordmark counts as attached while any part of it is still level with the fixed
+  // toggle, i.e. until its bottom edge scrolls past the toggle's top edge.
+  const { scrollY } = useScroll()
+  useMotionValueEvent(scrollY, "change", () => {
+    const wordmarkEl = wordmarkRef.current
+    const toggleEl = toggleRef.current
+    if (!wordmarkEl || !toggleEl) return
+    const wordmarkBottom = wordmarkEl.getBoundingClientRect().bottom
+    const attached = wordmarkBottom > toggleEl.getBoundingClientRect().top
+    if (attached !== wordmark.attached) setWordmark({ attached, animate: true })
+  })
+
+  function toggleMenu() {
+    setWordmark((value) => ({ ...value, animate: false }))
+    setOpen((value) => !value)
+  }
 
   // While open: lock page scroll, close on Escape, keep keyboard focus inside the menu.
   useEffect(() => {
@@ -98,8 +116,8 @@ export function SiteMenu() {
 
   return (
     <div ref={rootRef}>
-      {/* In-page wordmark: scrolls away with the page (not sticky). */}
-      <div className="absolute inset-x-0 top-0 mx-auto max-w-site">
+      {/* In-page wordmark: scrolls away with the page (not sticky), stays above the open panel. */}
+      <div className="absolute inset-x-0 top-0 z-50 mx-auto max-w-site">
         <Link
           ref={wordmarkRef}
           href="/"
@@ -107,9 +125,6 @@ export function SiteMenu() {
           className={cn(
             BAR_POSITION,
             "absolute flex h-14 w-42 translate-x-14 items-center bg-foreground pl-3 text-background ring-1 ring-border lg:h-[85px] lg:w-[255px] lg:translate-x-[85px] lg:pl-[18px]",
-            // Hidden while the menu is open (the fixed cell takes over), back once it has slid away.
-            "visible transition-[visibility] duration-0 delay-800",
-            open && "invisible delay-0",
             WORDMARK_TEXT,
           )}
         >
@@ -121,6 +136,7 @@ export function SiteMenu() {
         <div
           data-open={open || undefined}
           data-logo={logo}
+          data-animate={wordmark.animate || undefined}
           className={cn(
             BAR_POSITION,
             "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
@@ -132,7 +148,7 @@ export function SiteMenu() {
             aria-label={open ? "Close menu" : "Open menu"}
             aria-expanded={open}
             aria-controls="site-menu-panel"
-            onClick={() => setOpen((value) => !value)}
+            onClick={toggleMenu}
             className={cn(
               CELL,
               "relative z-10 grid place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
