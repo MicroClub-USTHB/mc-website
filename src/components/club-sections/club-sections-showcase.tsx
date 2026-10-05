@@ -115,7 +115,9 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
                 // Hidden with `inert` + opacity: a visibility transition would restyle every frame.
                 "transition-[opacity,translate]",
                 transition,
-                !isShown && "translate-y-4 opacity-0",
+                // On phones the cell appears with the open section (from `display: none`, which
+                // skips transitions): `starting:` gives it the same fade up as on desktop.
+                isShown ? "starting:translate-y-4 starting:opacity-0" : "translate-y-4 opacity-0",
               )}
             >
               {item.details}
