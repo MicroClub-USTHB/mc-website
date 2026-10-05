@@ -43,10 +43,10 @@ export function FeaturedProjects() {
       <JsonLd data={PROJECTS_JSON_LD} />
 
       <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
-        <header className="flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-[104px]">
+        <header className="flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-26">
           <h2
             id="featured-projects-title"
-            className="header-lg text-primary uppercase lg:w-[374px] lg:header-xl"
+            className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl"
           >
             Hall of Projects
           </h2>
@@ -55,12 +55,12 @@ export function FeaturedProjects() {
           </p>
         </header>
 
-        <Accordion.Root className="flex flex-col gap-20 lg:gap-[140px]">
+        <Accordion.Root className="flex flex-col gap-20 lg:gap-35">
           {PROJECT_CATEGORIES.map((category) => (
             <section
               key={category.id}
               aria-labelledby={`projects-${category.id}`}
-              className="flex flex-col gap-8 border-t border-border pt-8 lg:flex-row lg:items-start lg:justify-between lg:pt-[52px]"
+              className="flex flex-col gap-8 border-t border-border pt-8 lg:flex-row lg:items-start lg:justify-between lg:pt-13"
             >
               <h3
                 id={`projects-${category.id}`}
@@ -68,7 +68,7 @@ export function FeaturedProjects() {
               >
                 {category.name}
               </h3>
-              <div className="lg:w-[908px]">
+              <div className="lg:w-227">
                 {category.projects.map((project) => (
                   <ProjectItem key={project.name} project={project} />
                 ))}

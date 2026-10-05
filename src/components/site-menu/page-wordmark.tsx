@@ -20,7 +20,7 @@ export function PageWordmark({ label }: { label: string }) {
         aria-label={label}
         className={cn(
           "top-4 left-4 lg:top-24 lg:left-20",
-          "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-[18px]",
+          "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-4.5",
           "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
           "absolute translate-x-14 ring-1 ring-border lg:translate-x-[85px]",
         )}
