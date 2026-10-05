@@ -72,7 +72,7 @@ Rendered in this order by `src/app/(site)/page.tsx`. Each section has an anchor 
 | 2   | About Us         | `About`            | `#about`             | Scaffold                      |
 | 3   | Statistics       | `Statistics`       | `#statistics`        | Waiting for data              |
 | 4   | Our Sections     | `ClubSections`     | `#club-sections`     | Scaffold                      |
-| 5   | What We've Built | `FeaturedProjects` | `#featured-projects` | Scaffold                      |
+| 5   | Hall of Projects | `FeaturedProjects` | `#featured-projects` | Done                          |
 | 6   | Our Departments  | `Departments`      | `#departments`       | Scaffold                      |
 | 7   | Featured Events  | `FeaturedEvents`   | `#featured-events`   | Scaffold                      |
 | 8   | Trusted By       | `TrustedBy`        | `#trusted-by`        | Waiting for sponsors list     |
