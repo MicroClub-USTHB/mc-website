@@ -113,10 +113,14 @@ export function SiteMenu() {
     }
   }, [open, lenis])
 
-  function navigateTo(target: string | number) {
+  /**
+   * Closes the menu and scrolls to `target`. Menu links jump instantly (`immediate`) while the
+   * panel still covers the page, so the closing wipe reveals the section directly.
+   */
+  function navigateTo(target: string | number, { immediate = false } = {}) {
     setOpen(false)
     lenis?.start()
-    lenis?.scrollTo(target)
+    lenis?.scrollTo(target, { immediate })
   }
 
   return (
@@ -200,7 +204,10 @@ export function SiteMenu() {
         <ul className="mx-auto max-w-site px-4 pt-18 pb-10 lg:px-20 lg:pt-[181px]">
           {menuLinks.map((link) => (
             <li key={link.id}>
-              <MenuLink href={`/#${link.id}`} onNavigate={() => navigateTo(`#${link.id}`)}>
+              <MenuLink
+                href={`/#${link.id}`}
+                onNavigate={() => navigateTo(`#${link.id}`, { immediate: true })}
+              >
                 {link.label}
               </MenuLink>
             </li>
