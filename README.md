@@ -53,7 +53,7 @@ src/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
 │   ├── layout/               # SiteMenu (header + hamburger menu), SiteFooter
 │   ├── site-menu/            # Menu sub-components (bar, panel, links, context)
-│   ├── shared/               # Reusable building blocks (SectionContainer)
+│   ├── shared/               # Reusable building blocks (SectionContainer, JsonLd)
 │   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
 ├── providers/                # SmoothScrollProvider (Lenis + Motion)
@@ -72,7 +72,7 @@ Rendered in this order by `src/app/(site)/page.tsx`. Each section has an anchor 
 | 2   | About Us         | `About`            | `#about`             | Scaffold                      |
 | 3   | Statistics       | `Statistics`       | `#statistics`        | Waiting for data              |
 | 4   | Our Sections     | `ClubSections`     | `#club-sections`     | Scaffold                      |
-| 5   | What We've Built | `FeaturedProjects` | `#featured-projects` | Scaffold                      |
+| 5   | Hall of Projects | `FeaturedProjects` | `#featured-projects` | Done                          |
 | 6   | Our Departments  | `Departments`      | `#departments`       | Scaffold                      |
 | 7   | Featured Events  | `FeaturedEvents`   | `#featured-events`   | Scaffold                      |
 | 8   | Trusted By       | `TrustedBy`        | `#trusted-by`        | Waiting for sponsors list     |

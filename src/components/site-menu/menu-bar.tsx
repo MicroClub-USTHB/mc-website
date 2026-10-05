@@ -102,7 +102,7 @@ function MenuWordmark() {
       aria-hidden
       style={{ clipPath }}
       className={cn(
-        "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-[18px]",
+        "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-4.5",
         "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
         "pointer-events-none absolute top-0 left-14 lg:left-[85px]",
       )}
