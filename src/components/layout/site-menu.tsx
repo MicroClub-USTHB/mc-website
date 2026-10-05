@@ -177,7 +177,17 @@ export function SiteMenu() {
             }}
             className={LOGO_CELL}
           >
-            <Image src="/brand/mc-logo.svg" alt="" width={55} height={39} className={LOGO_MARK} />
+            {/* Preloaded + eager: the cell starts at 0 width, so a lazy image would only load once
+                it slides in, showing an empty square first. */}
+            <Image
+              src="/brand/mc-logo.svg"
+              alt=""
+              width={55}
+              height={39}
+              preload
+              loading="eager"
+              className={LOGO_MARK}
+            />
           </Link>
 
           {!attached && (
