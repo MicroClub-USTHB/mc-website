@@ -32,6 +32,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.
 - `src/providers/`: global client providers (`SmoothScrollProvider`).
 - `src/config/`: site metadata, section anchors, menu links.
+- `src/const/`: static content constants, one file per section (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
 - Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
 ## Conventions

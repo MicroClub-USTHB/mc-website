@@ -57,6 +57,7 @@ src/
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
 ├── providers/                # SmoothScrollProvider (Lenis + Motion)
 ├── config/site.ts            # Site metadata, section anchors, menu links
+├── const/                    # Static content per section (e.g. statistics.ts)
 └── lib/utils.ts              # `cn` helper
 ```
 
