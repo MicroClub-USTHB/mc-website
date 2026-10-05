@@ -1,7 +1,8 @@
 "use client"
 
-import { motion, useTransform, type MotionValue } from "motion/react"
+import { motion, useTransform } from "motion/react"
 
+import { useStatisticsStep } from "@/components/statistics/statistics-scroll"
 import { cn } from "@/lib/utils"
 
 /** Angle between two faces of the drum and drum radius (in em of the number font size). */
@@ -13,17 +14,12 @@ const FADE_PER_FACE = 0.45
 /** One face: Figma line height (161 px for a 132 px number), vertically centered on the drum. */
 const FACE = "top-1/2 -mt-[0.61em] leading-[1.22em]"
 
-type RouletteNumberProps = {
-  values: number[]
-  /** Continuous scroll-linked step: 0 = first value centered, 1 = second, ... */
-  step: MotionValue<number>
-}
-
 /**
  * 3D roulette drum: values sit on the faces of a cylinder that rotates on the X axis
- * as `step` changes, so neighbours peek above and below in perspective.
+ * with the scroll-linked step, so neighbours peek above and below in perspective.
+ * Decorative: each value is exposed to assistive tech and crawlers by its stat heading.
  */
-export function RouletteNumber({ values, step }: RouletteNumberProps) {
+export function RouletteNumber({ values }: { values: number[] }) {
   return (
     <div
       aria-hidden
@@ -31,14 +27,15 @@ export function RouletteNumber({ values, step }: RouletteNumberProps) {
     >
       <div className="absolute inset-0 transform-3d">
         {values.map((value, index) => (
-          <Face key={index} value={value} index={index} step={step} />
+          <Face key={index} value={value} index={index} />
         ))}
       </div>
     </div>
   )
 }
 
-function Face({ value, index, step }: { value: number; index: number; step: MotionValue<number> }) {
+function Face({ value, index }: { value: number; index: number }) {
+  const step = useStatisticsStep()
   const transform = useTransform(
     step,
     (s) => `translateZ(-${RADIUS}) rotateX(${(s - index) * FACE_ANGLE}deg) translateZ(${RADIUS})`,
