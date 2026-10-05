@@ -27,8 +27,8 @@ const transition = "duration-300 ease-out-quart motion-reduce:transition-none"
  * selected section's details. Arrow keys move the carousel, Escape goes back to the overview.
  * Client island: only the hover/selection state lives here, the content comes from the server.
  *
- * Layouts: stacked (phones, portrait tablets), title and details under the illustrations
- * (desktop), and side by side on short landscape screens (`short:`).
+ * Layouts: title above and details below the illustrations (phones, portrait tablets), title
+ * and details under them (desktop), and side by side on short landscape screens (`short:`).
  */
 export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcaseProps) {
   const rootRef = useRef<HTMLDivElement>(null)
@@ -70,7 +70,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
       ref={rootRef}
       onKeyDown={handleKeyDown}
       className={cn(
-        "grid min-h-0 flex-1 grid-cols-1 grid-rows-[minmax(0,1fr)_auto_auto] [grid-template-areas:'stage'_'details'_'title']",
+        "grid min-h-0 flex-1 grid-cols-1 grid-rows-[auto_minmax(0,1fr)_auto] [grid-template-areas:'title'_'stage'_'details']",
         "lg:grid-cols-[minmax(0,1fr)_auto] lg:grid-rows-[minmax(0,1fr)_auto] lg:gap-x-12 lg:[grid-template-areas:'stage_stage'_'title_details']",
         "short:grid-cols-[minmax(0,3fr)_minmax(16rem,2fr)] short:grid-rows-[minmax(0,1fr)_auto] short:gap-x-6 short:[grid-template-areas:'stage_details'_'stage_title']",
       )}
@@ -111,7 +111,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
               key={item.id}
               inert={!isShown}
               className={cn(
-                "col-start-1 row-start-1 flex flex-col items-start lg:items-end lg:text-right short:items-start short:text-left",
+                "col-start-1 row-start-1 flex flex-col items-end text-right short:items-start short:text-left",
                 // Hidden with `inert` + opacity: a visibility transition would restyle every frame.
                 "transition-[opacity,translate]",
                 transition,
@@ -129,7 +129,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         {section?.title}
       </p>
 
-      <div className="mt-6 [grid-area:title] lg:mt-0 lg:self-end short:mt-3 compact:mt-3">
+      <div className="mb-6 [grid-area:title] lg:mb-0 lg:self-end short:mt-3 short:mb-0 compact:mb-3">
         {heading}
       </div>
     </div>
