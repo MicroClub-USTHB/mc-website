@@ -81,7 +81,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         aria-label="MicroClub sections"
         // Size container: the stage fits the space left by the texts (see ClubSectionsStage).
         // From xl, it may dip 48px into the details row: the open icon stays clear of the text.
-        className="[container-type:size] flex min-h-0 min-w-0 items-center justify-center [grid-area:stage] xl:-mb-12 lg:landscape:items-end short:mb-0 short:items-center"
+        className="[container-type:size] flex min-h-0 min-w-0 items-start justify-center [grid-area:stage] lg:items-center xl:-mb-12 lg:landscape:items-end short:mb-0 short:items-center"
       >
         <ClubSectionsStage
           sections={sections}
@@ -95,15 +95,10 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
       </div>
 
       {/*
-        Every section's details share one cell, so it is as tall as the longest: switching
-        sections never moves the layout. Phones only show it once a section is open.
+        Every section's details share one cell, so it is as tall as the longest and always
+        holds its space: opening or switching sections never moves the layout.
       */}
-      <div
-        className={cn(
-          "mt-6 grid [grid-area:details] lg:mt-0 lg:w-100 short:mt-0 short:w-auto short:self-end compact:mt-3",
-          selected === null && "max-lg:hidden short:grid",
-        )}
-      >
+      <div className="mt-6 grid [grid-area:details] lg:mt-0 lg:w-100 short:mt-0 short:w-auto short:self-end compact:mt-3">
         {sections.map((item, index) => {
           const isShown = index === selected
           return (
@@ -115,9 +110,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
                 // Hidden with `inert` + opacity: a visibility transition would restyle every frame.
                 "transition-[opacity,translate]",
                 transition,
-                // On phones the cell appears with the open section (from `display: none`, which
-                // skips transitions): `starting:` gives it the same fade up as on desktop.
-                isShown ? "starting:translate-y-4 starting:opacity-0" : "translate-y-4 opacity-0",
+                !isShown && "translate-y-4 opacity-0",
               )}
             >
               {item.details}
@@ -129,7 +122,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         {section?.title}
       </p>
 
-      <div className="mb-6 [grid-area:title] lg:mb-0 lg:self-end short:mt-3 short:mb-0 compact:mb-3">
+      <div className="mb-2 [grid-area:title] lg:mb-0 lg:self-end short:mt-3 short:mb-0">
         {heading}
       </div>
     </div>
