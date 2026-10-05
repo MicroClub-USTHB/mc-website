@@ -44,6 +44,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 - Max width: content never exceeds 1440px (Figma desktop frame). Use the `max-w-site` token (`--container-site: 90rem`) with `mx-auto`; keep section backgrounds full-bleed.
 - Single theme, no theme switcher. Sections are light by default; make a section dark with `<SectionContainer theme="dark">`, which scopes the mcoli-ui dark tokens to it. Never add a theme toggle or `next-themes`. Use the `dark:` variant only for exceptions.
 - Icons: `lucide-react` only, named imports with the `Icon` suffix (`MenuIcon`, `ArrowRightIcon`). Size them with Tailwind (`size-5`); icon-only buttons need an `aria-label`.
+- Easings: use the shared tokens, `ease-out-expo` / `ease-out-quart` / `ease-in-out-quart` in Tailwind and `EASE_*` from `src/lib/easing.ts` in Motion.
 - Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
