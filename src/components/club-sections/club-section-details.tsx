@@ -8,10 +8,10 @@ import type { ClubSection } from "@/const/club-sections"
 export function ClubSectionDetails({ section }: { section: ClubSection }) {
   return (
     <>
-      <h3 className="header-sm font-light text-primary md:header-lg lg:header-xl short:header-xs compact:header-xs">
+      <h3 className="header-sm font-normal text-primary md:header-lg lg:header-xl short:header-xs compact:header-xs">
         {section.title}
       </h3>
-      <p className="mt-2 paragraph-md text-muted-foreground md:mt-4 md:max-w-xl md:paragraph-lg short:mt-1 short:paragraph-sm compact:mt-1 compact:paragraph-sm">
+      <p className="mt-2 paragraph-md font-medium text-muted-foreground md:mt-4 md:max-w-xl md:paragraph-lg short:mt-1 short:paragraph-sm compact:mt-1 compact:paragraph-sm">
         {section.description}
       </p>
       <McButton
