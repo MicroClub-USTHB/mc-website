@@ -2,7 +2,7 @@
 
 import { motion, useTransform } from "motion/react"
 
-import { useMenu } from "@/components/layout/site-menu/menu-context"
+import { useMenu } from "@/components/site-menu/menu-context"
 
 /**
  * Full-screen navigation panel, wiped in from the left by the shared `reveal` value. Always in

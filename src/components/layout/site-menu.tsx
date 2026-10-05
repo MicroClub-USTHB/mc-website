@@ -1,8 +1,8 @@
-import { MenuBar } from "@/components/layout/site-menu/menu-bar"
-import { MenuProvider } from "@/components/layout/site-menu/menu-context"
-import { MenuLink } from "@/components/layout/site-menu/menu-link"
-import { MenuPanel } from "@/components/layout/site-menu/menu-panel"
-import { PageWordmark } from "@/components/layout/site-menu/page-wordmark"
+import { MenuBar } from "@/components/site-menu/menu-bar"
+import { MenuProvider } from "@/components/site-menu/menu-context"
+import { MenuLink } from "@/components/site-menu/menu-link"
+import { MenuPanel } from "@/components/site-menu/menu-panel"
+import { PageWordmark } from "@/components/site-menu/page-wordmark"
 import { menuLinks, siteConfig } from "@/config/site"
 
 /**

@@ -1,6 +1,6 @@
 "use client"
 
-import { useMenu } from "@/components/layout/site-menu/menu-context"
+import { useMenu } from "@/components/site-menu/menu-context"
 
 /**
  * Sets the hover fill origin to the edge the pointer crossed, so the fill grows from where the

@@ -5,14 +5,8 @@ import Image from "next/image"
 import Link from "next/link"
 import { motion, useTransform } from "motion/react"
 
-import { useMenu } from "@/components/layout/site-menu/menu-context"
-import { MenuToggleIcon } from "@/components/layout/site-menu/menu-toggle-icon"
-import {
-  BAR_POSITION,
-  CELL,
-  WORDMARK_BOX,
-  WORDMARK_TEXT,
-} from "@/components/layout/site-menu/styles"
+import { useMenu } from "@/components/site-menu/menu-context"
+import { MenuToggleIcon } from "@/components/site-menu/menu-toggle-icon"
 import { cn } from "@/lib/utils"
 
 /**
@@ -38,7 +32,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-open={open || undefined}
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
-          BAR_POSITION,
+          "top-4 left-4 lg:top-24 lg:left-20",
           "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
         )}
       >
@@ -50,7 +44,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
           aria-controls="site-menu-panel"
           onClick={toggle}
           className={cn(
-            CELL,
+            "size-14 lg:size-[85px]",
             "relative z-10 grid place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
             "group-data-open:hover:bg-accent group-data-open:hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
           )}
@@ -108,8 +102,8 @@ function MenuWordmark() {
       aria-hidden
       style={{ clipPath }}
       className={cn(
-        WORDMARK_BOX,
-        WORDMARK_TEXT,
+        "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-[18px]",
+        "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
         "pointer-events-none absolute top-0 left-14 lg:left-[85px]",
       )}
     >

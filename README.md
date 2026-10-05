@@ -51,7 +51,8 @@ src/
 │       └── page.tsx          # Landing page (composes the sections in order)
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
-│   ├── layout/               # site-menu/ (header + hamburger menu), SiteFooter
+│   ├── layout/               # SiteMenu (header + hamburger menu), SiteFooter
+│   ├── site-menu/            # Menu sub-components (bar, panel, links, context)
 │   ├── shared/               # Reusable building blocks (SectionContainer)
 │   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)

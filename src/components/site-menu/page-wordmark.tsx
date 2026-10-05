@@ -2,8 +2,7 @@
 
 import Link from "next/link"
 
-import { useMenu } from "@/components/layout/site-menu/menu-context"
-import { BAR_POSITION, WORDMARK_BOX, WORDMARK_TEXT } from "@/components/layout/site-menu/styles"
+import { useMenu } from "@/components/site-menu/menu-context"
 import { cn } from "@/lib/utils"
 
 /**
@@ -20,9 +19,9 @@ export function PageWordmark({ label }: { label: string }) {
         href="/"
         aria-label={label}
         className={cn(
-          BAR_POSITION,
-          WORDMARK_BOX,
-          WORDMARK_TEXT,
+          "top-4 left-4 lg:top-24 lg:left-20",
+          "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-[18px]",
+          "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
           "absolute translate-x-14 ring-1 ring-border lg:translate-x-[85px]",
         )}
       >
