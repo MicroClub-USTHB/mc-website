@@ -43,6 +43,9 @@ const STEP = {
  *
  * It moves toward the bottom left in an infinite loop, driven by Motion (`ChainViewport`): every
  * slice is anchored on slot 0 (top right, offscreen) and offset by its current slot.
+ *
+ * Photos are grayscale and fade to color while hovered (only the visible slanted part of a
+ * slice reacts, see `SlantedImage`).
  */
 export function EventChain({ events }: { events: FeaturedEvent[] }) {
   const tiles = Array.from({ length: Math.ceil(MIN_SLOTS / events.length) }, () => events).flat()
@@ -70,9 +73,14 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
                 top: `calc(50% + ${CENTER_OFFSET_Y + firstSlot * STEP_Y} * var(--u))`,
                 width: `calc(${TILE_WIDTH} * var(--u))`,
               }}
-              className="absolute"
+              className="pointer-events-none absolute"
             >
-              <SlantedImage image={event.cover} sizes="20vw" />
+              <SlantedImage
+                image={event.cover}
+                sizes="20vw"
+                frameClassName="group/slice"
+                imageClassName="grayscale transition-[filter] duration-500 ease-out-quart group-hover/slice:grayscale-0"
+              />
             </ChainSlot>
           </li>
         ))}
