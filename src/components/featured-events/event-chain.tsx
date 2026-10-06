@@ -65,6 +65,7 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
           // Tiles repeat events once the list is shorter than the loop.
           <li key={`${event.id}-${index}`}>
             <ChainSlot
+              eventId={event.id}
               index={index}
               slots={slots}
               stepDuration={STEP_DURATION}

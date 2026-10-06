@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
+import { useSetActiveEvent } from "@/components/featured-events/active-event"
 import { EASE_IN_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 
@@ -27,6 +28,7 @@ const SLICE_SELECTOR = '[data-slot="slanted-frame"]'
  *
  * Hovering a slice (mouse or pen) slows the whole chain down to a stop, and leaving it speeds the
  * chain back up, by easing the slices' playback rate, so the photo under the pointer stays put.
+ * The hovered slice's event is the active event (see `ActiveEventProvider`), none otherwise.
  */
 export function ChainViewport({ className, ...props }: React.ComponentProps<"div">) {
   const ref = useRef<HTMLDivElement>(null)
@@ -34,16 +36,29 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
   const reduceMotion = useReducedMotion()
   const [hovered, setHovered] = useState(false)
   const speed = useMotionValue(1)
+  const setActiveEvent = useSetActiveEvent()
 
   useEffect(() => {
     const animation = animate(speed, hovered ? 0 : 1, { duration: 0.6, ease: EASE_IN_OUT_QUART })
     return () => animation.stop()
   }, [hovered, speed])
 
-  // Delegated: `pointerover` also fires when the pointer moves from a slice to the empty box.
+  /*
+   * Delegated on real pointer moves only (non-zero movement): the browser also reports hover when
+   * a moving slice slides under a still pointer, or when the page scrolls under it, and a still
+   * pointer somewhere on the chain's path would otherwise end up pausing it for good.
+   */
   function updateHover(event: React.PointerEvent) {
     if (event.pointerType === "touch") return
-    setHovered(event.target instanceof Element && event.target.closest(SLICE_SELECTOR) !== null)
+    if (event.movementX === 0 && event.movementY === 0) return
+    const slice = event.target instanceof Element ? event.target.closest(SLICE_SELECTOR) : null
+    setHovered(slice !== null)
+    setActiveEvent(slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId ?? null)
+  }
+
+  function clearHover() {
+    setHovered(false)
+    setActiveEvent(null)
   }
 
   return (
@@ -51,8 +66,8 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
       <ChainSpeedContext value={speed}>
         <div
           ref={ref}
-          onPointerOver={updateHover}
-          onPointerLeave={() => setHovered(false)}
+          onPointerMove={updateHover}
+          onPointerLeave={clearHover}
           className={cn(className)}
           {...props}
         />
@@ -76,6 +91,7 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
  * in front without touching every `z-index` at each step.
  */
 export function ChainSlot({
+  eventId,
   index,
   slots,
   stepDuration,
@@ -84,6 +100,8 @@ export function ChainSlot({
   style,
   children,
 }: {
+  /** Event shown by the slice, made active when the slice is hovered. */
+  eventId: string
   index: number
   slots: number
   stepDuration: number
@@ -148,6 +166,7 @@ export function ChainSlot({
   return (
     <div
       ref={ref}
+      data-event-id={eventId}
       style={{
         ...style,
         // Resting place (slot `index`), also used before hydration and with reduced motion.
