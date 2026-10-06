@@ -7,7 +7,8 @@ import { cn } from "@/lib/utils"
 
 /**
  * Reusable event card: cover photo on the left, event logo and short name on top of the text
- * panel, description and link at the bottom. Everything comes from the `event` prop, so the same
+ * panel, description and link at the bottom (logo, description and link are skipped when the
+ * event does not have them yet). Everything comes from the `event` prop, so the same
  * card serves every event. It forwards props to the `<article>`, so it can be the `render`
  * target of a dialog popup.
  *
@@ -53,13 +54,17 @@ export function EventCard({
 
       <div className="flex flex-col justify-between gap-12 p-6 sm:p-8 lg:gap-[1.5em] lg:p-[5cqw] lg:text-[length:clamp(0.75rem,1.8cqw,1.25rem)]">
         <div className="flex items-start justify-between gap-4">
-          <Image
-            src={event.logo.src}
-            alt={event.logo.alt}
-            width={event.logo.width}
-            height={event.logo.height}
-            className="h-6 w-auto lg:h-[1.75em]"
-          />
+          {event.logo ? (
+            <Image
+              src={event.logo.src}
+              alt={event.logo.alt}
+              width={event.logo.width}
+              height={event.logo.height}
+              className="h-6 w-auto lg:h-[1.75em]"
+            />
+          ) : (
+            <span />
+          )}
           <h3
             id={titleId}
             className="paragraph-xl font-normal text-muted-foreground lg:text-[1.43em] lg:leading-tight"
@@ -69,20 +74,24 @@ export function EventCard({
         </div>
 
         <div className="flex flex-col items-start gap-5 lg:gap-[1.2em]">
-          <p className="paragraph-md text-muted-foreground lg:text-[1em] lg:leading-normal">
-            {event.description}
-          </p>
-          <McButton
-            variant="link"
-            size="sm"
-            icon="leading"
-            nativeButton={false}
-            render={<a href={event.link.href} target="_blank" rel="noopener noreferrer" />}
-            className="lg:text-[1em] lg:[&_[data-slot=leading-icon]]:size-[1.15em]"
-          >
-            {event.link.label}
-            <span className="sr-only"> (opens in a new tab)</span>
-          </McButton>
+          {event.description && (
+            <p className="paragraph-md text-muted-foreground lg:text-[1em] lg:leading-normal">
+              {event.description}
+            </p>
+          )}
+          {event.link && (
+            <McButton
+              variant="link"
+              size="sm"
+              icon="leading"
+              nativeButton={false}
+              render={<a href={event.link.href} target="_blank" rel="noopener noreferrer" />}
+              className="lg:text-[1em] lg:[&_[data-slot=leading-icon]]:size-[1.15em]"
+            >
+              {event.link.label}
+              <span className="sr-only"> (opens in a new tab)</span>
+            </McButton>
+          )}
         </div>
       </div>
     </article>
