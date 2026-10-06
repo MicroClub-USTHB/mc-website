@@ -1,5 +1,6 @@
 import type { CSSProperties } from "react"
 
+import { ChainSlot, ChainViewport } from "@/components/featured-events/chain-viewport"
 import { SlantedImage } from "@/components/featured-events/slanted-image"
 import type { FeaturedEvent } from "@/const/featured-events"
 
@@ -14,6 +15,22 @@ const STEP_X = 6.64
 const STEP_Y = 3.76
 const CENTER_OFFSET_X = -0.47
 const CENTER_OFFSET_Y = -18.08
+/** Slice height over width (975×1966 slanted slice, see `SlantedImage`). */
+const TILE_RATIO = 1966 / 975
+
+/**
+ * Minimum slots on the loop. 19 slots span the section on every aspect ratio (fewer on portrait
+ * screens), so a slice always wraps around offscreen; the events are repeated to reach it.
+ */
+const MIN_SLOTS = 20
+/** Seconds for a slice to move one slot: about 30px/s on a 1440px wide section. */
+const STEP_DURATION = 3
+
+/** One slot down the chain (toward the bottom left), in % of the slice width and height. */
+const STEP = {
+  x: (-STEP_X / TILE_WIDTH) * 100,
+  y: (STEP_Y / (TILE_WIDTH * TILE_RATIO)) * 100,
+}
 
 /**
  * Diagonal chain of slanted event photos, from the top right (first event) down to the bottom
@@ -23,35 +40,43 @@ const CENTER_OFFSET_Y = -18.08
  * Fills its positioned parent. Everything is laid out from the center of that box in `--u`
  * units: 1% of its width (as in Figma), but never less than 0.8% of its height, so the chain
  * keeps crossing the whole box on narrow, tall screens.
+ *
+ * It moves toward the bottom left in an infinite loop, driven by Motion (`ChainViewport`): every
+ * slice is anchored on slot 0 (top right, offscreen) and offset by its current slot.
  */
 export function EventChain({ events }: { events: FeaturedEvent[] }) {
-  const middle = (events.length - 1) / 2
+  const tiles = Array.from({ length: Math.ceil(MIN_SLOTS / events.length) }, () => events).flat()
+  const slots = tiles.length
+  // Slot 0 (top right) sits `firstSlot` steps from the middle of the chain.
+  const firstSlot = -(slots - 1) / 2
 
   return (
-    <div
+    <ChainViewport
+      slots={slots}
+      stepDuration={STEP_DURATION}
       aria-hidden
-      className="border-2 border-red-600[container-type:size] absolute inset-0 [mask-image:linear-gradient(to_top_right,transparent,black_16%,black_84%,transparent)]"
+      className="@container-[size] absolute inset-0 mask-[linear-gradient(to_top_right,transparent,black_16%,black_84%,transparent)]"
     >
       <ul style={{ "--u": "max(1cqw, 0.8cqh)" } as CSSProperties} className="absolute inset-0">
-        {events.map((event, index) => {
-          const fromMiddle = index - middle
-          return (
-            <li key={event.id}>
-              <SlantedImage
-                image={event.cover}
-                sizes="20vw"
-                style={{
-                  left: `calc(50% + ${CENTER_OFFSET_X - fromMiddle * STEP_X} * var(--u))`,
-                  top: `calc(50% + ${CENTER_OFFSET_Y + fromMiddle * STEP_Y} * var(--u))`,
-                  width: `calc(${TILE_WIDTH} * var(--u))`,
-                  zIndex: index + 1,
-                }}
-                className="absolute"
-              />
-            </li>
-          )
-        })}
+        {tiles.map((event, index) => (
+          // Tiles repeat events once the list is shorter than the loop.
+          <li key={`${event.id}-${index}`}>
+            <ChainSlot
+              index={index}
+              slots={slots}
+              step={STEP}
+              style={{
+                left: `calc(50% + ${CENTER_OFFSET_X - firstSlot * STEP_X} * var(--u))`,
+                top: `calc(50% + ${CENTER_OFFSET_Y + firstSlot * STEP_Y} * var(--u))`,
+                width: `calc(${TILE_WIDTH} * var(--u))`,
+              }}
+              className="absolute"
+            >
+              <SlantedImage image={event.cover} sizes="20vw" />
+            </ChainSlot>
+          </li>
+        ))}
       </ul>
-    </div>
+    </ChainViewport>
   )
 }
