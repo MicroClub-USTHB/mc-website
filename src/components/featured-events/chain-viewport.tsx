@@ -1,25 +1,62 @@
 "use client"
 
-import { createContext, useContext, useEffect, useRef } from "react"
-import { animate, useInView, useReducedMotion, type AnimationPlaybackControls } from "motion/react"
+import { createContext, useContext, useEffect, useRef, useState } from "react"
+import {
+  animate,
+  useInView,
+  useMotionValue,
+  useReducedMotion,
+  type AnimationPlaybackControls,
+  type MotionValue,
+} from "motion/react"
 
+import { EASE_IN_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 
 /** Whether the chain should move: on screen and motion allowed. */
 const ChainPlayingContext = createContext(false)
+/** Playback rate of every slice: 1 while moving, eased down to 0 while a slice is hovered. */
+const ChainSpeedContext = createContext<MotionValue<number> | null>(null)
+
+/** Visible slanted part of a slice (see `SlantedImage`), the only part that takes the pointer. */
+const SLICE_SELECTOR = '[data-slot="slanted-frame"]'
 
 /**
  * Box of the event chain: plays its slices while it is on screen, pauses them offscreen, and
  * never plays them when the user prefers reduced motion (the chain then stays still).
+ *
+ * Hovering a slice (mouse or pen) slows the whole chain down to a stop, and leaving it speeds the
+ * chain back up, by easing the slices' playback rate, so the photo under the pointer stays put.
  */
 export function ChainViewport({ className, ...props }: React.ComponentProps<"div">) {
   const ref = useRef<HTMLDivElement>(null)
   const inView = useInView(ref)
   const reduceMotion = useReducedMotion()
+  const [hovered, setHovered] = useState(false)
+  const speed = useMotionValue(1)
+
+  useEffect(() => {
+    const animation = animate(speed, hovered ? 0 : 1, { duration: 0.6, ease: EASE_IN_OUT_QUART })
+    return () => animation.stop()
+  }, [hovered, speed])
+
+  // Delegated: `pointerover` also fires when the pointer moves from a slice to the empty box.
+  function updateHover(event: React.PointerEvent) {
+    if (event.pointerType === "touch") return
+    setHovered(event.target instanceof Element && event.target.closest(SLICE_SELECTOR) !== null)
+  }
 
   return (
     <ChainPlayingContext value={inView && !reduceMotion}>
-      <div ref={ref} className={cn(className)} {...props} />
+      <ChainSpeedContext value={speed}>
+        <div
+          ref={ref}
+          onPointerOver={updateHover}
+          onPointerLeave={() => setHovered(false)}
+          className={cn(className)}
+          {...props}
+        />
+      </ChainSpeedContext>
     </ChainPlayingContext>
   )
 }
@@ -32,6 +69,7 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
  * own size) and wraps back offscreen. Its clock starts `index` steps in, so the slices stay one
  * slot apart. The `transform` is a full string, so Motion hands it to the browser (WAAPI): it runs
  * on the compositor, on the slice's own GPU layer (`will-change`), unaffected by main-thread work.
+ * Its playback rate follows the chain speed, so all slices slow down and stop together.
  *
  * Depth only changes when needed: a slice drops behind everything when it wraps (offscreen),
  * then all slices rise together when the loop restarts, so the slice further down always stays
@@ -57,6 +95,8 @@ export function ChainSlot({
 }) {
   const ref = useRef<HTMLDivElement>(null)
   const playing = useContext(ChainPlayingContext)
+  const speed = useContext(ChainSpeedContext)
+  if (!speed) throw new Error("ChainSlot must be rendered inside ChainViewport")
   const controls = useRef<AnimationPlaybackControls>(null)
   const playingRef = useRef(playing)
 
@@ -81,6 +121,7 @@ export function ChainSlot({
     )
     animation.pause()
     animation.time = index * stepDuration
+    animation.speed = speed.get()
     if (playingRef.current) animation.play()
     controls.current = animation
 
@@ -88,13 +129,21 @@ export function ChainSlot({
       animation.stop()
       controls.current = null
     }
-  }, [index, slots, stepDuration, step.x, step.y])
+  }, [index, slots, stepDuration, step.x, step.y, speed])
 
   useEffect(() => {
     playingRef.current = playing
     if (playing) controls.current?.play()
     else controls.current?.pause()
   }, [playing])
+
+  useEffect(
+    () =>
+      speed.on("change", (value) => {
+        if (controls.current) controls.current.speed = value
+      }),
+    [speed],
+  )
 
   return (
     <div

@@ -36,6 +36,7 @@ export function SlantedImage({
   return (
     <div style={style} className={cn("pointer-events-none relative aspect-975/1966", className)}>
       <div
+        data-slot="slanted-frame"
         className={cn(
           "pointer-events-auto absolute inset-x-0 top-0 aspect-975/1314 origin-top-left skew-y-[33.69deg]",
           frameClassName,
