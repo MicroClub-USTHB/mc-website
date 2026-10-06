@@ -35,14 +35,15 @@ const STEP = {
 /**
  * Diagonal chain of slanted event photos, from the top right (first event) down to the bottom
  * left. Each slice overlaps the previous one and sits in front of it, so the chain reads as a
- * stack seen from the side; its ends run off the section and fade out.
+ * stack seen from the side; its ends run off the section and fade into the background.
  *
  * Fills its positioned parent. Everything is laid out from the center of that box in `--u`
  * units: 1% of its width (as in Figma), but never less than 0.8% of its height, so the chain
  * keeps crossing the whole box on narrow, tall screens.
  *
- * It moves toward the bottom left in an infinite loop, driven by Motion (`ChainViewport`): every
- * slice is anchored on slot 0 (top right, offscreen) and offset by its current slot.
+ * It moves toward the bottom left in an infinite loop, driven by Motion on the compositor (see
+ * `ChainSlot`): every slice is anchored on slot 0 (top right, offscreen) and offset by its
+ * current slot.
  *
  * Photos are grayscale and fade to color while hovered (only the visible slanted part of a
  * slice reacts, see `SlantedImage`).
@@ -54,19 +55,19 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
   const firstSlot = -(slots - 1) / 2
 
   return (
-    <ChainViewport
-      slots={slots}
-      stepDuration={STEP_DURATION}
-      aria-hidden
-      className="@container-[size] absolute inset-0 mask-[linear-gradient(to_top_right,transparent,black_16%,black_84%,transparent)]"
-    >
-      <ul style={{ "--u": "max(1cqw, 0.8cqh)" } as CSSProperties} className="absolute inset-0">
+    <ChainViewport aria-hidden className="@container-[size] absolute inset-0">
+      {/* `isolate` keeps the slices' z-indexes below the fade overlay. */}
+      <ul
+        style={{ "--u": "max(1cqw, 0.8cqh)" } as CSSProperties}
+        className="absolute inset-0 isolate"
+      >
         {tiles.map((event, index) => (
           // Tiles repeat events once the list is shorter than the loop.
           <li key={`${event.id}-${index}`}>
             <ChainSlot
               index={index}
               slots={slots}
+              stepDuration={STEP_DURATION}
               step={STEP}
               style={{
                 left: `calc(50% + ${CENTER_OFFSET_X - firstSlot * STEP_X} * var(--u))`,
@@ -85,6 +86,11 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
           </li>
         ))}
       </ul>
+      {/*
+        Ends of the chain fading into the background: a static overlay instead of a mask, so the
+        moving slices never have to be re-masked (same look on the plain section background).
+      */}
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top_right,var(--background),transparent_16%,transparent_84%,var(--background))]" />
     </ChainViewport>
   )
 }
