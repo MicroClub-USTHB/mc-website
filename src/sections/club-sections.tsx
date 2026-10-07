@@ -4,13 +4,28 @@ import { DevSectionIcon } from "@/components/club-sections/dev-section-icon"
 import { GameDevSectionIcon } from "@/components/club-sections/game-dev-section-icon"
 import { RoboticsSectionIcon } from "@/components/club-sections/robotics-section-icon"
 import type { SectionIconProps } from "@/components/club-sections/svg-effects"
+import { JsonLd } from "@/components/shared/json-ld"
 import { SectionContainer } from "@/components/shared/section-container"
+import { siteConfig } from "@/config/site"
 import { CLUB_SECTIONS, type ClubSectionId } from "@/const/club-sections"
 
 const ILLUSTRATIONS: Record<ClubSectionId, (props: SectionIconProps) => React.ReactNode> = {
   it: DevSectionIcon,
   "game-dev": GameDevSectionIcon,
   robotics: RoboticsSectionIcon,
+}
+
+/** schema.org Organization listing MicroClub's sections as departments. */
+const SECTIONS_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  department: CLUB_SECTIONS.map((section) => ({
+    "@type": "Organization",
+    name: `${siteConfig.name} ${section.title}`,
+    description: section.description,
+  })),
 }
 
 /**
@@ -27,6 +42,8 @@ export function ClubSections() {
       bleed
       className="h-svh max-h-screen overflow-x-clip"
     >
+      <JsonLd data={SECTIONS_JSON_LD} />
+
       {/*
         One screen tall: the illustrations shrink to fit. The top padding clears the fixed menu
         toggle, the bottom one follows the screen height.

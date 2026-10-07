@@ -24,6 +24,7 @@ export function ClubSectionDetails({ section }: { section: ClubSection }) {
         className="mt-4 lg:mt-7 short:mt-2 compact:mt-2"
       >
         Meet our projects
+        <span className="sr-only"> in {section.title}</span>
       </McButton>
     </>
   )

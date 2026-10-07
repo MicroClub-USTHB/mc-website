@@ -75,6 +75,11 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         "short:grid-cols-[minmax(0,3fr)_minmax(16rem,2fr)] short:grid-rows-[minmax(0,1fr)_auto] short:gap-x-6 short:[grid-template-areas:'stage_details'_'stage_title']",
       )}
     >
+      {/* First in the DOM so the h2 precedes the sections' h3s; grid areas place it visually. */}
+      <div className="mb-2 [grid-area:title] lg:mb-0 lg:self-end short:mt-3 short:mb-0">
+        {heading}
+      </div>
+
       <div
         role="group"
         aria-roledescription="carousel"
@@ -121,10 +126,6 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
       <p className="sr-only" aria-live="polite">
         {section?.title}
       </p>
-
-      <div className="mb-2 [grid-area:title] lg:mb-0 lg:self-end short:mt-3 short:mb-0">
-        {heading}
-      </div>
     </div>
   )
 }
