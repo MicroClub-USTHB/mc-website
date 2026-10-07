@@ -12,7 +12,7 @@ import { cn } from "@/lib/utils"
 
 /**
  * Compact counterpart of the event list, category label and cursor badge, for touch and short
- * screens: names the active event (category, name, position). On desktop it follows the hovered
+ * screens: names the active event (category and name). On desktop it follows the hovered
  * slice (empty otherwise, a click on a slice opens the card); on touch screens it follows the
  * chain's spotlight and adds a "View event" button that opens the card.
  */
@@ -26,8 +26,7 @@ export function SpotlightPanel({
   // Desktop: only while a slice is hovered. Touch: the spotlight keeps an event active.
   const { activeId } = useActiveEvent()
   const openEvent = useOpenEvent()
-  const index = events.findIndex((event) => event.id === activeId)
-  const event = index === -1 ? undefined : events[index]
+  const event = events.find((event) => event.id === activeId)
 
   return (
     <div className={cn("flex items-end justify-between gap-4", className)}>
@@ -43,9 +42,6 @@ export function SpotlightPanel({
             >
               <p className="paragraph-xs text-muted-foreground">
                 ({EVENT_CATEGORY_LABELS[event.category]})
-                <span className="ml-2 tabular-nums">
-                  {String(index + 1).padStart(2, "0")} / {events.length}
-                </span>
               </p>
               <p className="truncate header-xs text-primary sm:header-sm">{event.name}</p>
             </motion.div>

@@ -23,15 +23,38 @@ const ChainSpeedContext = createContext<MotionValue<number> | null>(null)
 /** Visible slanted part of a slice (see `SlantedImage`), the only part that takes the pointer. */
 const SLICE_SELECTOR = '[data-slot="slanted-frame"]'
 
-/** Spotlight point on touch screens, in fractions of the chain box (its center). */
-const FOCUS = { x: 0.5, y: 0.5 }
-/** How often the spotlight looks for the slice under its point, in ms. */
-const FOCUS_INTERVAL = 200
+/** How often the spotlight looks for the slice at the center of the chain, in ms. */
+const FOCUS_INTERVAL = 100
+/**
+ * The spotlight point sits this many slots up the chain from its center (toward the top right,
+ * where slices come from), so a slice gets colored a bit before it reaches the middle and loses
+ * its color a bit before it leaves it. One slot is 6.64u right and 3.76u up, with
+ * u = max(1% width, 1.1% height) of the chain box (see `EventChain`).
+ */
+const FOCUS_LEAD = 0.5
+const SLOT = { x: 6.64, y: -3.76 }
 
-/** Event id of the slice whose visible part is at the given viewport point, if any. */
-function eventAt(x: number, y: number) {
-  const slice = document.elementFromPoint(x, y)?.closest(SLICE_SELECTOR)
-  return slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId ?? null
+/**
+ * Event id of the slice whose visible part is centered closest to the spotlight point of `box`.
+ * Picking by slice centers (not by the slice drawn at that point, often the next one overlapping
+ * it) keeps the colored slice in the middle of the screen.
+ */
+function centeredEvent(box: HTMLElement) {
+  const rect = box.getBoundingClientRect()
+  const u = Math.max(rect.width / 100, (1.1 * rect.height) / 100)
+  const x = rect.left + rect.width / 2 + FOCUS_LEAD * SLOT.x * u
+  const y = rect.top + rect.height / 2 + FOCUS_LEAD * SLOT.y * u
+  let closest: Element | null = null
+  let closestDistance = Infinity
+  for (const slice of box.querySelectorAll(SLICE_SELECTOR)) {
+    const r = slice.getBoundingClientRect()
+    const distance = Math.hypot(r.left + r.width / 2 - x, r.top + r.height / 2 - y)
+    if (distance < closestDistance) {
+      closest = slice
+      closestDistance = distance
+    }
+  }
+  return closest?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId ?? null
 }
 
 /**
@@ -106,8 +129,7 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
     if (!box || !inView || dialogOpen || window.matchMedia("(any-pointer: fine)").matches) return
 
     function spotlight() {
-      const rect = box!.getBoundingClientRect()
-      const eventId = eventAt(rect.left + rect.width * FOCUS.x, rect.top + rect.height * FOCUS.y)
+      const eventId = centeredEvent(box!)
       if (eventId) setActiveEvent(eventId)
     }
 
