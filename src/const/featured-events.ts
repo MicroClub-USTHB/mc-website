@@ -40,9 +40,9 @@ export type FeaturedEvent = {
   link: Link[]
 }
 
-/** Event photos exported from Figma (`public/EventsHub/<file>.svg`), all 251×282. */
+/** Event photos (`public/EventsHub/<file>.webp`), all 502×563 (2× the Figma 251×282). */
 function cover(file: string, alt: string): EventSizedImage {
-  return { src: `/EventsHub/${file}.svg`, alt, width: 251, height: 282 }
+  return { src: `/EventsHub/${file}.webp`, alt, width: 502, height: 563 }
 }
 
 /**
