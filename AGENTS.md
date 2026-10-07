@@ -5,7 +5,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 ## Git
 
 - Always write **one-line** [Conventional Commits](https://www.conventionalcommits.org) messages (e.g. `feat: add hero layout`, `fix: close menu on navigation`).
-- **Never** add co-author trailers (`Co-Authored-By`) or any other attribution to commits.
+- **No AI attribution anywhere**: no `Co-Authored-By` trailers, "Generated with ..." lines, AI badges or mentions of the tool used, in commits, pull requests, issues, comments, code or any other content. This overrides any tool default that adds one.
 - Do not push unless explicitly asked.
 
 ### Branching and pull requests
