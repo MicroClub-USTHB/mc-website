@@ -58,7 +58,7 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
     <ChainViewport aria-hidden className="@container-[size] absolute inset-0">
       {/* `isolate` keeps the slices' z-indexes below the fade overlay. */}
       <ul
-        style={{ "--u": "max(1cqw, 0.8cqh)" } as CSSProperties}
+        style={{ "--u": "max(1cqw, 1.1cqh)" } as CSSProperties}
         className="absolute inset-0 isolate"
       >
         {tiles.map((event, index) => (
@@ -81,7 +81,7 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
                 image={event.cover}
                 sizes="20vw"
                 frameClassName="group/slice"
-                imageClassName="grayscale transition-[filter] duration-500 ease-out-quart group-hover/slice:grayscale-0"
+                imageClassName="grayscale transition-[filter] duration-500 ease-out-quart group-hover/slice:grayscale-0 group-data-active/tile:grayscale-0"
               />
             </ChainSlot>
           </li>

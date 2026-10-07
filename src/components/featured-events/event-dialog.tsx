@@ -66,7 +66,7 @@ export function EventDialogProvider({
             <Dialog.Backdrop className="dark fixed inset-0 z-60 bg-background/50 transition-opacity duration-300 ease-out-quart data-ending-style:opacity-0 data-starting-style:opacity-0" />
             <Dialog.Viewport
               data-lenis-prevent
-              className="dark fixed inset-0 z-60 flex overflow-y-auto p-4 sm:p-6 lg:p-8"
+              className="dark fixed inset-0 z-60 flex overflow-y-auto p-0 sm:p-6 lg:p-8"
             >
               {/* Not in Figma: only shown to keyboard users (Escape or a click outside also close). */}
               <Dialog.Close
@@ -75,7 +75,7 @@ export function EventDialogProvider({
                     variant="secondary"
                     icon="only"
                     iconDefinition={<XIcon />}
-                    className="fixed top-4 right-4 z-10 opacity-0 focus-visible:opacity-100"
+                    className="fixed top-4 right-4 z-10 opacity-0 focus-visible:opacity-100 pointer-coarse:opacity-100"
                   />
                 }
               >
@@ -84,7 +84,7 @@ export function EventDialogProvider({
               {selected && (
                 <Dialog.Popup
                   render={<EventCard event={selected} />}
-                  className="transition duration-300 ease-out-quart data-ending-style:scale-95 data-ending-style:opacity-0 data-starting-style:scale-95 data-starting-style:opacity-0"
+                  className="transition duration-300 ease-out-quart max-sm:mb-0 max-sm:data-ending-style:translate-y-full max-sm:data-starting-style:translate-y-full sm:data-ending-style:scale-95 sm:data-ending-style:opacity-0 sm:data-starting-style:scale-95 sm:data-starting-style:opacity-0"
                 />
               )}
             </Dialog.Viewport>

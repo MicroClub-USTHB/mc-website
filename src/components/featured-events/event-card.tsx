@@ -51,11 +51,11 @@ export function EventCard({
         } as CSSProperties
       }
       className={cn(
-        "@container mx-auto my-auto grid w-full max-w-site overflow-hidden border border-border bg-card text-card-foreground lg:aspect-(--card-ratio) lg:w-[min(65%,calc((100svh-8rem)*var(--card-ratio)))] lg:grid-cols-2",
+        "@container mx-auto my-auto grid max-h-[92svh] w-full overflow-y-auto border border-border bg-card text-card-foreground [--card-budget:8rem] sm:max-w-lg wide:aspect-(--card-ratio) wide:max-h-none wide:w-[min(65%,calc((100svh-var(--card-budget))*var(--card-ratio)))] wide:max-w-site wide:grid-cols-2 wide:overflow-hidden [@media(max-height:40rem)]:[--card-budget:2rem] [@media(max-height:40rem)]:wide:w-[min(94%,calc((100svh-var(--card-budget))*var(--card-ratio)))]",
         className,
       )}
     >
-      <div className="relative aspect-(--cover-ratio) lg:aspect-auto">
+      <div className="relative aspect-4/3 wide:aspect-auto">
         <Image
           src={cover.src}
           alt={cover.alt}
@@ -65,7 +65,7 @@ export function EventCard({
         />
       </div>
 
-      <div className="flex flex-col justify-between gap-12 p-6 sm:p-8 lg:gap-[1.5em] lg:p-[5cqw] lg:text-[length:clamp(0.75rem,1.8cqw,1.25rem)]">
+      <div className="flex flex-col justify-between gap-10 p-5 sm:p-8 wide:min-h-0 wide:gap-[1.5em] wide:overflow-y-auto wide:p-[5cqw] wide:text-[length:clamp(0.75rem,1.8cqw,1.25rem)]">
         <div className="flex items-start justify-between gap-4">
           {event.logo ? (
             <Image
@@ -74,27 +74,27 @@ export function EventCard({
               width={event.logo.width}
               height={event.logo.height}
               style={{ "--logo-scale": logoScale(event.logo) } as CSSProperties}
-              className="h-[calc(1.5rem*var(--logo-scale))] w-auto lg:h-[calc(1.75em*var(--logo-scale))]"
+              className="h-[calc(1.5rem*var(--logo-scale))] w-auto wide:h-[calc(1.75em*var(--logo-scale))]"
             />
           ) : (
             <span />
           )}
           <h3
             id={titleId}
-            className="paragraph-xl font-normal text-muted-foreground lg:text-[1.43em] lg:leading-tight"
+            className="paragraph-xl font-normal text-muted-foreground wide:text-[1.43em] wide:leading-tight"
           >
             {event.name}
           </h3>
         </div>
 
-        <div className="flex flex-col items-start gap-5 lg:gap-[1.2em]">
+        <div className="flex flex-col items-start gap-5 wide:gap-[1.2em]">
           {event.description && (
-            <p className="paragraph-md text-muted-foreground lg:text-[1em] lg:leading-normal">
+            <p className="paragraph-md text-muted-foreground wide:text-[1em] wide:leading-normal">
               {event.description}
             </p>
           )}
           {links.length > 0 && (
-            <ul className="flex flex-col items-start gap-2 lg:gap-[0.6em]">
+            <ul className="flex flex-col items-start gap-2 wide:gap-[0.6em]">
               {links.map((link) => (
                 <li key={`${link.label}-${link.href}`}>
                   <McButton
@@ -103,7 +103,7 @@ export function EventCard({
                     icon="leading"
                     nativeButton={false}
                     render={<a href={link.href} target="_blank" rel="noopener noreferrer" />}
-                    className="lg:text-[1em] lg:[&_[data-slot=leading-icon]]:size-[1.15em]"
+                    className="wide:text-[1em] wide:[&_[data-slot=leading-icon]]:size-[1.15em]"
                   >
                     {link.label}
                     <span className="sr-only"> (opens in a new tab)</span>

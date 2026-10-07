@@ -47,7 +47,7 @@ export function CursorBadge({ events }: { events: Pick<FeaturedEvent, "id" | "na
       aria-hidden
       data-active={activeId !== null || undefined}
       style={{ x, y }}
-      className="pointer-events-none fixed top-0 left-0 z-40 bg-primary px-3.5 py-0.5 paragraph-xs font-medium whitespace-nowrap text-primary-foreground opacity-0 transition-opacity duration-150 ease-out-quart data-active:opacity-100"
+      className="pointer-events-none fixed top-0 left-0 z-40 bg-primary px-3.5 py-0.5 paragraph-xs font-medium whitespace-nowrap text-primary-foreground opacity-0 transition-opacity duration-150 ease-out-quart data-active:opacity-100 [@media(any-hover:none)]:hidden"
     >
       {shown?.name}
     </motion.div>

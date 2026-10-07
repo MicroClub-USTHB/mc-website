@@ -10,7 +10,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
-import { useSetActiveEvent } from "@/components/featured-events/active-event"
+import { useActiveEvent, useSetActiveEvent } from "@/components/featured-events/active-event"
 import { useEventDialogOpen, useOpenEvent } from "@/components/featured-events/event-dialog"
 import { EASE_IN_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
@@ -22,6 +22,17 @@ const ChainSpeedContext = createContext<MotionValue<number> | null>(null)
 
 /** Visible slanted part of a slice (see `SlantedImage`), the only part that takes the pointer. */
 const SLICE_SELECTOR = '[data-slot="slanted-frame"]'
+
+/** Spotlight point on touch screens, in fractions of the chain box (its center). */
+const FOCUS = { x: 0.5, y: 0.5 }
+/** How often the spotlight looks for the slice under its point, in ms. */
+const FOCUS_INTERVAL = 200
+
+/** Event id of the slice whose visible part is at the given viewport point, if any. */
+function eventAt(x: number, y: number) {
+  const slice = document.elementFromPoint(x, y)?.closest(SLICE_SELECTOR)
+  return slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId ?? null
+}
 
 /**
  * Box of the event chain: plays its slices while it is on screen, pauses them offscreen or while
@@ -85,6 +96,25 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
     setHovered(false)
     setActiveEvent(null)
   }
+
+  /*
+   * Touch-only screens (no mouse or trackpad) have no hover: the slice passing through the center
+   * of the chain becomes the active event instead (colored, named in the panel), while on screen.
+   */
+  useEffect(() => {
+    const box = ref.current
+    if (!box || !inView || dialogOpen || window.matchMedia("(any-pointer: fine)").matches) return
+
+    function spotlight() {
+      const rect = box!.getBoundingClientRect()
+      const eventId = eventAt(rect.left + rect.width * FOCUS.x, rect.top + rect.height * FOCUS.y)
+      if (eventId) setActiveEvent(eventId)
+    }
+
+    spotlight()
+    const timer = window.setInterval(spotlight, FOCUS_INTERVAL)
+    return () => window.clearInterval(timer)
+  }, [inView, dialogOpen, setActiveEvent])
 
   function openClickedEvent(event: React.MouseEvent) {
     const slice = event.target instanceof Element ? event.target.closest(SLICE_SELECTOR) : null
@@ -186,6 +216,7 @@ export function ChainSlot({
   const playing = useContext(ChainPlayingContext)
   const speed = useContext(ChainSpeedContext)
   if (!speed) throw new Error("ChainSlot must be rendered inside ChainViewport")
+  const { activeId } = useActiveEvent()
   const animations = useRef<SliceAnimations>(null)
   const playingRef = useRef(playing)
 
@@ -242,13 +273,14 @@ export function ChainSlot({
     <div
       ref={ref}
       data-event-id={eventId}
+      data-active={activeId === eventId || undefined}
       style={{
         ...style,
         // Resting place (slot `index`), also used before hydration and with reduced motion.
         transform: `translate(${index * step.x}%, ${index * step.y}%)`,
         zIndex: index,
       }}
-      className={cn("will-change-transform", className)}
+      className={cn("group/tile will-change-transform", className)}
     >
       {children}
     </div>
