@@ -13,7 +13,7 @@ const PANEL_HEIGHT = 150
 const RADIUS = 340
 const PERSPECTIVE = 1100
 /** Height of the slot of each panel (panel centered in it), in unscaled px. */
-const PITCH = 110
+const PITCH = 150
 /** Full turns from the top panel to the bottom one, and angle of the top panel (0 = facing). */
 const TURNS = 2
 const START_ANGLE = -30

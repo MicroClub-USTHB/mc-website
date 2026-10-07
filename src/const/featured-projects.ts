@@ -66,7 +66,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["AUTOMATION", "HARDWARE", "SENSORS"],
         year: 2026,
         description:
-          "A dual-axis solar panel that follows the sun throughout the day. Light sensors feed a microcontroller that drives two servo motors, keeping the panel facing the brightest point of the sky to capture more energy than a fixed installation.",
+          "A dual axis solar tracker that uses light sensors (LDRs) and servo motors to keep a panel pointed at the sun through the day. It captures more energy than a fixed panel and shows how sensing, control logic, and actuation work together",
         url: ORGANIZATION_URL,
       },
       {
@@ -74,7 +74,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["AI", "DRONE", "AUTONOMOUS"],
         year: 2026,
         description:
-          "A quadcopter that flies without a pilot. An onboard computer runs computer vision models to detect obstacles and targets in real time, while the flight controller handles stabilization and navigation along autonomous missions.",
+          "A custom built drone with an onboard flight controller and AI based perception. It can stabilize itself, detect its surroundings, and navigate with little or no human input",
         url: ORGANIZATION_URL,
       },
       {
@@ -82,7 +82,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["ROBOTICS", "WIRELESS", "SENSORS"],
         year: 2026,
         description:
-          "A compact remote-controlled car built as a modular robotics platform. It is driven wirelessly from a custom controller, and its onboard sensors make it a base for experiments with obstacle avoidance and line following.",
+          "A compact modular car platform for testing motor control, wireless communication, and sensor integration. It’s also a base for later upgrades such as obstacle avoidance and line following",
         url: ORGANIZATION_URL,
       },
       {
@@ -90,7 +90,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["CNC", "AUTOMATION", "HARDWARE"],
         year: 2026,
         description:
-          "A two-axis CNC drawing machine that turns digital vector files into precise pen drawings on paper. Stepper motors move the pen along X and Y while a small servo lifts and lowers it, all driven by G-code.",
+          "A CNC style plotter that turns digital drawings into precise pen movements using stepper motors and G code and it teaches motion control, mechanical design, and calibration",
         url: ORGANIZATION_URL,
       },
       {
@@ -98,7 +98,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["ROBOTICS", "AUTOMATION", "HARDWARE"],
         year: 2026,
         description:
-          "A multi-joint robotic arm driven by servo motors that can pick, move and place small objects. Each joint is controlled by a microcontroller, allowing both manual control and pre-programmed automated movements.",
+          "A multi-joint arm driven by servo motors and controlled through Arduino, able to pick and place objects. It covers kinematics, precise positioning, and mechanical structure",
         url: ORGANIZATION_URL,
       },
     ],
