@@ -85,8 +85,8 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         aria-roledescription="carousel"
         aria-label="MicroClub sections"
         // Size container: the stage fits the space left by the texts (see ClubSectionsStage).
-        // From xl, it may dip 48px into the details row: the open icon stays clear of the text.
-        className="[container-type:size] flex min-h-0 min-w-0 items-start justify-center [grid-area:stage] lg:items-center xl:-mb-12 lg:landscape:items-end short:mb-0 short:items-center"
+        // From xl, it dips 39px into the details row, as in the Figma frames (the open icon stays clear of the text).
+        className="[container-type:size] flex min-h-0 min-w-0 items-center justify-center [grid-area:stage] xl:-mb-[39px] lg:landscape:items-end short:mb-0 short:items-center"
       >
         <ClubSectionsStage
           sections={sections}
@@ -103,7 +103,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
         Every section's details share one cell, so it is as tall as the longest and always
         holds its space: opening or switching sections never moves the layout.
       */}
-      <div className="mt-6 grid [grid-area:details] lg:mt-0 lg:w-100 short:mt-0 short:w-auto short:self-end compact:mt-3">
+      <div className="mt-6 grid [grid-area:details] lg:mt-0 lg:mr-8 lg:w-[527px] short:mt-0 short:mr-0 short:w-auto short:self-end compact:mt-3">
         {sections.map((item, index) => {
           const isShown = index === selected
           return (
