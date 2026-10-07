@@ -229,7 +229,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     cover: cover("ICT", "ICT Africa Summit event photo"),
     logo: logo("ICT.svg", "ICT Africa Summit", 107, 40),
     description:
-      "MicroHack is a 3 day event now in its 3rd edition featuring activities, challenges, workshops, and a hackathon where participants from different fields collaborate to build digital solutions",
+      "ICT Africa Summit is Africa's largest technology event, co-organized by Micro Club at SAFEX . It marks the historic convergence of Digital Africa Summit, ICT Maghreb, and ALVETIC creating an unprecedented platform for innovation and digital transformation. ",
     link: [{ label: "Relive ICT Recap ", href: "#" }],
   },
   {
