@@ -189,7 +189,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     cover: cover("MSRC", "MSRC event photo"),
     logo: logo("MSRC.svg", "MSRC", 112, 30),
     description:
-      "MicroJam is an internal event now in its 3rd edition. Game development enthusiasts build their own games. The event ends with an art gallery day, giving game developers a chance to showcase their work and receive feedback.",
+      "MC Solid Robotics Camp is an internal robotics competition now in its 2nd edition. Robotics enthusiasts compete in 3D modeling on SolidWorks over 3 in-person days, with mentoring, workshops, and challenges along the way.",
     link: [{ label: "Relive MSRC Recap Reel", href: "" }],
   },
   {
