@@ -59,6 +59,7 @@ export function TrustedBy() {
                     key={`${partner.id}-${index}`}
                     partner={partner}
                     decorative={index >= row.partners.length}
+                    trackedHover
                   />
                 ))}
               </LogoMarquee>

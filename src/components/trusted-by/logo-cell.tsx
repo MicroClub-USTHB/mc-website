@@ -1,21 +1,32 @@
 import Image from "next/image"
 
 import type { Partner } from "@/const/trusted-by"
+import { cn } from "@/lib/utils"
 
 /**
  * One partner tile (Figma 224×170 at 1440px): logo centered and contained in a box of the same
  * proportions for every partner, so wide and square logos weigh alike; light accent on hover.
  * Its width is the shared `--logo-cell` (see `TrustedBy`).
+ *
+ * `trackedHover`: in a moving row, CSS `:hover` goes stale (the browser only updates it when the
+ * pointer moves), so the row sets `data-hovered` on the tile under the pointer instead.
  */
 export function LogoCell({
   partner,
   decorative = false,
+  trackedHover = false,
 }: {
   partner: Partner
   decorative?: boolean
+  trackedHover?: boolean
 }) {
   return (
-    <li className="grid aspect-224/170 w-(--logo-cell) shrink-0 place-items-center border border-border bg-background transition-colors duration-300 ease-out-quart hover:bg-accent">
+    <li
+      className={cn(
+        "grid aspect-224/170 w-(--logo-cell) shrink-0 place-items-center border border-border bg-background transition-colors duration-300 ease-out-quart",
+        trackedHover ? "data-hovered:bg-accent" : "hover:bg-accent",
+      )}
+    >
       <div className="relative h-[46%] w-[72%]">
         <Image
           src={partner.logo}
