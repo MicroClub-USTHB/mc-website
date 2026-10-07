@@ -1,6 +1,8 @@
 import { PhotoSpiral, spiralClearSide } from "@/components/about/photo-spiral"
 import { RevealText } from "@/components/about/reveal-text"
+import { JsonLd } from "@/components/shared/json-ld"
 import { SectionContainer } from "@/components/shared/section-container"
+import { siteConfig } from "@/config/site"
 import { ABOUT_PARAGRAPHS } from "@/const/about"
 import { cn } from "@/lib/utils"
 
@@ -12,10 +14,25 @@ const RIGHT = "right-4 text-right sm:right-6 lg:right-28"
  * side margins and these widths). Narrower screens give each one half the width.
  */
 const PARAGRAPH_LAYOUT = [
-  { top: spiralClearSide("left", 0), className: cn(LEFT, "lg:max-w-90") },
-  { top: spiralClearSide("right", 0), className: cn(RIGHT, "lg:max-w-86") },
-  { top: spiralClearSide("left", 1), className: cn(LEFT, "lg:max-w-125") },
+  { top: spiralClearSide("left", 0), className: cn(LEFT, "lg:max-w-[363px]") },
+  { top: spiralClearSide("right", 0), className: cn(RIGHT, "lg:max-w-[365px]") },
+  { top: spiralClearSide("left", 1), className: cn(LEFT, "lg:max-w-[511px]") },
 ]
+
+/** schema.org Organization facts from the About Us story. */
+const ABOUT_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  description: ABOUT_PARAGRAPHS.join(" "),
+  foundingDate: "1985",
+  foundingLocation: {
+    "@type": "Place",
+    name: "USTHB (University of Science and Technology Houari Boumediene), Algiers, Algeria",
+  },
+  award: "Best scientific club in Algeria, recognized by the President (2024)",
+}
 
 /**
  * About Us (Figma): a 3D spiral of club photos that rotates with the scroll, with the club story
@@ -24,6 +41,8 @@ const PARAGRAPH_LAYOUT = [
 export function About() {
   return (
     <SectionContainer id="about" aria-labelledby="about-title" bleed className="overflow-hidden">
+      <JsonLd data={ABOUT_JSON_LD} />
+
       <h2 id="about-title" className="sr-only">
         About Us
       </h2>
