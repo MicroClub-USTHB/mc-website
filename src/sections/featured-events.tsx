@@ -9,7 +9,13 @@ import { SectionContainer } from "@/components/shared/section-container"
 import { FEATURED_EVENTS } from "@/const/featured-events"
 
 /**
- * Full-viewport section: title, diagonal chain of event photos (see `EventChain`), the event
+ * Pinned full-viewport section (like Statistics): the section is taller than the screen and its
+ * content sticks full screen while it scrolls by, so the user sees it whole for a moment instead
+ * of scrolling past it. Pinned for 60% of a screen from `md`, 30% below (shorter on touch, where
+ * a long pin feels stuck). `overflow-hidden` sits on the sticky box: on the section it would break
+ * the sticky. `scroll-mt-0` so `/#featured-events` lands straight on the pinned view.
+ *
+ * Content: title, diagonal chain of event photos (see `EventChain`), the event
  * list and the active event's category. Hovering a photo makes its event active, clicking it opens
  * the event card (see `EventDialogProvider`).
  *
@@ -25,41 +31,44 @@ export function FeaturedEvents() {
       bleed
       theme="dark"
       aria-label="Featured Events"
-      className="relative h-svh min-h-80 cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair] overflow-hidden"
+      className="relative h-[130svh] cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair] scroll-mt-0 md:h-[160svh]"
     >
-      <ActiveEventProvider>
-        <EventDialogProvider events={FEATURED_EVENTS}>
-          <div className="pointer-events-none relative z-10 mx-auto max-w-site px-4 pt-24 sm:px-6 lg:px-20 [@media(max-height:520px)]:pt-20">
-            <header>
-              <h2
-                id="featured-events-title"
-                className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl [@media(max-height:520px)]:header-md"
-              >
-                EVENT HUB
-              </h2>
-            </header>
-          </div>
-          <EventChain events={FEATURED_EVENTS} />
-          {/* Figma positions on the 1440px frame, kept within the site width on larger screens. */}
-          <div className="pointer-events-none absolute inset-0 mx-auto hidden max-w-site any-pointer-fine:md:[@media(min-height:30rem)]:block">
-            <EventCategoryLabel
-              events={FEATURED_EVENTS}
-              className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap lg:top-10 2xl:top-28"
-            />
-            <EventList
-              events={FEATURED_EVENTS}
-              className="absolute right-0 bottom-0 isolate before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(closest-side,var(--background)_55%,transparent)] lg:px-20 lg:py-5"
-            />
-          </div>
-          <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-background via-background/85 to-transparent pt-20 any-pointer-fine:md:[@media(min-height:30rem)]:hidden">
-            <SpotlightPanel
-              events={FEATURED_EVENTS}
-              className="mx-auto max-w-site px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-20"
-            />
-          </div>
-          <CursorBadge events={FEATURED_EVENTS} />
-        </EventDialogProvider>
-      </ActiveEventProvider>
+      {/* Pinned full screen while the section scrolls by (see the doc comment above). */}
+      <div className="sticky top-0 h-svh min-h-80 overflow-hidden">
+        <ActiveEventProvider>
+          <EventDialogProvider events={FEATURED_EVENTS}>
+            <div className="pointer-events-none relative z-10 mx-auto max-w-site px-4 pt-24 sm:px-6 lg:px-20 [@media(max-height:520px)]:pt-20">
+              <header>
+                <h2
+                  id="featured-events-title"
+                  className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl [@media(max-height:520px)]:header-md"
+                >
+                  EVENT HUB
+                </h2>
+              </header>
+            </div>
+            <EventChain events={FEATURED_EVENTS} />
+            {/* Figma positions on the 1440px frame, kept within the site width on larger screens. */}
+            <div className="pointer-events-none absolute inset-0 mx-auto hidden max-w-site any-pointer-fine:md:[@media(min-height:30rem)]:block">
+              <EventCategoryLabel
+                events={FEATURED_EVENTS}
+                className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap lg:top-10 2xl:top-28"
+              />
+              <EventList
+                events={FEATURED_EVENTS}
+                className="absolute right-0 bottom-0 isolate before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(closest-side,var(--background)_55%,transparent)] lg:px-20 lg:py-5"
+              />
+            </div>
+            <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-background via-background/85 to-transparent pt-20 any-pointer-fine:md:[@media(min-height:30rem)]:hidden">
+              <SpotlightPanel
+                events={FEATURED_EVENTS}
+                className="mx-auto max-w-site px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-20"
+              />
+            </div>
+            <CursorBadge events={FEATURED_EVENTS} />
+          </EventDialogProvider>
+        </ActiveEventProvider>
+      </div>
     </SectionContainer>
   )
 }
