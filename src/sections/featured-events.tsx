@@ -5,8 +5,33 @@ import { EventChain } from "@/components/featured-events/event-chain"
 import { EventDialogProvider } from "@/components/featured-events/event-dialog"
 import { EventList } from "@/components/featured-events/event-list"
 import { SpotlightPanel } from "@/components/featured-events/spotlight-panel"
+import { JsonLd } from "@/components/shared/json-ld"
 import { SectionContainer } from "@/components/shared/section-container"
+import { siteConfig } from "@/config/site"
 import { FEATURED_EVENTS } from "@/const/featured-events"
+
+/**
+ * schema.org ItemList of the club's events, with MicroClub as organizer. `EventSeries`: they are
+ * recurring editions without a single date or venue, which a plain `Event` would require. It also
+ * carries the descriptions, otherwise only rendered in the client-side event card.
+ */
+const EVENTS_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "ItemList",
+  name: `${siteConfig.name} Event Hub`,
+  numberOfItems: FEATURED_EVENTS.length,
+  itemListElement: FEATURED_EVENTS.map((event, index) => ({
+    "@type": "ListItem",
+    position: index + 1,
+    item: {
+      "@type": "EventSeries",
+      name: event.name,
+      ...(event.description && { description: event.description.trim() }),
+      image: new URL(event.cover.src, siteConfig.url).href,
+      organizer: { "@type": "Organization", name: siteConfig.name, url: siteConfig.url },
+    },
+  })),
+}
 
 /**
  * Pinned full-viewport section (like Statistics): the section is taller than the screen and its
@@ -30,10 +55,12 @@ export function FeaturedEvents() {
       id="featured-events"
       bleed
       theme="dark"
-      aria-label="Featured Events"
+      aria-labelledby="featured-events-title"
       className="relative h-[130svh] cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair] scroll-mt-0 md:h-[160svh]"
     >
       {/* Pinned full screen while the section scrolls by (see the doc comment above). */}
+      <JsonLd data={EVENTS_JSON_LD} />
+
       <div className="sticky top-0 h-svh min-h-80 overflow-hidden">
         <ActiveEventProvider>
           <EventDialogProvider events={FEATURED_EVENTS}>
@@ -43,7 +70,7 @@ export function FeaturedEvents() {
                   id="featured-events-title"
                   className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl [@media(max-height:520px)]:header-md"
                 >
-                  EVENT HUB
+                  Event Hub
                 </h2>
               </header>
             </div>
