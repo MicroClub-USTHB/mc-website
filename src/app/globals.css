@@ -8,6 +8,14 @@
 /* Short portrait screens (small phones, Safari with its toolbars): tighter text. */
 @custom-variant compact (@media (orientation: portrait) and (max-height: 600px));
 
+/* Trusted By logo tile width: registered as a length, so it is computed where it is declared
+   (from the content box, in `cqw`) and inherited as is, also by the full-bleed marquee row. */
+@property --logo-cell {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 14rem;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
