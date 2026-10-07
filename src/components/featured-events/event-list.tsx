@@ -25,8 +25,8 @@ export function EventList({
           key={event.id}
           data-active={event.id === activeId || undefined}
           className={cn(
-            "relative pr-3 paragraph-sm leading-7 text-muted-foreground/50 transition-colors duration-300 ease-out-quart data-active:text-primary",
-            "after:absolute after:top-1/2 after:right-0 after:h-5.5 after:w-px after:-translate-y-1/2 after:bg-primary after:opacity-0 after:transition-opacity after:duration-300 data-active:after:opacity-100",
+            "relative pr-3 paragraph-sm leading-7 text-muted-foreground transition-colors duration-300 ease-out-quart data-active:text-primary ",
+            "after:absolute after:top-1/2 after:right-0 after:h-5.5 after:w-0.5 after:-translate-y-1/2 after:bg-primary after:opacity-0 after:transition-opacity after:duration-300 data-active:after:opacity-100",
           )}
         >
           {event.name}

@@ -1,4 +1,5 @@
 import { ActiveEventProvider } from "@/components/featured-events/active-event"
+import { CursorBadge } from "@/components/featured-events/cursor-badge"
 import { EventCategoryLabel } from "@/components/featured-events/event-category-label"
 import { EventChain } from "@/components/featured-events/event-chain"
 import { EventList } from "@/components/featured-events/event-list"
@@ -16,11 +17,11 @@ export function FeaturedEvents() {
       bleed
       theme="dark"
       aria-label="Featured Events"
-      className="relative h-svh min-h-160 overflow-hidden"
+      className="relative h-svh min-h-screen overflow-hidden cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair]"
     >
       <ActiveEventProvider>
-        <div className="mx-auto max-w-site pt-24 pb-20">
-          <header className="flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-26">
+        <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
+          <header >
             <h2
               id="featured-events-title"
               className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl"
@@ -32,12 +33,13 @@ export function FeaturedEvents() {
         <EventChain events={FEATURED_EVENTS} />
         {/* Figma positions on the 1440px frame, kept within the site width on larger screens. */}
         <div className="pointer-events-none absolute inset-0 mx-auto max-w-site">
-          <EventCategoryLabel events={FEATURED_EVENTS} className="absolute top-24 left-[46%]" />
+          <EventCategoryLabel events={FEATURED_EVENTS} className="absolute lg:top-10 2xl:top-28 left-1/2 -translate-x-1/2 whitespace-nowrap" />
           <EventList
             events={FEATURED_EVENTS}
-            className="absolute right-0 bottom-14 hidden md:flex"
+            className="absolute right-0 bottom-0 lg:px-20 lg:py-5  hidden md:flex"
           />
         </div>
+        <CursorBadge events={FEATURED_EVENTS} />
       </ActiveEventProvider>
     </SectionContainer>
   )

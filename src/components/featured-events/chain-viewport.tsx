@@ -38,10 +38,30 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
   const speed = useMotionValue(1)
   const setActiveEvent = useSetActiveEvent()
 
+  // Last pointer position over the chain, to find the slice under it once the chain has stopped.
+  const pointer = useRef<{ x: number; y: number } | null>(null)
+
   useEffect(() => {
-    const animation = animate(speed, hovered ? 0 : 1, { duration: 0.6, ease: EASE_IN_OUT_QUART })
+    /*
+     * The chain keeps sliding a few pixels while it slows down, so another slice may end up under
+     * the still pointer: once stopped, take the slice really under it (or resume if there is none).
+     */
+    function settleHover() {
+      const position = pointer.current
+      const element = position && document.elementFromPoint(position.x, position.y)
+      const slice = element?.closest(SLICE_SELECTOR)
+      const eventId = slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId
+      if (!eventId) setHovered(false)
+      setActiveEvent(eventId ?? null)
+    }
+
+    const animation = animate(speed, hovered ? 0 : 1, {
+      duration: 0.6,
+      ease: EASE_IN_OUT_QUART,
+      onComplete: hovered ? settleHover : undefined,
+    })
     return () => animation.stop()
-  }, [hovered, speed])
+  }, [hovered, speed, setActiveEvent])
 
   /*
    * Delegated on real pointer moves only (non-zero movement): the browser also reports hover when
@@ -51,6 +71,7 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
   function updateHover(event: React.PointerEvent) {
     if (event.pointerType === "touch") return
     if (event.movementX === 0 && event.movementY === 0) return
+    pointer.current = { x: event.clientX, y: event.clientY }
     const slice = event.target instanceof Element ? event.target.closest(SLICE_SELECTOR) : null
     setHovered(slice !== null)
     setActiveEvent(slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId ?? null)
