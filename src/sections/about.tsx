@@ -4,17 +4,17 @@ import { SectionContainer } from "@/components/shared/section-container"
 import { ABOUT_PARAGRAPHS } from "@/const/about"
 import { cn } from "@/lib/utils"
 
+const LEFT = "left-4 sm:left-6 lg:left-28"
+const RIGHT = "right-4 text-right sm:right-6 lg:right-28"
+
 /**
  * Placement of each paragraph in the spiral's clear sides (Figma: left, right, left with 112px
- * side margins). Below `lg` they stack full width over the spiral on a blurred backdrop.
+ * side margins and these widths). Narrower screens give each one half the width.
  */
 const PARAGRAPH_LAYOUT = [
-  { top: spiralClearSide("left", 0), className: "lg:left-[calc(var(--u)*112)] lg:max-w-90" },
-  {
-    top: spiralClearSide("right", 0),
-    className: "lg:right-[calc(var(--u)*112)] lg:left-auto lg:max-w-86 lg:text-right",
-  },
-  { top: spiralClearSide("left", 1), className: "lg:left-[calc(var(--u)*112)] lg:max-w-125" },
+  { top: spiralClearSide("left", 0), className: cn(LEFT, "lg:max-w-90") },
+  { top: spiralClearSide("right", 0), className: cn(RIGHT, "lg:max-w-86") },
+  { top: spiralClearSide("left", 1), className: cn(LEFT, "lg:max-w-125") },
 ]
 
 /**
@@ -28,22 +28,27 @@ export function About() {
         About Us
       </h2>
 
-      {/* `--u`: one Figma px, scaled down with the viewport below the 1440px frame. */}
-      <div className="relative mx-auto max-w-site [--u:clamp(0.5px,calc(100vw/1440),1px)]">
-        <PhotoSpiral />
+      {/*
+        `--u`: one horizontal Figma px, scaled down when the spiral (~740px wide) would not fit.
+        The padding leaves room for the nearest panels, which bulge past the spiral in perspective,
+        and the mask fades them out at the section edges.
+      */}
+      <div className="mx-auto max-w-site mask-[linear-gradient(to_bottom,transparent,black_8rem,black_calc(100%-8rem),transparent)] py-20 [--u:min(1px,calc(100vw/780))]">
+        <div className="relative">
+          <PhotoSpiral />
 
-        {ABOUT_PARAGRAPHS.map((paragraph, i) => (
-          <RevealText
-            key={paragraph}
-            text={paragraph}
-            className={cn(
-              "absolute inset-x-4 -translate-y-1/2 rounded-lg bg-background/80 p-4 paragraph-md text-foreground backdrop-blur-sm sm:inset-x-6",
-              "lg:right-auto lg:rounded-none lg:bg-transparent lg:p-0 lg:backdrop-blur-none",
-              PARAGRAPH_LAYOUT[i].className,
-            )}
-            style={{ top: PARAGRAPH_LAYOUT[i].top }}
-          />
-        ))}
+          {ABOUT_PARAGRAPHS.map((paragraph, i) => (
+            <RevealText
+              key={paragraph}
+              text={paragraph}
+              className={cn(
+                "absolute w-[calc(50%-1.5rem)] -translate-y-1/2 paragraph-sm text-foreground sm:paragraph-md",
+                PARAGRAPH_LAYOUT[i].className,
+              )}
+              style={{ top: PARAGRAPH_LAYOUT[i].top }}
+            />
+          ))}
+        </div>
       </div>
     </SectionContainer>
   )

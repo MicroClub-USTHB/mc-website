@@ -2,15 +2,18 @@ import { SpiralScroll } from "@/components/about/spiral-scroll"
 import { ABOUT_PHOTOS } from "@/const/about"
 
 /**
- * Spiral geometry in px of the 1440px Figma frame, scaled by the `--u` length set by the section
- * (1px on desktop). One panel per photo, 3:2 like the photos so they are not stretched.
+ * Spiral geometry in px of the 1440px Figma frame. Horizontal sizes (panels, radius, perspective)
+ * are scaled by the `--u` length set by the section, so the spiral fits narrow screens. Vertical
+ * spacing is not: it keeps the clear sides tall enough for the paragraphs on phones too.
+ * One panel per photo, 3:2 like the photos so they are not stretched.
  */
 const PANEL_COUNT = ABOUT_PHOTOS.length
 const PANEL_WIDTH = 225
 const PANEL_HEIGHT = 150
 const RADIUS = 340
-const PITCH = 110
 const PERSPECTIVE = 1100
+/** Height of the slot of each panel (panel centered in it), in unscaled px. */
+const PITCH = 110
 /** Full turns from the top panel to the bottom one, and angle of the top panel (0 = facing). */
 const TURNS = 2
 const START_ANGLE = -30
@@ -25,9 +28,8 @@ const STRIPS = 6
 const ANGLE_STEP = (TURNS * 360) / (PANEL_COUNT - 1)
 const STRIP_WIDTH = PANEL_WIDTH / STRIPS
 const STRIP_ANGLE = (STRIP_WIDTH / RADIUS) * (180 / Math.PI)
-const SPIRAL_HEIGHT = (PANEL_COUNT - 1) * PITCH + PANEL_HEIGHT
 
-/** Length in Figma px, scaled with the section. */
+/** Horizontal length in Figma px, scaled with the section. */
 const u = (px: number) => `calc(var(--u) * ${px})`
 
 /**
@@ -36,14 +38,12 @@ const u = (px: number) => `calc(var(--u) * ${px})`
  * rotation at that moment is added. Paragraphs centered on it never sit over a photo while read.
  */
 export function spiralClearSide(side: "left" | "right", n: number) {
-  // Angle of the panels at the viewport center: START_ANGLE + winding * (y - PANEL_HEIGHT / 2)
-  // from the spiral, plus SCROLL_TURN * y / SPIRAL_HEIGHT from the scroll. Solved for y.
+  // At `slot` panel slots from the top, the panels face START_ANGLE + (slot - 0.5) * ANGLE_STEP and
+  // the scroll has turned them by SCROLL_TURN * slot / PANEL_COUNT. Solved for `slot`.
   const facing = side === "left" ? 90 : 270
-  const winding = ANGLE_STEP / PITCH
-  const y =
-    (facing + 360 * n - START_ANGLE + (winding * PANEL_HEIGHT) / 2) /
-    (winding + SCROLL_TURN / SPIRAL_HEIGHT)
-  return u(y)
+  const slot =
+    (facing + 360 * n - START_ANGLE + ANGLE_STEP / 2) / (ANGLE_STEP + SCROLL_TURN / PANEL_COUNT)
+  return `${slot * PITCH}px`
 }
 
 /**
@@ -55,7 +55,7 @@ export function PhotoSpiral({ className }: { className?: string }) {
     <SpiralScroll
       turn={SCROLL_TURN}
       className={className}
-      style={{ height: u(SPIRAL_HEIGHT), perspective: u(PERSPECTIVE) }}
+      style={{ height: PANEL_COUNT * PITCH, perspective: u(PERSPECTIVE) }}
     >
       {Array.from({ length: PANEL_COUNT }, (_, panel) =>
         Array.from({ length: STRIPS }, (_, strip) => (
@@ -73,7 +73,7 @@ function Strip({ panel, strip }: { panel: number; strip: number }) {
     <div
       className="absolute bg-foreground bg-no-repeat"
       style={{
-        top: u(panel * PITCH),
+        top: `calc(${(panel + 0.5) * PITCH}px - ${u(PANEL_HEIGHT / 2)})`,
         // 1px wider than the arc so neighbouring strips overlap without seams.
         width: u(STRIP_WIDTH + 1),
         height: u(PANEL_HEIGHT),
