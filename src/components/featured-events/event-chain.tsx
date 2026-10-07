@@ -46,7 +46,7 @@ const STEP = {
  * current slot.
  *
  * Photos are grayscale and fade to color while hovered (only the visible slanted part of a
- * slice reacts, see `SlantedImage`).
+ * slice reacts, see `SlantedImage`). With a mouse, the hovered slice also zooms in slightly.
  */
 export function EventChain({ events }: { events: FeaturedEvent[] }) {
   const tiles = Array.from({ length: Math.ceil(MIN_SLOTS / events.length) }, () => events).flat()
@@ -80,6 +80,8 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
               <SlantedImage
                 image={event.cover}
                 sizes="20vw"
+                // Figma hover zoom (toned down): mouse and trackpad only, from the bottom right corner.
+                className="origin-bottom-right transition-[scale] duration-500 ease-out-quart pointer-fine:group-data-active/tile:scale-115"
                 frameClassName="group/slice"
                 imageClassName="grayscale transition-[filter] duration-500 ease-out-quart group-hover/slice:grayscale-0 group-data-active/tile:grayscale-0"
               />
