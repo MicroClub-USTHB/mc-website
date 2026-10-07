@@ -3,6 +3,10 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Short landscape screens (phones turned sideways, short windows): side-by-side layouts. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 540px));
+/* Short portrait screens (small phones, Safari with its toolbars): tighter text. */
+@custom-variant compact (@media (orientation: portrait) and (max-height: 600px));
 
 /* Two-column event card: large screens, and phones held sideways (short landscape). */
 @custom-variant wide (@media (width >= 64rem) or ((orientation: landscape) and (height <= 40rem)));
