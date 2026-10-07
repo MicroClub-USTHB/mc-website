@@ -37,7 +37,9 @@ const STEP = {
  * left. Each slice overlaps the previous one and sits in front of it, so the chain reads as a
  * stack seen from the side; its ends run off the section and fade into the background.
  *
- * Fills its positioned parent. Everything is laid out from the center of that box in `--u`
+ * Fills its positioned parent, up to the 1440px site width (`max-w-site`, centered and clipped, so
+ * on wider screens the chain and its fades stay within the site like the rest of the content).
+ * Everything is laid out from the center of that box in `--u`
  * units: 1% of its width (as in Figma), but never less than 0.8% of its height, so the chain
  * keeps crossing the whole box on narrow, tall screens.
  *
@@ -55,7 +57,10 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
   const firstSlot = -(slots - 1) / 2
 
   return (
-    <ChainViewport aria-hidden className="@container-[size] absolute inset-0">
+    <ChainViewport
+      aria-hidden
+      className="@container-[size] absolute inset-0 mx-auto max-w-site overflow-hidden"
+    >
       {/* `isolate` keeps the slices' z-indexes below the fade overlay. */}
       <ul
         style={{ "--u": "max(1cqw, 1.1cqh)" } as CSSProperties}
@@ -90,10 +95,11 @@ export function EventChain({ events }: { events: FeaturedEvent[] }) {
         ))}
       </ul>
       {/*
-        Ends of the chain fading into the background: a static overlay instead of a mask, so the
+        Left and right edges of the box (the 1440px site width) and ends of the chain fading into
+        the background: a static overlay instead of a mask, so the
         moving slices never have to be re-masked (same look on the plain section background).
       */}
-      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_top_right,var(--background),transparent_16%,transparent_84%,var(--background))]" />
+      <div className="pointer-events-none absolute inset-0 bg-[linear-gradient(to_right,var(--background),transparent_12%,transparent_88%,var(--background)),linear-gradient(to_top_right,var(--background),transparent_16%,transparent_84%,var(--background))]" />
     </ChainViewport>
   )
 }
