@@ -11,10 +11,11 @@ import {
 } from "motion/react"
 
 import { useSetActiveEvent } from "@/components/featured-events/active-event"
+import { useEventDialogOpen, useOpenEvent } from "@/components/featured-events/event-dialog"
 import { EASE_IN_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 
-/** Whether the chain should move: on screen and motion allowed. */
+/** Whether the chain should move: on screen, no event card open, and motion allowed. */
 const ChainPlayingContext = createContext(false)
 /** Playback rate of every slice: 1 while moving, eased down to 0 while a slice is hovered. */
 const ChainSpeedContext = createContext<MotionValue<number> | null>(null)
@@ -23,8 +24,9 @@ const ChainSpeedContext = createContext<MotionValue<number> | null>(null)
 const SLICE_SELECTOR = '[data-slot="slanted-frame"]'
 
 /**
- * Box of the event chain: plays its slices while it is on screen, pauses them offscreen, and
- * never plays them when the user prefers reduced motion (the chain then stays still).
+ * Box of the event chain: plays its slices while it is on screen, pauses them offscreen or while
+ * an event card is open, and never plays them when the user prefers reduced motion (the chain
+ * then stays still). Clicking a slice opens its event card (see `EventDialogProvider`).
  *
  * Hovering a slice (mouse or pen) slows the whole chain down to a stop, and leaving it speeds the
  * chain back up, by easing the slices' playback rate, so the photo under the pointer stays put.
@@ -37,6 +39,8 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
   const [hovered, setHovered] = useState(false)
   const speed = useMotionValue(1)
   const setActiveEvent = useSetActiveEvent()
+  const openEvent = useOpenEvent()
+  const dialogOpen = useEventDialogOpen()
 
   // Last pointer position over the chain, to find the slice under it once the chain has stopped.
   const pointer = useRef<{ x: number; y: number } | null>(null)
@@ -82,13 +86,20 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
     setActiveEvent(null)
   }
 
+  function openClickedEvent(event: React.MouseEvent) {
+    const slice = event.target instanceof Element ? event.target.closest(SLICE_SELECTOR) : null
+    const eventId = slice?.closest<HTMLElement>("[data-event-id]")?.dataset.eventId
+    if (eventId) openEvent(eventId)
+  }
+
   return (
-    <ChainPlayingContext value={inView && !reduceMotion}>
+    <ChainPlayingContext value={inView && !dialogOpen && !reduceMotion}>
       <ChainSpeedContext value={speed}>
         <div
           ref={ref}
           onPointerMove={updateHover}
           onPointerLeave={clearHover}
+          onClick={openClickedEvent}
           className={cn(className)}
           {...props}
         />

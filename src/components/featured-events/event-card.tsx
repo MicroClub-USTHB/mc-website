@@ -2,15 +2,26 @@ import Image from "next/image"
 import type { ComponentProps, CSSProperties } from "react"
 
 import { McButton } from "@/components/ui/mc-button"
-import type { FeaturedEvent } from "@/const/featured-events"
+import type { EventSizedImage, FeaturedEvent } from "@/const/featured-events"
 import { cn } from "@/lib/utils"
 
 /**
+ * Logos come in very different shapes (from 64×44 to 161×27). Each one is sized to the same area
+ * as the Figma GHCTF logo (94×34, 1.75em tall), so square and wide logos carry the same visual
+ * weight: a squarer logo gets taller, a wider one shorter.
+ */
+const LOGO_REFERENCE_RATIO = 94 / 34
+
+function logoScale(logo: EventSizedImage) {
+  return Math.sqrt(LOGO_REFERENCE_RATIO / (logo.width / logo.height))
+}
+
+/**
  * Reusable event card: cover photo on the left, event logo and short name on top of the text
- * panel, description and link at the bottom (logo, description and link are skipped when the
- * event does not have them yet). Everything comes from the `event` prop, so the same
- * card serves every event. It forwards props to the `<article>`, so it can be the `render`
- * target of a dialog popup.
+ * panel, description and links (stacked) at the bottom. Logo, description and links are skipped
+ * while the event does not have them yet: `null` logo, empty description, links with an empty
+ * `href`. Everything comes from the `event` prop, so the same card serves every event. It
+ * forwards props to the `<article>`, so it can be the `render` target of a dialog popup.
  *
  * Below `lg` it stacks (photo first, natural height). From `lg` it is a fixed-ratio card: two
  * cover-wide halves, so the whole photo shows without cropping, and it is never wider than what
@@ -25,6 +36,8 @@ export function EventCard({
 }: { event: FeaturedEvent } & ComponentProps<"article">) {
   const titleId = `event-${event.id}-title`
   const { cover } = event
+  // Links without a URL yet are skipped.
+  const links = event.link.filter((link) => link.href)
 
   return (
     <article
@@ -60,7 +73,8 @@ export function EventCard({
               alt={event.logo.alt}
               width={event.logo.width}
               height={event.logo.height}
-              className="h-6 w-auto lg:h-[1.75em]"
+              style={{ "--logo-scale": logoScale(event.logo) } as CSSProperties}
+              className="h-[calc(1.5rem*var(--logo-scale))] w-auto lg:h-[calc(1.75em*var(--logo-scale))]"
             />
           ) : (
             <span />
@@ -79,18 +93,24 @@ export function EventCard({
               {event.description}
             </p>
           )}
-          {event.link && (
-            <McButton
-              variant="link"
-              size="sm"
-              icon="leading"
-              nativeButton={false}
-              render={<a href={event.link.href} target="_blank" rel="noopener noreferrer" />}
-              className="lg:text-[1em] lg:[&_[data-slot=leading-icon]]:size-[1.15em]"
-            >
-              {event.link.label}
-              <span className="sr-only"> (opens in a new tab)</span>
-            </McButton>
+          {links.length > 0 && (
+            <ul className="flex flex-col items-start gap-2 lg:gap-[0.6em]">
+              {links.map((link) => (
+                <li key={`${link.label}-${link.href}`}>
+                  <McButton
+                    variant="link"
+                    size="sm"
+                    icon="leading"
+                    nativeButton={false}
+                    render={<a href={link.href} target="_blank" rel="noopener noreferrer" />}
+                    className="lg:text-[1em] lg:[&_[data-slot=leading-icon]]:size-[1.15em]"
+                  >
+                    {link.label}
+                    <span className="sr-only"> (opens in a new tab)</span>
+                  </McButton>
+                </li>
+              ))}
+            </ul>
           )}
         </div>
       </div>
