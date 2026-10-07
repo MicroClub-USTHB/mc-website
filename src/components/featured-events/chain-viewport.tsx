@@ -109,6 +109,45 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
 }
 
 /**
+ * A slice's two animations, driven together: its movement (Motion, `transform` on the compositor)
+ * and its depth (native Web Animation, as Motion does not animate `z-index` next to an accelerated
+ * `transform`). Both run on the document timeline, so setting their time, speed and play state
+ * together keeps them in sync.
+ */
+class SliceAnimations {
+  constructor(
+    private movement: AnimationPlaybackControls,
+    private depth: Animation,
+  ) {}
+
+  play() {
+    this.movement.play()
+    this.depth.play()
+  }
+
+  pause() {
+    this.movement.pause()
+    this.depth.pause()
+  }
+
+  stop() {
+    this.movement.stop()
+    this.depth.cancel()
+  }
+
+  /** Seconds into the loop. */
+  set time(seconds: number) {
+    this.movement.time = seconds
+    this.depth.currentTime = seconds * 1000
+  }
+
+  set speed(rate: number) {
+    this.movement.speed = rate
+    this.depth.playbackRate = rate
+  }
+}
+
+/**
  * One slice of the chain, moving toward the bottom left in an infinite linear loop.
  *
  * Each slice runs its own Motion animation over the whole loop (`slots` steps of `stepDuration`
@@ -120,7 +159,7 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
  *
  * Depth only changes when needed: a slice drops behind everything when it wraps (offscreen),
  * then all slices rise together when the loop restarts, so the slice further down always stays
- * in front without touching every `z-index` at each step.
+ * in front without touching every `z-index` at each step (see `SliceAnimations`).
  */
 export function ChainSlot({
   eventId,
@@ -147,50 +186,54 @@ export function ChainSlot({
   const playing = useContext(ChainPlayingContext)
   const speed = useContext(ChainSpeedContext)
   if (!speed) throw new Error("ChainSlot must be rendered inside ChainViewport")
-  const controls = useRef<AnimationPlaybackControls>(null)
+  const animations = useRef<SliceAnimations>(null)
   const playingRef = useRef(playing)
 
   useEffect(() => {
     const element = ref.current
     if (!element) return
 
-    // Local slot runs 0 → slots; the slice has wrapped while it is below `index`.
-    const wrapAt = index / slots
-    const animation = animate(
+    const duration = slots * stepDuration
+    const movement = animate(
       element,
-      {
-        transform: ["translate(0%, 0%)", `translate(${slots * step.x}%, ${slots * step.y}%)`],
-        zIndex: [index - slots, index - slots, index, index],
-      },
-      {
-        duration: slots * stepDuration,
-        ease: "linear",
-        repeat: Infinity,
-        zIndex: { times: [0, wrapAt, wrapAt, 1] },
-      },
+      { transform: ["translate(0%, 0%)", `translate(${slots * step.x}%, ${slots * step.y}%)`] },
+      { duration, ease: "linear", repeat: Infinity },
     )
-    animation.pause()
-    animation.time = index * stepDuration
-    animation.speed = speed.get()
-    if (playingRef.current) animation.play()
-    controls.current = animation
+    // Local slot runs 0 → slots; the slice has wrapped (drops behind) while it is below `index`.
+    const wrapAt = index / slots
+    const depth = element.animate(
+      [
+        { zIndex: index - slots },
+        { zIndex: index - slots, offset: wrapAt },
+        { zIndex: index, offset: wrapAt },
+        { zIndex: index },
+      ],
+      { duration: duration * 1000, iterations: Infinity, easing: "linear" },
+    )
+
+    const slice = new SliceAnimations(movement, depth)
+    slice.pause()
+    slice.time = index * stepDuration
+    slice.speed = speed.get()
+    if (playingRef.current) slice.play()
+    animations.current = slice
 
     return () => {
-      animation.stop()
-      controls.current = null
+      slice.stop()
+      animations.current = null
     }
   }, [index, slots, stepDuration, step.x, step.y, speed])
 
   useEffect(() => {
     playingRef.current = playing
-    if (playing) controls.current?.play()
-    else controls.current?.pause()
+    if (playing) animations.current?.play()
+    else animations.current?.pause()
   }, [playing])
 
   useEffect(
     () =>
       speed.on("change", (value) => {
-        if (controls.current) controls.current.speed = value
+        if (animations.current) animations.current.speed = value
       }),
     [speed],
   )
