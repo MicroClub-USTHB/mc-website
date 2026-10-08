@@ -46,7 +46,7 @@ export const TRUSTED_BY_ROWS: PartnerRow[] = [
       partner("cybears", "Cybears"),
       partner("horia-technologies", "Horia Technologies"),
       partner("mmc", "MMC"),
-      partner("maison-de-jeunes", "Maison de Jeunes"),
+      partner("maison-de-jeunes", "House of Youth"),
       partner("miniros", "Miniros"),
       partner("naftal", "Naftal"),
       partner("prima-glaces", "Prima Glaces"),
