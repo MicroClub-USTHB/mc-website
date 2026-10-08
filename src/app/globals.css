@@ -16,6 +16,9 @@
   initial-value: 14rem;
 }
 
+/* Two-column event card: large screens, and phones held sideways (short landscape). */
+@custom-variant wide (@media (width >= 64rem) or ((orientation: landscape) and (height <= 40rem)));
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
