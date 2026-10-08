@@ -74,7 +74,8 @@ export function LogoMarquee({
       hovered?.removeAttribute("data-hovered")
       tile?.setAttribute("data-hovered", "")
       hovered = tile
-      setHoveredPartner(tile?.getAttribute(PARTNER_ATTRIBUTE) ?? null)
+      // Over a gap the title keeps the last name; `PartnerHoverArea` clears it when leaving all rows.
+      if (tile) setHoveredPartner(tile.getAttribute(PARTNER_ATTRIBUTE))
     }
 
     function stop() {

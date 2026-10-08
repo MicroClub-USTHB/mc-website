@@ -29,7 +29,8 @@ export function useSetHoveredPartner() {
 /**
  * Figma title on hover, "TRUSTED BY : DJEEZY": " :" at the title size, then 24px further the
  * hovered partner's name (styled by `nameClassName`, Figma: `header-lg` medium, accent color),
- * vertically centered on the title. It stays on one line (a long name is truncated rather than pushing
+ * vertically centered on the title. The " :" fades in once when a tile gets hovered and stays
+ * while moving from tile to tile; only the name animates when it changes. It stays on one line (a long name is truncated rather than pushing
  * the rows down) and is hidden from assistive tech, so the section keeps its "Trusted By" name.
  */
 export function HoveredPartnerName({ nameClassName }: { nameClassName?: string }) {
@@ -37,19 +38,29 @@ export function HoveredPartnerName({ nameClassName }: { nameClassName?: string }
 
   return (
     <span aria-hidden className="min-w-0 truncate">
-      <AnimatePresence mode="wait" initial={false}>
+      <AnimatePresence initial={false}>
         {name && (
           <motion.span
-            key={name}
-            initial={{ opacity: 0, y: "0.15em" }}
-            animate={{ opacity: 1, y: 0 }}
-            exit={{ opacity: 0, y: "-0.15em" }}
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
             transition={{ duration: 0.2, ease: EASE_OUT_QUART }}
             className="inline-flex items-center gap-6"
           >
             {/* Non-breaking space: a plain one would collapse at the start of the flex item. */}
             <span>{"\u00a0:"}</span>
-            <span className={nameClassName}>{name}</span>
+            <AnimatePresence mode="wait" initial={false}>
+              <motion.span
+                key={name}
+                initial={{ opacity: 0, y: "0.15em" }}
+                animate={{ opacity: 1, y: 0 }}
+                exit={{ opacity: 0, y: "-0.15em" }}
+                transition={{ duration: 0.2, ease: EASE_OUT_QUART }}
+                className={nameClassName}
+              >
+                {name}
+              </motion.span>
+            </AnimatePresence>
           </motion.span>
         )}
       </AnimatePresence>
@@ -58,7 +69,9 @@ export function HoveredPartnerName({ nameClassName }: { nameClassName?: string }
 }
 
 /**
- * Hover area of the fixed rows: the tile under the pointer names the hovered partner. Moving rows
+ * Hover area of the fixed rows: the tile under the pointer names the hovered partner, and the name
+ * stays over the gaps between tiles (cleared only when leaving the area), so it does not flicker
+ * from tile to tile. Moving rows
  * are skipped here: their tiles slide under a still pointer, so `LogoMarquee` tracks them itself.
  */
 export function PartnerHoverArea({ className, ...props }: React.ComponentProps<"div">) {
@@ -67,9 +80,8 @@ export function PartnerHoverArea({ className, ...props }: React.ComponentProps<"
   function update(event: React.PointerEvent) {
     if (event.pointerType === "touch" || !(event.target instanceof Element)) return
     if (event.target.closest("[data-marquee]")) return
-    setHovered(
-      event.target.closest(`[${PARTNER_ATTRIBUTE}]`)?.getAttribute(PARTNER_ATTRIBUTE) ?? null,
-    )
+    const name = event.target.closest(`[${PARTNER_ATTRIBUTE}]`)?.getAttribute(PARTNER_ATTRIBUTE)
+    if (name) setHovered(name)
   }
 
   return (
