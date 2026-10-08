@@ -5,8 +5,23 @@ import {
 } from "@/components/trusted-by/hovered-partner"
 import { LogoCell } from "@/components/trusted-by/logo-cell"
 import { LogoMarquee } from "@/components/trusted-by/logo-marquee"
+import { JsonLd } from "@/components/shared/json-ld"
 import { SectionContainer } from "@/components/shared/section-container"
+import { siteConfig } from "@/config/site"
 import { TRUSTED_BY_ROWS, type Partner } from "@/const/trusted-by"
+
+/** schema.org Organization listing every partner as a sponsor of MicroClub. */
+const TRUSTED_BY_JSON_LD = {
+  "@context": "https://schema.org",
+  "@type": "Organization",
+  name: siteConfig.name,
+  url: siteConfig.url,
+  sponsor: TRUSTED_BY_ROWS.flatMap((row) => row.partners).map((partner) => ({
+    "@type": "Organization",
+    name: partner.name,
+    logo: new URL(partner.logo, siteConfig.url).href,
+  })),
+}
 
 /** Minimum tiles in one copy of the loop, so a copy is wider than ultra-wide screens. */
 const LOOP_MIN_ITEMS = 16
@@ -34,6 +49,7 @@ export function TrustedBy() {
       bleed
       className="overflow-hidden"
     >
+      <JsonLd data={TRUSTED_BY_JSON_LD} />
       <HoveredPartnerProvider>
         <div className="@container mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
           <h2
