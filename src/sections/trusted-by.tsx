@@ -51,8 +51,8 @@ export function TrustedBy() {
                 key={row.id}
                 itemCount={tiles.length}
                 secondsPerItem={SECONDS_PER_ITEM}
-                // Full bleed: out of the padded, max-width content box, edge to edge.
-                className="mx-[calc(50%-50vw)]"
+                // Out of the padding, up to the 1440px site width (edge to edge on smaller screens).
+                className="-mx-4 sm:-mx-6 lg:-mx-20"
               >
                 {tiles.map((partner, index) => (
                   <LogoCell

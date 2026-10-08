@@ -108,13 +108,23 @@ export function LogoMarquee({
   }, [])
 
   return (
-    <div ref={viewport} className={cn("overflow-hidden motion-reduce:overflow-x-auto", className)}>
+    <div
+      ref={viewport}
+      className={cn("relative overflow-hidden motion-reduce:overflow-x-auto", className)}
+    >
       <div ref={track} className="flex w-max will-change-transform">
         <ul className="flex gap-(--logo-gap) pr-(--logo-gap)">{children}</ul>
         <ul aria-hidden className="flex gap-(--logo-gap) pr-(--logo-gap)">
           {children}
         </ul>
       </div>
+      {/*
+        On screens wider than the 1440px site, the row stops inside the screen: its ends fade
+        out instead of cutting tiles in the middle of the page. Static overlays, so the moving
+        track is never re-masked.
+      */}
+      <div className="pointer-events-none absolute inset-y-0 left-0 hidden w-24 bg-linear-to-r from-background to-transparent min-[90rem]:block" />
+      <div className="pointer-events-none absolute inset-y-0 right-0 hidden w-24 bg-linear-to-l from-background to-transparent min-[90rem]:block" />
     </div>
   )
 }
