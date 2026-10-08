@@ -3,6 +3,7 @@
 import { useEffect, useRef } from "react"
 import { animate, useInView, useReducedMotion, type AnimationPlaybackControls } from "motion/react"
 
+import { PARTNER_ATTRIBUTE, useSetHoveredPartner } from "@/components/trusted-by/hovered-partner"
 import { cn } from "@/lib/utils"
 
 /**
@@ -16,7 +17,7 @@ import { cn } from "@/lib/utils"
  * Hover is tracked by hand: the tiles move under a still pointer, and the browser only updates
  * `:hover` when the pointer moves, which would leave the highlight on a tile that slid away. While
  * a mouse is over the row, each frame marks the tile really under it with `data-hovered` (see
- * `LogoCell` `trackedHover`).
+ * `LogoCell` `trackedHover`) and names its partner in the title (see `HoveredPartnerName`).
  */
 export function LogoMarquee({
   secondsPerItem,
@@ -36,6 +37,7 @@ export function LogoMarquee({
   const inView = useInView(viewport)
   const reduceMotion = useReducedMotion()
   const loop = useRef<AnimationPlaybackControls>(null)
+  const setHoveredPartner = useSetHoveredPartner()
 
   useEffect(() => {
     if (!track.current || reduceMotion) return
@@ -68,6 +70,7 @@ export function LogoMarquee({
       hovered?.removeAttribute("data-hovered")
       tile?.setAttribute("data-hovered", "")
       hovered = tile
+      setHoveredPartner(tile?.getAttribute(PARTNER_ATTRIBUTE) ?? null)
     }
 
     function stop() {
@@ -105,11 +108,12 @@ export function LogoMarquee({
       box.removeEventListener("pointerleave", stop)
       stop()
     }
-  }, [])
+  }, [setHoveredPartner])
 
   return (
     <div
       ref={viewport}
+      data-marquee
       className={cn("relative overflow-hidden motion-reduce:overflow-x-auto", className)}
     >
       <div ref={track} className="flex w-max will-change-transform">

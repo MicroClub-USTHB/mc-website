@@ -22,6 +22,8 @@ export function LogoCell({
 }) {
   return (
     <li
+      // Names the partner in the title while hovered (see `HoveredPartnerName`).
+      data-partner={partner.name}
       className={cn(
         "grid aspect-224/170 w-(--logo-cell) shrink-0 place-items-center border border-border bg-background transition-colors duration-300 ease-out-quart",
         trackedHover ? "data-hovered:bg-accent" : "hover:bg-accent",

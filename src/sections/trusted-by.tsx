@@ -1,3 +1,8 @@
+import {
+  HoveredPartnerName,
+  HoveredPartnerProvider,
+  PartnerHoverArea,
+} from "@/components/trusted-by/hovered-partner"
 import { LogoCell } from "@/components/trusted-by/logo-cell"
 import { LogoMarquee } from "@/components/trusted-by/logo-marquee"
 import { SectionContainer } from "@/components/shared/section-container"
@@ -14,7 +19,8 @@ function fillLoop(partners: Partner[]) {
 
 /**
  * Trusted By (Figma): partner logos in three rows of tiles, the top and bottom ones fixed and
- * centered, the middle one full width and moving in an endless loop.
+ * centered, the middle one full width and moving in an endless loop. Hovering a tile names its
+ * partner in the title ("TRUSTED BY : DJEEZY"), back to "TRUSTED BY" otherwise.
  *
  * Tiles share one width, `--logo-cell` (a registered length, see globals.css), computed from the
  * content width: two per row on phones (capped at 12rem), five per row from `md` (capped at the
@@ -28,45 +34,51 @@ export function TrustedBy() {
       bleed
       className="overflow-hidden"
     >
-      <div className="@container mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
-        <h2 id="trusted-by-title" className="header-lg text-primary uppercase lg:header-xl">
-          Trusted By
-        </h2>
+      <HoveredPartnerProvider>
+        <div className="@container mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
+          <h2
+            id="trusted-by-title"
+            className="flex min-w-0 header-lg whitespace-nowrap text-primary uppercase lg:header-xl"
+          >
+            Trusted By
+            <HoveredPartnerName className="text-[0.85em] text-accent-foreground" />
+          </h2>
 
-        <div className="mt-8 flex flex-col gap-(--logo-gap) [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:0.75rem] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-10">
-          {TRUSTED_BY_ROWS.map((row) => {
-            if (row.motion === "static") {
+          <PartnerHoverArea className="mt-8 flex flex-col gap-(--logo-gap) [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:0.75rem] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-10">
+            {TRUSTED_BY_ROWS.map((row) => {
+              if (row.motion === "static") {
+                return (
+                  <ul key={row.id} className="flex flex-wrap justify-center gap-(--logo-gap)">
+                    {row.partners.map((partner) => (
+                      <LogoCell key={partner.id} partner={partner} />
+                    ))}
+                  </ul>
+                )
+              }
+
+              const tiles = fillLoop(row.partners)
               return (
-                <ul key={row.id} className="flex flex-wrap justify-center gap-(--logo-gap)">
-                  {row.partners.map((partner) => (
-                    <LogoCell key={partner.id} partner={partner} />
+                <LogoMarquee
+                  key={row.id}
+                  itemCount={tiles.length}
+                  secondsPerItem={SECONDS_PER_ITEM}
+                  // Out of the padding, up to the 1440px site width (edge to edge on smaller screens).
+                  className="-mx-4 sm:-mx-6 lg:-mx-20"
+                >
+                  {tiles.map((partner, index) => (
+                    <LogoCell
+                      key={`${partner.id}-${index}`}
+                      partner={partner}
+                      decorative={index >= row.partners.length}
+                      trackedHover
+                    />
                   ))}
-                </ul>
+                </LogoMarquee>
               )
-            }
-
-            const tiles = fillLoop(row.partners)
-            return (
-              <LogoMarquee
-                key={row.id}
-                itemCount={tiles.length}
-                secondsPerItem={SECONDS_PER_ITEM}
-                // Out of the padding, up to the 1440px site width (edge to edge on smaller screens).
-                className="-mx-4 sm:-mx-6 lg:-mx-20"
-              >
-                {tiles.map((partner, index) => (
-                  <LogoCell
-                    key={`${partner.id}-${index}`}
-                    partner={partner}
-                    decorative={index >= row.partners.length}
-                    trackedHover
-                  />
-                ))}
-              </LogoMarquee>
-            )
-          })}
+            })}
+          </PartnerHoverArea>
         </div>
-      </div>
+      </HoveredPartnerProvider>
     </SectionContainer>
   )
 }
