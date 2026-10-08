@@ -37,6 +37,8 @@ export function LogoMarquee({
   const inView = useInView(viewport)
   const reduceMotion = useReducedMotion()
   const loop = useRef<AnimationPlaybackControls>(null)
+  // Read by the loop when it is (re)created, so it never starts playing offscreen.
+  const inViewRef = useRef(inView)
   const setHoveredPartner = useSetHoveredPartner()
 
   useEffect(() => {
@@ -46,6 +48,7 @@ export function LogoMarquee({
       { transform: ["translateX(0%)", "translateX(-50%)"] },
       { duration: itemCount * secondsPerItem, ease: "linear", repeat: Infinity },
     )
+    if (!inViewRef.current) animation.pause()
     loop.current = animation
     return () => {
       animation.stop()
@@ -54,6 +57,7 @@ export function LogoMarquee({
   }, [itemCount, secondsPerItem, reduceMotion])
 
   useEffect(() => {
+    inViewRef.current = inView
     if (inView) loop.current?.play()
     else loop.current?.pause()
   }, [inView])
