@@ -14,9 +14,13 @@ export type PartnerRow = {
   partners: Partner[]
 }
 
-/** Logos exported from Figma, saved as `public/sponsors/<id>.svg`. */
-function partner(id: string, name: string): Partner {
-  return { id, name, logo: `/sponsors/${id}.svg` }
+/**
+ * Logos exported from Figma, saved as `public/sponsors/<id>.<format>`. Light vector logos stay
+ * SVG; heavy ones (traced artwork or embedded photos, 64KB to 1.5MB as SVG) are rendered to WebP
+ * at 3× the tile's logo box, so the image optimizer can resize them (it does not process SVG).
+ */
+function partner(id: string, name: string, format: "svg" | "webp" = "svg"): Partner {
+  return { id, name, logo: `/sponsors/${id}.${format}` }
 }
 
 /** Trusted By rows, top to bottom, as in Figma. */
@@ -40,16 +44,16 @@ export const TRUSTED_BY_ROWS: PartnerRow[] = [
       partner("tassili-travail-aerien", "Tassili Travail Aérien"),
       partner("yalidine-express", "Yalidine Express"),
       partner("pwc", "PwC"),
-      partner("itcomp-academy", "ITComp Academy"),
+      partner("itcomp-academy", "ITComp Academy", "webp"),
       partner("apcs", "Algerian Port Community System"),
       partner("cnep-banque", "CNEP Banque"),
       partner("cybears", "Cybears"),
-      partner("horia-technologies", "Horia Technologies"),
+      partner("horia-technologies", "Horia Technologies", "webp"),
       partner("mmc", "MMC"),
-      partner("maison-de-jeunes", "House of Youth"),
-      partner("miniros", "Miniros"),
+      partner("maison-de-jeunes", "House of Youth", "webp"),
+      partner("miniros", "Miniros", "webp"),
       partner("naftal", "Naftal"),
-      partner("prima-glaces", "Prima Glaces"),
+      partner("prima-glaces", "Prima Glaces", "webp"),
     ],
   },
   {
@@ -60,7 +64,7 @@ export const TRUSTED_BY_ROWS: PartnerRow[] = [
       partner("djezzy", "Djezzy"),
       partner("okt-solutions", "OKT Solutions"),
       partner("itihad-talents-united", "Itihad Talents United"),
-      partner("nuts-raya", "Nuts Raya"),
+      partner("nuts-raya", "Nuts Raya", "webp"),
     ],
   },
 ]
