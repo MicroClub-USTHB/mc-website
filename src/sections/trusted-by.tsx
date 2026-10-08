@@ -37,6 +37,8 @@ function fillLoop(partners: Partner[]) {
  * centered, the middle one full width and moving in an endless loop. Hovering a tile names its
  * partner in the title ("TRUSTED BY : DJEEZY"), back to "TRUSTED BY" otherwise.
  *
+ * Figma spacing: tiles 13px apart, rows 11px apart.
+ *
  * Tiles share one width, `--logo-cell` (a registered length, see globals.css), computed from the
  * content width: two per row on phones (capped at 12rem), five per row from `md` (capped at the
  * Figma 14rem = 224px). Fixed rows wrap and stay centered, so they fit every screen.
@@ -51,16 +53,16 @@ export function TrustedBy() {
     >
       <JsonLd data={TRUSTED_BY_JSON_LD} />
       <HoveredPartnerProvider>
-        <div className="@container mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
+        <div className="@container mx-auto max-w-site px-4 pt-24 pb-24 sm:px-6 lg:px-20">
           <h2
             id="trusted-by-title"
-            className="flex min-w-0 header-lg whitespace-nowrap text-primary uppercase lg:header-xl"
+            className="flex min-w-0 items-center header-lg whitespace-nowrap text-primary uppercase lg:header-xl"
           >
             Trusted By
-            <HoveredPartnerName className="text-[0.85em] text-accent-foreground" />
+            <HoveredPartnerName nameClassName="header-md font-medium text-accent-foreground lg:header-lg" />
           </h2>
 
-          <PartnerHoverArea className="mt-8 flex flex-col gap-(--logo-gap) [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:0.75rem] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-10">
+          <PartnerHoverArea className="mt-8 flex flex-col gap-[11px] [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:13px] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-9">
             {TRUSTED_BY_ROWS.map((row) => {
               if (row.motion === "static") {
                 return (

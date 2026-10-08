@@ -4,7 +4,6 @@ import { createContext, useContext, useState } from "react"
 import { AnimatePresence, motion } from "motion/react"
 
 import { EASE_OUT_QUART } from "@/lib/easing"
-import { cn } from "@/lib/utils"
 
 const HoveredPartnerContext = createContext<string | null>(null)
 const SetHoveredPartnerContext = createContext<(name: string | null) => void>(() => {})
@@ -28,15 +27,16 @@ export function useSetHoveredPartner() {
 }
 
 /**
- * Figma title on hover, "TRUSTED BY : DJEEZY": the hovered partner's name after the title, in the
- * accent color, a bit smaller. It stays on one line (a long name is truncated rather than pushing
+ * Figma title on hover, "TRUSTED BY : DJEEZY": " :" at the title size, then 24px further the
+ * hovered partner's name (styled by `nameClassName`, Figma: `header-lg` medium, accent color),
+ * vertically centered on the title. It stays on one line (a long name is truncated rather than pushing
  * the rows down) and is hidden from assistive tech, so the section keeps its "Trusted By" name.
  */
-export function HoveredPartnerName({ className }: { className?: string }) {
+export function HoveredPartnerName({ nameClassName }: { nameClassName?: string }) {
   const name = useContext(HoveredPartnerContext)
 
   return (
-    <span aria-hidden className={cn("min-w-0 truncate", className)}>
+    <span aria-hidden className="min-w-0 truncate">
       <AnimatePresence mode="wait" initial={false}>
         {name && (
           <motion.span
@@ -45,11 +45,11 @@ export function HoveredPartnerName({ className }: { className?: string }) {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: "-0.15em" }}
             transition={{ duration: 0.2, ease: EASE_OUT_QUART }}
-            className="inline-block"
+            className="inline-flex items-center gap-6"
           >
-            {/* Non-breaking spaces: plain ones would collapse at the start of the inline block. */}
-            <span className="text-primary">{" : "}</span>
-            {name}
+            {/* Non-breaking space: a plain one would collapse at the start of the flex item. */}
+            <span>{"\u00a0:"}</span>
+            <span className={nameClassName}>{name}</span>
           </motion.span>
         )}
       </AnimatePresence>
