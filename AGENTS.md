@@ -11,8 +11,10 @@ Guidelines for AI coding agents working on the official MicroClub website.
 ### Branching and pull requests
 
 - `main` is production. `dev` is the integration branch.
-- Implement every issue on a branch created from `dev`, named `section/<section-name>` (kebab-case, e.g. `section/statistics`).
-- When finished, open a pull request **into `dev`** (never directly into `main`).
+- Implement every issue on a branch created from `dev`.
+  - A new section built from scratch: `section/<section-name>` (kebab-case, e.g. `section/statistics`).
+  - Any later work (fixes, edits, UI improvements, refactors...): a Conventional Commits type prefix and a kebab-case topic, e.g. `feat/event-hub-interactions`, `fix/menu-focus-trap`.
+- When finished, open a pull request **into `dev`** (never directly into `main`). Outside new sections, title it as a Conventional Commit (e.g. `feat: drag to scroll the event hub`).
 - Always link the PR to its issue with a closing keyword in the PR description (e.g. `Closes #1`), so the issue closes when the PR is merged.
 
 ## Stack

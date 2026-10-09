@@ -34,3 +34,15 @@ export const menuLinks: { id: HomeSectionId; label: string }[] = [
   { id: "featured-events", label: "Event Hub" },
   { id: "contact", label: "Contact Us" },
 ]
+
+/** Footer "Navigation" column links (Figma "Footer"), in display order. */
+export const footerLinks: { id: HomeSectionId; label: string }[] = [
+  { id: "hero", label: "Home" },
+  { id: "about", label: "About Us" },
+  { id: "statistics", label: "Statistics" },
+  { id: "featured-events", label: "Our Events" },
+  { id: "featured-projects", label: "Our Projects" },
+  { id: "community", label: "MC Community" },
+  { id: "club-sections", label: "Our Sections" },
+  { id: "departments", label: "Our Departments" },
+]
