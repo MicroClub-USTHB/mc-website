@@ -1,5 +1,8 @@
 "use server"
 
+import { Resend } from "resend"
+
+import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact-email"
 import {
   readContactValues,
   validateContact,
@@ -15,11 +18,15 @@ export type ContactState = {
   values?: ContactValues
 }
 
-const RESEND_URL = "https://api.resend.com/emails"
+const SEND_ERROR = "We could not send your message. Please try again later."
 
 /**
- * Validates the contact form and emails it to the club inbox through Resend.
+ * Validates the contact form, then through Resend:
+ * 1. emails the submission to the club inbox (reply-to is the sender), and
+ * 2. emails a confirmation with a copy of the message to the sender.
+ *
  * Needs `CONTACT_RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL` (see `.env.example`).
+ * The club email decides success; a failed confirmation is only logged.
  */
 export async function sendContactMessage(
   _previous: ContactState,
@@ -36,37 +43,38 @@ export async function sendContactMessage(
     console.error(
       "Contact form: CONTACT_RESEND_API_KEY, CONTACT_TO_EMAIL or CONTACT_FROM_EMAIL is missing",
     )
-    return {
-      status: "error",
-      message: "We could not send your message. Please try again later.",
-      values,
-    }
+    return { status: "error", message: SEND_ERROR, values }
+  }
+
+  const resend = new Resend(apiKey)
+
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to,
+      replyTo: values.email,
+      ...buildClubEmail(values),
+    })
+    if (error) throw new Error(`${error.name}: ${error.message}`)
+  } catch (error) {
+    console.error("Contact form: sending to the club failed", error)
+    return { status: "error", message: SEND_ERROR, values }
   }
 
   try {
-    const response = await fetch(RESEND_URL, {
-      method: "POST",
-      headers: { Authorization: `Bearer ${apiKey}`, "Content-Type": "application/json" },
-      body: JSON.stringify({
-        from,
-        to,
-        reply_to: values.email,
-        subject: `Website contact: ${values.name}`,
-        text: `From: ${values.name} <${values.email}>\n\n${values.message}`,
-      }),
+    const { error } = await resend.emails.send({
+      from,
+      to: values.email,
+      replyTo: to,
+      ...buildConfirmationEmail(values),
     })
-    if (!response.ok) throw new Error(`Resend responded with ${response.status}`)
+    if (error) throw new Error(`${error.name}: ${error.message}`)
   } catch (error) {
-    console.error("Contact form: sending failed", error)
-    return {
-      status: "error",
-      message: "We could not send your message. Please try again later.",
-      values,
-    }
+    console.error("Contact form: sending the confirmation failed", error)
   }
 
   return {
     status: "success",
-    message: "Thank you! Your message has been sent, we will get back to you soon.",
+    message: "Thank you! Your message has been sent. A confirmation was sent to your email.",
   }
 }

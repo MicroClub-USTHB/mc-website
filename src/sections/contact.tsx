@@ -24,7 +24,7 @@ export function Contact() {
           </p>
         </div>
 
-        <div className="flex w-full flex-col gap-5 lg:w-147.25 lg:pt-6.25 lg:pb-9.25">
+        <div className="flex w-full flex-col gap-5 lg:w-147.25 lg:pt-6.25 lg:pb-3">
           <div className="flex flex-col gap-1.5">
             <h3 className="header-sm font-medium text-foreground">Send Message</h3>
             <p className="paragraph-sm font-medium text-muted-foreground">
