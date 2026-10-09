@@ -3,7 +3,11 @@
 import { useActionState, useState, type FormEvent } from "react"
 import { CircleIcon, MailIcon, UserRoundIcon } from "lucide-react"
 
-import { sendContactMessage, type ContactState } from "@/actions/send-contact-message"
+import {
+  HONEYPOT_FIELD,
+  sendContactMessage,
+  type ContactState,
+} from "@/actions/send-contact-message"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
 import { McTextarea } from "@/components/ui/mc-textarea"
@@ -43,6 +47,14 @@ export function ContactForm() {
       noValidate
       className="flex flex-col gap-7.5"
     >
+      {/* Honeypot: hidden from people and screen readers, filled by bots. */}
+      <div aria-hidden className="absolute -left-2499.75 h-0 w-0 overflow-hidden">
+        <label>
+          Website
+          <input type="text" name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
+        </label>
+      </div>
+
       <div className="flex flex-col gap-3.75">
         <McInput
           className={FIELD_CLASSNAME}
