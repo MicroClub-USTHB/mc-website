@@ -41,7 +41,9 @@ export function SpotlightPanel({
               transition={{ duration: 0.25, ease: EASE_OUT_QUART }}
             >
               <p className="paragraph-xs text-muted-foreground">
-                ({EVENT_CATEGORY_LABELS[event.category]})
+                {"{"}
+                {EVENT_CATEGORY_LABELS[event.category]}
+                {"}"}
               </p>
               <p className="truncate header-xs text-primary sm:header-sm">{event.name}</p>
             </motion.div>

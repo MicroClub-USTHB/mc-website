@@ -5,7 +5,7 @@ import { EVENT_CATEGORY_LABELS, type FeaturedEvent } from "@/const/featured-even
 import { cn } from "@/lib/utils"
 
 /**
- * Category of the hovered event, e.g. "(External Event)". It fades out when no slice is hovered,
+ * Category of the hovered event, e.g. "{External Event}". It fades out when no slice is hovered,
  * keeping the last category's text while it fades.
  */
 export function EventCategoryLabel({
@@ -26,7 +26,7 @@ export function EventCategoryLabel({
         className,
       )}
     >
-      {shown && `(${EVENT_CATEGORY_LABELS[shown.category]})`}
+      {shown && `{${EVENT_CATEGORY_LABELS[shown.category]}}`}
     </p>
   )
 }
