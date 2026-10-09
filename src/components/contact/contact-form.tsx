@@ -3,16 +3,13 @@
 import { useActionState, useState, type FormEvent } from "react"
 import { CircleIcon, MailIcon, UserRoundIcon } from "lucide-react"
 
-import {
-  HONEYPOT_FIELD,
-  sendContactMessage,
-  type ContactState,
-} from "@/actions/send-contact-message"
+import { sendContactMessage, type ContactState } from "@/actions/send-contact-message"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
 import { McTextarea } from "@/components/ui/mc-textarea"
 import {
   CONTACT_LIMITS,
+  HONEYPOT_FIELD,
   readContactValues,
   validateContact,
   type ContactErrors,

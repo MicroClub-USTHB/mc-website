@@ -6,6 +6,7 @@ import { Resend } from "resend"
 import { notifyDiscord } from "@/lib/contact-discord"
 import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact-email"
 import {
+  HONEYPOT_FIELD,
   readContactValues,
   validateContact,
   type ContactErrors,
@@ -20,9 +21,6 @@ export type ContactState = {
   /** Submitted values, so the form can keep them when the submission fails. */
   values?: ContactValues
 }
-
-/** Name of the hidden decoy field: real visitors never see it, bots fill it. */
-export const HONEYPOT_FIELD = "website"
 
 const RATE_LIMIT = { limit: 3, windowMs: 10 * 60 * 1000 }
 
