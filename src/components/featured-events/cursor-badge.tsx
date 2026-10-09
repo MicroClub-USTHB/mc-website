@@ -28,9 +28,12 @@ export function CursorBadge({ events }: { events: Pick<FeaturedEvent, "id" | "na
 
   useEffect(() => {
     function follow(event: PointerEvent) {
-      if (event.pointerType === "touch") return
-      const width = ref.current?.offsetWidth ?? 0
-      const height = ref.current?.offsetHeight ?? 0
+      if (event.pointerType === "touch" || !ref.current) return
+      // Placed: until the first pointer move it would sit in the top-left corner (e.g. an event
+      // shown from the list with the keyboard).
+      ref.current.dataset.placed = ""
+      const width = ref.current.offsetWidth
+      const height = ref.current.offsetHeight
       x.set(Math.min(event.clientX + OFFSET.x, window.innerWidth - width - EDGE))
       y.set(Math.min(event.clientY + OFFSET.y, window.innerHeight - height - EDGE))
     }
@@ -47,7 +50,7 @@ export function CursorBadge({ events }: { events: Pick<FeaturedEvent, "id" | "na
       aria-hidden
       data-active={activeId !== null || undefined}
       style={{ x, y }}
-      className="pointer-events-none fixed top-0 left-0 z-40 bg-primary px-3.5 py-0.5 paragraph-xs font-medium whitespace-nowrap text-primary-foreground opacity-0 transition-opacity duration-150 ease-out-quart data-active:opacity-100 [@media(any-hover:none)]:hidden"
+      className="pointer-events-none fixed top-0 left-0 z-40 bg-primary px-3.5 py-0.5 paragraph-xs font-medium whitespace-nowrap text-primary-foreground opacity-0 transition-opacity duration-150 ease-out-quart not-data-placed:invisible data-active:opacity-100 [@media(any-hover:none)]:hidden"
     >
       {shown?.name}
     </motion.div>
