@@ -45,7 +45,7 @@ export function ContactForm() {
       className="flex flex-col gap-7.5"
     >
       {/* Honeypot: hidden from people and screen readers, filled by bots. */}
-      <div aria-hidden className="absolute -left-2499.75 h-0 w-0 overflow-hidden">
+      <div aria-hidden className="sr-only">
         <label>
           Website
           <input type="text" name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
