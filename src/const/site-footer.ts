@@ -1,3 +1,5 @@
+import { CONTACT } from "@/const/contact"
+
 export type ContactTileId = "instagram" | "facebook" | "tiktok" | "discord" | "email" | "location"
 
 export type ContactTile = {
@@ -16,9 +18,8 @@ export type ProfessionalLink = { label: string; href: string }
 /** MicroClub was founded in 1985: the copyright counts the years of progress from it. */
 export const FOUNDING_YEAR = 1985
 
-export const CONTACT_EMAIL = "microclub.contact@usthb.edu.dz"
-
-const ADDRESS = "CS Faculty, USTHB, BP32, Bab Ezzouar"
+/** "CS Faculty, USTHB, BP32, Bab Ezzouar", from the club address shared with Contact Us. */
+const ADDRESS = `${CONTACT.address.streetAddress}, ${CONTACT.address.addressLocality}`
 
 /** Social icon tiles (Figma "Footer"). */
 export const SOCIAL_TILES: ContactTile[] = [
@@ -53,8 +54,8 @@ export const CONTACT_TILES: ContactTile[] = [
   {
     id: "email",
     label: "Email",
-    text: CONTACT_EMAIL,
-    href: `mailto:${CONTACT_EMAIL}`,
+    text: CONTACT.email,
+    href: `mailto:${CONTACT.email}`,
     external: false,
   },
   {

@@ -2,13 +2,8 @@ import { JsonLd } from "@/components/shared/json-ld"
 import { ContactTile } from "@/components/site-footer/contact-tile"
 import { FallingTiles } from "@/components/site-footer/falling-tiles"
 import { footerLinks, siteConfig } from "@/config/site"
-import {
-  CONTACT_EMAIL,
-  CONTACT_TILES,
-  FOUNDING_YEAR,
-  PROFESSIONAL_LINKS,
-  SOCIAL_TILES,
-} from "@/const/site-footer"
+import { CONTACT } from "@/const/contact"
+import { CONTACT_TILES, FOUNDING_YEAR, PROFESSIONAL_LINKS, SOCIAL_TILES } from "@/const/site-footer"
 
 /** schema.org Organization contact facts and profiles from the footer. */
 const FOOTER_JSON_LD = {
@@ -16,14 +11,9 @@ const FOOTER_JSON_LD = {
   "@type": "Organization",
   name: siteConfig.name,
   url: siteConfig.url,
-  email: CONTACT_EMAIL,
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Faculty of Computer Science, USTHB, BP 32 El Alia",
-    addressLocality: "Bab Ezzouar",
-    addressRegion: "Algiers",
-    addressCountry: "DZ",
-  },
+  foundingDate: String(FOUNDING_YEAR),
+  email: CONTACT.email,
+  address: { "@type": "PostalAddress", ...CONTACT.address },
   sameAs: [...SOCIAL_TILES, ...PROFESSIONAL_LINKS].map((link) => link.href),
 }
 
@@ -32,7 +22,7 @@ const FOOTER_JSON_LD = {
  * the right when it ends (the anchor point flips with the state), so it can animate.
  */
 const linkClassName =
-  "paragraph-lg text-primary outline-none bg-[linear-gradient(currentColor,currentColor)] bg-size-[0%_1px] bg-position-[100%_100%] bg-no-repeat transition-[background-size] duration-300 ease-out-quart hover:bg-size-[100%_1px] hover:bg-position-[0_100%] focus-visible:bg-size-[100%_1px] focus-visible:bg-position-[0_100%] motion-reduce:transition-none"
+  "paragraph-lg text-primary outline-none bg-linear-to-r from-current to-current bg-size-[0%_1px] bg-right-bottom bg-no-repeat transition-[background-size] duration-300 ease-out-quart hover:bg-size-[100%_1px] hover:bg-left-bottom focus-visible:bg-size-[100%_1px] focus-visible:bg-left-bottom motion-reduce:transition-none"
 
 /**
  * Footer (Figma): contact tiles on the left, in three rows, that fall and pile up with physics when
@@ -73,8 +63,8 @@ export function SiteFooter() {
           </ul>
         </FallingTiles>
 
-        <div className="px-4 pt-16 sm:px-6 lg:w-1/2 lg:px-0 lg:pt-21.5 lg:pb-[47px]">
-          <div className="flex h-full flex-col border-border lg:min-h-108 lg:border-l-2 lg:py-9 lg:pr-20 lg:pl-20">
+        <div className="px-4 pt-16 sm:px-6 lg:w-1/2 lg:px-0 lg:pt-21.5 lg:pb-11.75">
+          <div className="flex h-full flex-col border-border lg:min-h-108 lg:border-l-2 lg:px-20 lg:py-9">
             <div className="flex flex-wrap gap-x-12 gap-y-10 lg:gap-x-0">
               <nav aria-labelledby="footer-navigation-title" className="lg:w-63">
                 <h2 id="footer-navigation-title" className="header-xs text-foreground">

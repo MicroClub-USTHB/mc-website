@@ -59,7 +59,9 @@ export function FallingTiles({
   // what was left of the way, so the frame before it counts too.
   useLenis(
     ({ scroll, limit }) => {
-      if (knocked) return
+      // Tracked from half a screen before the footer (`near`), well before the page can hit its
+      // bottom, so the rest of the page scrolls without this work.
+      if (knocked || !near) return
       const time = performance.now()
       const previous = lastScroll.current
       const speed = ((scroll - previous.scroll) / (time - previous.time)) * 1000
@@ -68,7 +70,7 @@ export function FallingTiles({
       const arrived = previous.time > 0 && scroll >= limit - 1 && previous.scroll < limit - 1
       if (arrived && Math.max(speed, previous.speed) >= IMPACT_SPEED) setKnocked(true)
     },
-    [knocked],
+    [knocked, near],
   )
 
   // Preload the engine half a screen early, so the tiles fall as soon as the page hits the bottom.
@@ -78,7 +80,8 @@ export function FallingTiles({
 
   useEffect(() => {
     const element = box.current
-    if (!element || !(knocked || reduceMotion)) return
+    // Reduced motion: the pile is built at rest once the footer is near, not on page load.
+    if (!element || !(knocked || (reduceMotion && near))) return
     let stop: (() => void) | undefined
     let cancelled = false
     void import("matter-js").then(({ default: matter }) => {
@@ -88,7 +91,7 @@ export function FallingTiles({
       cancelled = true
       stop?.()
     }
-  }, [knocked, reduceMotion])
+  }, [knocked, reduceMotion, near])
 
   return (
     <div ref={box} className={cn("relative", className)}>
