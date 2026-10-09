@@ -27,8 +27,12 @@ const FOOTER_JSON_LD = {
   sameAs: [...SOCIAL_TILES, ...PROFESSIONAL_LINKS].map((link) => link.href),
 }
 
+/**
+ * Underline drawn as a 1px background that grows from the left on hover / focus and shrinks to
+ * the right when it ends (the anchor point flips with the state), so it can animate.
+ */
 const linkClassName =
-  "paragraph-lg text-primary underline-offset-4 outline-none hover:underline focus-visible:underline"
+  "paragraph-lg text-primary outline-none bg-[linear-gradient(currentColor,currentColor)] bg-size-[0%_1px] bg-position-[100%_100%] bg-no-repeat transition-[background-size] duration-300 ease-out-quart hover:bg-size-[100%_1px] hover:bg-position-[0_100%] focus-visible:bg-size-[100%_1px] focus-visible:bg-position-[0_100%] motion-reduce:transition-none"
 
 /**
  * Footer (Figma): contact tiles on the left, laid out as the Figma pile but raised, that fall into
@@ -36,8 +40,8 @@ const linkClassName =
  * columns with the copyright on the right, split by a vertical line. Stacked on smaller screens,
  * the pile last.
  *
- * Figma spacing (1440px frame): the line is 540px tall, 108px from the top and 59px from the
- * bottom; the right column is inset 80px from it with 36px of padding top and bottom.
+ * Spacing (1440px frame), Figma 20% shorter: the line is 432px tall, 86px from the top and 47px
+ * from the bottom; the right column is inset 80px from it with 36px of padding top and bottom.
  *
  * Server Component: links and text are in the server-rendered HTML; only the physics is client.
  */
@@ -53,7 +57,7 @@ export function SiteFooter() {
           (455px wide with its margins) would not fit.
           `--pile-top`: where the pile hangs before it falls (lined up with "Navigation" on desktop).
         */}
-        <FallingTiles className="@container h-90 [--pile-top:2.5rem] [--u:min(0.7px,calc(100cqw/650))] max-lg:order-last sm:h-100 sm:[--pile-top:3rem] lg:h-auto lg:w-1/2 lg:[--pile-top:9rem]">
+        <FallingTiles className="@container h-90 [--pile-top:2.5rem] [--u:min(0.7px,calc(100cqw/650))] max-lg:order-last sm:h-100 sm:[--pile-top:3rem] lg:h-auto lg:w-1/2 lg:[--pile-top:7.625rem]">
           <ul aria-label="Social media">
             {SOCIAL_TILES.map((tile) => (
               <li key={tile.id}>
@@ -70,8 +74,8 @@ export function SiteFooter() {
           </ul>
         </FallingTiles>
 
-        <div className="px-4 pt-16 sm:px-6 lg:w-1/2 lg:px-0 lg:pt-27 lg:pb-[59px]">
-          <div className="flex h-full flex-col border-muted-foreground/30 lg:min-h-135 lg:border-l-2 lg:py-9 lg:pr-20 lg:pl-20">
+        <div className="px-4 pt-16 sm:px-6 lg:w-1/2 lg:px-0 lg:pt-21.5 lg:pb-[47px]">
+          <div className="flex h-full flex-col border-border lg:min-h-108 lg:border-l-2 lg:py-9 lg:pr-20 lg:pl-20">
             <div className="flex flex-wrap gap-x-12 gap-y-10 lg:gap-x-0">
               <nav aria-labelledby="footer-navigation-title" className="lg:w-63">
                 <h2 id="footer-navigation-title" className="header-xs text-foreground">
