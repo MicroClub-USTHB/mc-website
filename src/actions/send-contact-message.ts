@@ -3,7 +3,6 @@
 import { headers } from "next/headers"
 import { Resend } from "resend"
 
-import { notifyDiscord } from "@/lib/contact-discord"
 import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact-email"
 import {
   HONEYPOT_FIELD,
@@ -30,12 +29,11 @@ const SEND_ERROR = "We could not send your message. Please try again later."
 /**
  * Validates the contact form, then through Resend:
  * 1. emails the submission to the club inbox (reply-to is the sender), and
- * 2. emails a confirmation with a copy of the message to the sender, and
- * 3. posts the submission to Discord when `CONTACT_DISCORD_WEBHOOK_URL` is set.
+ * 2. emails a confirmation with a copy of the message to the sender.
  *
  * Spam: a filled honeypot gets a fake success (bots learn nothing), and each IP can send 3 messages
  * per 10 minutes. Needs `CONTACT_RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL`
- * (see `.env.example`). The club email decides success; the confirmation and Discord only log.
+ * (see `.env.example`). The club email decides success; the confirmation only logs.
  */
 export async function sendContactMessage(
   _previous: ContactState,
@@ -82,19 +80,17 @@ export async function sendContactMessage(
     return { status: "error", message: SEND_ERROR, values }
   }
 
-  const discordWebhook = process.env.CONTACT_DISCORD_WEBHOOK_URL
-  const [confirmation, discord] = await Promise.allSettled([
-    resend.emails
-      .send({ from, to: values.email, replyTo: to, ...buildConfirmationEmail(values) })
-      .then(({ error }) => {
-        if (error) throw new Error(`${error.name}: ${error.message}`)
-      }),
-    discordWebhook ? notifyDiscord(discordWebhook, values) : Promise.resolve(),
-  ])
-  if (confirmation.status === "rejected")
-    console.error("Contact form: sending the confirmation failed", confirmation.reason)
-  if (discord.status === "rejected")
-    console.error("Contact form: Discord notification failed", discord.reason)
+  try {
+    const { error } = await resend.emails.send({
+      from,
+      to: values.email,
+      replyTo: to,
+      ...buildConfirmationEmail(values),
+    })
+    if (error) throw new Error(`${error.name}: ${error.message}`)
+  } catch (error) {
+    console.error("Contact form: sending the confirmation failed", error)
+  }
 
   return {
     status: "success",
