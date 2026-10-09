@@ -20,7 +20,6 @@ export const CONTACT_EMAIL = "microclub.contact@usthb.edu.dz"
 
 const ADDRESS = "CS Faculty, USTHB, BP32, Bab Ezzouar"
 
-// TODO: confirm the Instagram, TikTok and Discord URLs with the club (Facebook is verified).
 /** Social icon tiles (Figma "Footer"). */
 export const SOCIAL_TILES: ContactTile[] = [
   {
@@ -44,7 +43,7 @@ export const SOCIAL_TILES: ContactTile[] = [
   {
     id: "discord",
     label: "MicroClub on Discord",
-    href: "https://discord.gg/microclub",
+    href: "https://discord.gg/tKrYWgeDpY",
     external: true,
   },
 ]
@@ -67,10 +66,9 @@ export const CONTACT_TILES: ContactTile[] = [
   },
 ]
 
-// TODO: confirm the Medium URL with the club (LinkedIn and GitHub are verified).
 /** Footer "Professional Links" column. */
 export const PROFESSIONAL_LINKS: ProfessionalLink[] = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/micro-club-usthb/" },
+  { label: "LinkedIn", href: "https://www.linkedin.com/company/micro-club-usthb-85/" },
   { label: "Github", href: "https://github.com/MicroClub-USTHB" },
-  { label: "Medium", href: "https://medium.com/@microclub" },
+  { label: "Medium", href: "https://medium.com/@microclub_usthb" },
 ]
