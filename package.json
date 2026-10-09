@@ -17,6 +17,7 @@
     "cn": "^0.4.0",
     "lenis": "^1.3.26",
     "lucide-react": "^1.51.0",
+    "matter-js": "^0.20.0",
     "motion": "^14.0.0",
     "next": "16.3.8",
     "react": "19.2.8",
@@ -27,6 +28,7 @@
   },
   "devDependencies": {
     "@tailwindcss/postcss": "^4",
+    "@types/matter-js": "^0.20.2",
     "@types/node": "^24.19.1",
     "@types/react": "^19",
     "@types/react-dom": "^19",
