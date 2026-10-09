@@ -49,10 +49,11 @@ export function SiteFooter() {
       <JsonLd data={FOOTER_JSON_LD} />
       <div className="mx-auto flex max-w-site flex-col lg:flex-row">
         {/*
-          `--u`: one Figma px, scaled down when the pile (650px wide with its margins) would not fit.
+          `--u`: one Figma px at 70% (tiles half the Figma area), scaled down further when the pile
+          (455px wide with its margins) would not fit.
           `--pile-top`: where the pile hangs before it falls (lined up with "Navigation" on desktop).
         */}
-        <FallingTiles className="@container h-90 [--pile-top:2.5rem] [--u:min(1px,calc(100cqw/650))] max-lg:order-last sm:h-136 sm:[--pile-top:3rem] lg:h-auto lg:w-1/2 lg:[--pile-top:9rem]">
+        <FallingTiles className="@container h-90 [--pile-top:2.5rem] [--u:min(0.7px,calc(100cqw/650))] max-lg:order-last sm:h-100 sm:[--pile-top:3rem] lg:h-auto lg:w-1/2 lg:[--pile-top:9rem]">
           <ul aria-label="Social media">
             {SOCIAL_TILES.map((tile) => (
               <li key={tile.id}>
@@ -70,7 +71,7 @@ export function SiteFooter() {
         </FallingTiles>
 
         <div className="px-4 pt-16 sm:px-6 lg:w-1/2 lg:px-0 lg:pt-27 lg:pb-[59px]">
-          <div className="flex h-full flex-col border-border lg:min-h-135 lg:border-l lg:py-9 lg:pr-20 lg:pl-20">
+          <div className="flex h-full flex-col border-muted-foreground/30 lg:min-h-135 lg:border-l-2 lg:py-9 lg:pr-20 lg:pl-20">
             <div className="flex flex-wrap gap-x-12 gap-y-10 lg:gap-x-0">
               <nav aria-labelledby="footer-navigation-title" className="lg:w-63">
                 <h2 id="footer-navigation-title" className="header-xs text-foreground">

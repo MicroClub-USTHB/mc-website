@@ -14,15 +14,12 @@ const STEP = 1000 / 60
 const SETTLE_STEPS = 600
 /** Wall thickness (px), so thrown tiles cannot tunnel through. */
 const WALL = 200
-/** Tile corner radius (px), Figma 12px (`rounded-xl`). */
-const TILE_RADIUS = 12
 /** Pointer travel (px) past which a press on a tile is a drag, not a click. */
 const DRAG_THRESHOLD = 4
 /** Steps between the release of one row of tiles and the next, bottom row first. */
 const ROW_STAGGER = 5
 
-const TILE_OPTIONS: Matter.IChamferableBodyDefinition = {
-  chamfer: { radius: TILE_RADIUS },
+const TILE_OPTIONS: Matter.IBodyDefinition = {
   friction: 0.6,
   frictionStatic: 1,
   restitution: 0.15,
@@ -113,7 +110,11 @@ function startPile(matter: MatterModule, box: HTMLElement, { animate }: { animat
         origins[i].y,
         tile.offsetWidth,
         tile.offsetHeight,
-        TILE_OPTIONS,
+        // Rounded like the tile, which scales its radius with its size.
+        {
+          ...TILE_OPTIONS,
+          chamfer: { radius: parseFloat(getComputedStyle(tile).borderTopLeftRadius) },
+        },
       )
       Body.setStatic(body, true) // Hangs until released by `step`.
       return body

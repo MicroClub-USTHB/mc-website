@@ -47,7 +47,7 @@ export function ContactTile({ tile }: { tile: ContactTileData }) {
         top: `calc(var(--pile-top) + ${tile.pile.y} * var(--u))`,
       }}
       className={cn(
-        "absolute flex h-[calc(84*var(--u))] items-center rounded-xl outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        "absolute flex h-[calc(84*var(--u))] items-center rounded-[calc(12*var(--u))] outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         tile.text
           ? "gap-[calc(16*var(--u))] pr-[calc(32*var(--u))] pl-[calc(24*var(--u))]"
           : "w-[calc(84*var(--u))] justify-center",
