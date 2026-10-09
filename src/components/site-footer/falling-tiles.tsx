@@ -1,6 +1,7 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useEffect, useRef, useState } from "react"
+import { useLenis } from "lenis/react"
 import { cancelFrame, frame, useInView, useReducedMotion } from "motion/react"
 import type Matter from "matter-js"
 
@@ -18,6 +19,8 @@ const WALL = 200
 const DRAG_THRESHOLD = 4
 /** Steps between the release of one row of tiles and the next, bottom row first. */
 const ROW_STAGGER = 5
+/** Speed (px/s) the page must hit its bottom with to knock the tiles down. */
+const IMPACT_SPEED = 50
 
 const TILE_OPTIONS: Matter.IBodyDefinition = {
   friction: 0.6,
@@ -28,9 +31,11 @@ const TILE_OPTIONS: Matter.IBodyDefinition = {
 
 /**
  * Falling tags (Figma dev notes, like the Framer "Falling Tags" component): the `[data-tile]`
- * links inside hang in their layout until the end of the page comes into view, then fall with
- * physics (Matter.js), row by row from the bottom, and pile up at the bottom of the box. With a
- * mouse, tiles can be dragged and thrown; a press without moving stays a click on the link.
+ * links inside hang in their layout until the page hits its bottom fast enough (`IMPACT_SPEED`;
+ * the scroll keeps its speed into the bottom, see `SmoothScrollProvider`), then fall with physics
+ * (Matter.js), row by row from the bottom, and pile up at the bottom of the box. A slow arrival
+ * leaves them hanging. With a mouse, tiles can be dragged and thrown; a press without moving
+ * stays a click on the link.
  *
  * Matter.js is loaded only as the footer approaches. Tiles keep their place in the layout and are
  * moved with `transform` only (the box does not reflow). With reduced motion, the pile is
@@ -44,19 +49,36 @@ export function FallingTiles({
   children: React.ReactNode
 }) {
   const box = useRef<HTMLDivElement>(null)
-  const end = useRef<HTMLSpanElement>(null)
   const near = useInView(box, { once: true, margin: "0px 0px 50% 0px" })
-  const atEnd = useInView(end, { once: true })
   const reduceMotion = useReducedMotion()
+  const [knocked, setKnocked] = useState(false)
+  // Scroll position, time and speed (px/s) at the previous scroll event.
+  const lastScroll = useRef({ scroll: 0, time: 0, speed: 0 })
 
-  // Preload the engine half a screen early, so the tiles fall as soon as the page end shows.
+  // Impact: the scroll speed when it reaches the bottom of the page. The arrival frame only covers
+  // what was left of the way, so the frame before it counts too.
+  useLenis(
+    ({ scroll, limit }) => {
+      if (knocked) return
+      const time = performance.now()
+      const previous = lastScroll.current
+      const speed = ((scroll - previous.scroll) / (time - previous.time)) * 1000
+      lastScroll.current = { scroll, time, speed }
+      // (No previous event yet: the page may load already at the bottom, which is not an impact.)
+      const arrived = previous.time > 0 && scroll >= limit - 1 && previous.scroll < limit - 1
+      if (arrived && Math.max(speed, previous.speed) >= IMPACT_SPEED) setKnocked(true)
+    },
+    [knocked],
+  )
+
+  // Preload the engine half a screen early, so the tiles fall as soon as the page hits the bottom.
   useEffect(() => {
     if (near) void import("matter-js")
   }, [near])
 
   useEffect(() => {
     const element = box.current
-    if (!element || !(atEnd || reduceMotion)) return
+    if (!element || !(knocked || reduceMotion)) return
     let stop: (() => void) | undefined
     let cancelled = false
     void import("matter-js").then(({ default: matter }) => {
@@ -66,13 +88,11 @@ export function FallingTiles({
       cancelled = true
       stop?.()
     }
-  }, [atEnd, reduceMotion])
+  }, [knocked, reduceMotion])
 
   return (
     <div ref={box} className={cn("relative", className)}>
       {children}
-      {/* The page end: the tiles fall once it is in view. */}
-      <span ref={end} aria-hidden className="absolute inset-x-0 bottom-0 h-px" />
     </div>
   )
 }
