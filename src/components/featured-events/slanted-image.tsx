@@ -47,6 +47,8 @@ export function SlantedImage({
           alt={image.alt}
           fill
           sizes={sizes}
+          // Pressing and moving on a slice drags the chain, never the photo itself.
+          draggable={false}
           className={cn("object-fill", imageClassName)}
         />
       </div>
