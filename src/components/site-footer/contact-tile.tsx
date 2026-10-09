@@ -28,9 +28,9 @@ const NEW_TAB = " (opens in a new tab)"
  * One footer contact tile (Figma: 84px tall, 12px radius): a square icon tile for the social
  * profiles, a wide icon + text tile for the email and the address.
  *
- * Sized and placed at its `pile` place in Figma px, scaled by `--u` (one Figma px) and offset by
- * `--pile-top`, both set by the footer, so the whole pile shrinks to fit phones. Text and icons
- * are `header-xs` and 36/44px at full size. Marked `data-tile` for `FallingTiles`.
+ * Sized in Figma px, scaled by `--u` (one Figma px) set by the footer, so the tiles shrink to fit
+ * phones. Text and icons are `header-xs` and 36/44px at full size. Marked `data-tile` for
+ * `FallingTiles`.
  */
 export function ContactTile({ tile }: { tile: ContactTileData }) {
   const { className, Icon } = TILE_STYLES[tile.id]
@@ -42,12 +42,8 @@ export function ContactTile({ tile }: { tile: ContactTileData }) {
       draggable={false}
       aria-label={tile.text ? undefined : `${tile.label}${tile.external ? NEW_TAB : ""}`}
       {...(tile.external && { target: "_blank", rel: "noopener noreferrer" })}
-      style={{
-        left: `calc(${tile.pile.x} * var(--u))`,
-        top: `calc(var(--pile-top) + ${tile.pile.y} * var(--u))`,
-      }}
       className={cn(
-        "absolute flex h-[calc(84*var(--u))] items-center rounded-[calc(12*var(--u))] outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
+        "flex h-[calc(84*var(--u))] items-center rounded-[calc(12*var(--u))] outline-none select-none focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-primary",
         tile.text
           ? "gap-[calc(16*var(--u))] pr-[calc(32*var(--u))] pl-[calc(24*var(--u))]"
           : "w-[calc(84*var(--u))] justify-center",

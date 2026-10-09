@@ -9,11 +9,6 @@ export type ContactTile = {
   text?: string
   /** Opens in a new tab (club profiles, maps). */
   external: boolean
-  /**
-   * Place in the Figma pile (1440px frame, 84px tiles): left edge in the footer's left half and
-   * top edge from the pile's top (px). The tiles are laid out like this, raised, then fall.
-   */
-  pile: { x: number; y: number }
 }
 
 export type ProfessionalLink = { label: string; href: string }
@@ -33,28 +28,24 @@ export const SOCIAL_TILES: ContactTile[] = [
     label: "MicroClub on Instagram",
     href: "https://www.instagram.com/microclub_usthb/",
     external: true,
-    pile: { x: 146, y: 0 },
   },
   {
     id: "facebook",
     label: "MicroClub on Facebook",
     href: "https://www.facebook.com/Micro.Club.USTHB/",
     external: true,
-    pile: { x: 98, y: 84 },
   },
   {
     id: "tiktok",
     label: "MicroClub on TikTok",
     href: "https://www.tiktok.com/@microclub_usthb",
     external: true,
-    pile: { x: 199, y: 84 },
   },
   {
     id: "discord",
     label: "MicroClub on Discord",
     href: "https://discord.gg/microclub",
     external: true,
-    pile: { x: 532, y: 168 },
   },
 ]
 
@@ -66,7 +57,6 @@ export const CONTACT_TILES: ContactTile[] = [
     text: CONTACT_EMAIL,
     href: `mailto:${CONTACT_EMAIL}`,
     external: false,
-    pile: { x: 22, y: 168 },
   },
   {
     id: "location",
@@ -74,7 +64,6 @@ export const CONTACT_TILES: ContactTile[] = [
     text: ADDRESS,
     href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Faculté d'Informatique USTHB, Bab Ezzouar")}`,
     external: true,
-    pile: { x: 80, y: 252 },
   },
 ]
 

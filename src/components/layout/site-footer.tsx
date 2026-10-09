@@ -35,10 +35,9 @@ const linkClassName =
   "paragraph-lg text-primary outline-none bg-[linear-gradient(currentColor,currentColor)] bg-size-[0%_1px] bg-position-[100%_100%] bg-no-repeat transition-[background-size] duration-300 ease-out-quart hover:bg-size-[100%_1px] hover:bg-position-[0_100%] focus-visible:bg-size-[100%_1px] focus-visible:bg-position-[0_100%] motion-reduce:transition-none"
 
 /**
- * Footer (Figma): contact tiles on the left, laid out as the Figma pile but raised, that fall into
- * that pile with physics when the end of the page comes into view (see `FallingTiles`), and link
- * columns with the copyright on the right, split by a vertical line. Stacked on smaller screens,
- * the pile last.
+ * Footer (Figma): contact tiles on the left, in three rows, that fall and pile up with physics when
+ * the page hits its bottom (see `FallingTiles`), and link columns with the copyright on the right,
+ * split by a vertical line. Stacked on smaller screens, the pile last.
  *
  * Spacing (1440px frame), Figma 20% shorter: the line is 432px tall, 86px from the top and 47px
  * from the bottom; the right column is inset 80px from it with 36px of padding top and bottom.
@@ -53,19 +52,19 @@ export function SiteFooter() {
       <JsonLd data={FOOTER_JSON_LD} />
       <div className="mx-auto flex max-w-site flex-col lg:flex-row">
         {/*
-          `--u`: one Figma px at 70% (tiles half the Figma area), scaled down further when the pile
-          (455px wide with its margins) would not fit.
-          `--pile-top`: where the pile hangs before it falls (lined up with "Navigation" on desktop).
+          `--u`: one Figma px at 70% (tiles half the Figma area), scaled down further when the
+          rows would not fit. Before they fall, the tiles sit in three rows (socials, email,
+          address), left-aligned, the first one lined up with "Navigation" on desktop.
         */}
-        <FallingTiles className="@container h-90 [--pile-top:2.5rem] [--u:min(0.7px,calc(100cqw/650))] max-lg:order-last sm:h-100 sm:[--pile-top:3rem] lg:h-auto lg:w-1/2 lg:[--pile-top:7.625rem]">
-          <ul aria-label="Social media">
+        <FallingTiles className="@container flex h-90 flex-col items-start gap-[calc(12*var(--u))] px-4 pt-10 [--u:min(0.7px,calc(100cqw/650))] max-lg:order-last sm:h-100 sm:px-6 sm:pt-12 lg:h-auto lg:w-1/2 lg:px-20 lg:pt-30.5">
+          <ul aria-label="Social media" className="flex gap-[calc(12*var(--u))]">
             {SOCIAL_TILES.map((tile) => (
               <li key={tile.id}>
                 <ContactTile tile={tile} />
               </li>
             ))}
           </ul>
-          <ul aria-label="Contact">
+          <ul aria-label="Contact" className="flex flex-col items-start gap-[calc(12*var(--u))]">
             {CONTACT_TILES.map((tile) => (
               <li key={tile.id}>
                 <ContactTile tile={tile} />
