@@ -118,7 +118,7 @@ export function buildClubEmail(values: ContactValues) {
       values,
       action: {
         label: `Reply to ${values.name}`,
-        href: `mailto:${values.email}?subject=${encodeURIComponent("Re: your message to MicroClub")}`,
+        href: `mailto:${values.email}?subject=${encodeURIComponent("Re: your message to Micro Club")}`,
       },
     }),
     text: renderText(intro, values),

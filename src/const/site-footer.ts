@@ -15,7 +15,7 @@ export type ContactTile = {
 
 export type ProfessionalLink = { label: string; href: string }
 
-/** MicroClub was founded in 1985: the copyright counts the years of progress from it. */
+/** Micro Club was founded in 1985: the copyright counts the years of progress from it. */
 export const FOUNDING_YEAR = 1985
 
 /** "CS Faculty, USTHB, BP32, Bab Ezzouar", from the club address shared with Contact Us. */
@@ -25,25 +25,25 @@ const ADDRESS = `${CONTACT.address.streetAddress}, ${CONTACT.address.addressLoca
 export const SOCIAL_TILES: ContactTile[] = [
   {
     id: "instagram",
-    label: "MicroClub on Instagram",
+    label: "Micro Club on Instagram",
     href: "https://www.instagram.com/microclub_usthb/",
     external: true,
   },
   {
     id: "facebook",
-    label: "MicroClub on Facebook",
+    label: "Micro Club on Facebook",
     href: "https://www.facebook.com/Micro.Club.USTHB/",
     external: true,
   },
   {
     id: "tiktok",
-    label: "MicroClub on TikTok",
+    label: "Micro Club on TikTok",
     href: "https://www.tiktok.com/@microclub_usthb",
     external: true,
   },
   {
     id: "discord",
-    label: "MicroClub on Discord",
+    label: "Micro Club on Discord",
     href: "https://discord.gg/tKrYWgeDpY",
     external: true,
   },

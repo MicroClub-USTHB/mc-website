@@ -27,7 +27,7 @@ export function Statistics() {
   return (
     <SectionContainer id="statistics" aria-labelledby="statistics-title" bleed>
       <h2 id="statistics-title" className="sr-only">
-        MicroClub in numbers
+        Micro Club in numbers
       </h2>
 
       <StatisticsScroll count={STATISTICS.length}>

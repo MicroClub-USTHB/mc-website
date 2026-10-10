@@ -1,6 +1,6 @@
 # AGENTS.md
 
-Guidelines for AI coding agents working on the official MicroClub website.
+Guidelines for AI coding agents working on the official Micro Club website.
 
 ## Git
 
@@ -20,7 +20,7 @@ Guidelines for AI coding agents working on the official MicroClub website.
 ## Stack
 
 - Next.js 16 (App Router, React Compiler), React 19, TypeScript
-- Tailwind CSS v4, **mcoli-ui** (MicroClub component library and design system, shadcn registry on Base UI), lucide-react
+- Tailwind CSS v4, **mcoli-ui** (Micro Club component library and design system, shadcn registry on Base UI), lucide-react
 - Lenis (smooth scroll) and Motion (animations)
 - pnpm
 

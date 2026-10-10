@@ -10,7 +10,7 @@ import { SectionContainer } from "@/components/shared/section-container"
 import { siteConfig } from "@/config/site"
 import { TRUSTED_BY_ROWS, type Partner } from "@/const/trusted-by"
 
-/** schema.org Organization listing every partner as a sponsor of MicroClub. */
+/** schema.org Organization listing every partner as a sponsor of Micro Club. */
 const TRUSTED_BY_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Organization",

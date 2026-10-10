@@ -1,4 +1,4 @@
-/** MicroClub GitHub organization, also used as placeholder link for projects without a public repo. */
+/** Micro Club GitHub organization, also used as placeholder link for projects without a public repo. */
 export const ORGANIZATION_URL = "https://github.com/MicroClub-USTHB"
 
 export type Project = {
@@ -28,7 +28,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         tags: ["WEB", "OPEN SOURCE"],
         year: 2026,
         description:
-          "The premier React component library that brings professional-grade UI components with a bold MicroClub DNA to developers everywhere. We’ve combined world-class design standards with an elite visual identity to help you build stunning web applications in record time.",
+          "The premier React component library that brings professional-grade UI components with a bold Micro Club DNA to developers everywhere. We’ve combined world-class design standards with an elite visual identity to help you build stunning web applications in record time.",
         url: `${ORGANIZATION_URL}/mcoli-ui`,
       },
       {

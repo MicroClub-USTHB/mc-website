@@ -22,7 +22,7 @@ export default function GlobalError({
           color: "#000350",
         }}
       >
-        <title>Something went wrong | MicroClub</title>
+        <title>Something went wrong | Micro Club</title>
         <h1>Something went wrong</h1>
         <button
           type="button"

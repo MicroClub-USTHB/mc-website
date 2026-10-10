@@ -65,7 +65,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     cover: cover("AGC", "AGC event photo"),
     logo: logo("AGC.svg", "AGC", 85, 33),
     description:
-      "Algeria Game Challenge is a national game development competition, launched in 2010 as the XNA Challenge with Microsoft. Now in its 10th edition, AGC is fully organized by MicroClub, bringing together game developers, gamers, and industry professionals through networking, gaming zones, and industry talks.",
+      "Algeria Game Challenge is a national game development competition, launched in 2010 as the XNA Challenge with Microsoft. Now in its 10th edition, AGC is fully organized by Micro Club, bringing together game developers, gamers, and industry professionals through networking, gaming zones, and industry talks.",
     link: [{ label: "AGC Recap Reel", href: "" }],
   },
   {
@@ -158,7 +158,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     cover: cover("GHCTF", "Participants solving challenges on their laptops during Green Hat CTF"),
     logo: logo("GHCTF.svg", "Green Hat CTF", 94, 34),
     description:
-      "Green Hat CTF is MicroClub's internal cybersecurity competition. Participants solve hands-on challenges in pwning, reverse engineering, web exploitation, cryptography, and forensics. Real skills, real experience.",
+      "Green Hat CTF is Micro Club's internal cybersecurity competition. Participants solve hands-on challenges in pwning, reverse engineering, web exploitation, cryptography, and forensics. Real skills, real experience.",
     // TODO: real recap URL (club GitHub as a placeholder until then).
     link: [{ label: "Relive GHCTF Recap Reel", href: "https://github.com/MicroClub-USTHB" }],
   },

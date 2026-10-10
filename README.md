@@ -1,13 +1,13 @@
 # mc-website
 
-Official MicroClub website. It replaces the current site at [microclub.info](https://www.microclub.info/).
+Official Micro Club website. It replaces the current site at [microclub.info](https://www.microclub.info/).
 
 ## Tech stack
 
 - [Next.js 16](https://nextjs.org) (App Router, React Compiler, Turbopack)
 - [React 19](https://react.dev) + TypeScript
 - [Tailwind CSS v4](https://tailwindcss.com)
-- **mcoli-ui**, the MicroClub component library and design system (shadcn/ui registry on [Base UI](https://base-ui.com))
+- **mcoli-ui**, the Micro Club component library and design system (shadcn/ui registry on [Base UI](https://base-ui.com))
 - [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
 - [Motion](https://motion.dev) for animations
 - [lucide-react](https://lucide.dev) icons

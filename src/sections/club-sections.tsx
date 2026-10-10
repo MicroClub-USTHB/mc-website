@@ -15,7 +15,7 @@ const ILLUSTRATIONS: Record<ClubSectionId, (props: SectionIconProps) => React.Re
   robotics: RoboticsSectionIcon,
 }
 
-/** schema.org Organization listing MicroClub's sections as departments. */
+/** schema.org Organization listing Micro Club's sections as departments. */
 const SECTIONS_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "Organization",

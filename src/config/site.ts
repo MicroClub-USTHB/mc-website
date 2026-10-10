@@ -1,7 +1,7 @@
 export const siteConfig = {
-  name: "MicroClub",
+  name: "Micro Club",
   description:
-    "MicroClub is a student scientific club passionate about technology, innovation and community.",
+    "Micro Club is a student scientific club passionate about technology, innovation and community.",
   url: "https://www.microclub.info",
 } as const
 

@@ -83,7 +83,7 @@ export function ClubSectionsShowcase({ sections, heading }: ClubSectionsShowcase
       <div
         role="group"
         aria-roledescription="carousel"
-        aria-label="MicroClub sections"
+        aria-label="Micro Club sections"
         // Size container: the stage fits the space left by the texts (see ClubSectionsStage).
         // From xl, it dips 39px into the details row, as in the Figma frames (the open icon stays clear of the text).
         className="[container-type:size] flex min-h-0 min-w-0 items-center justify-center [grid-area:stage] xl:-mb-[39px] lg:landscape:items-end short:mb-0 short:items-center"

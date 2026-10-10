@@ -9,7 +9,7 @@ export type ClubSection = {
   href: string
 }
 
-/** MicroClub's sections ("Our Sections"), in carousel order. */
+/** Micro Club's sections ("Our Sections"), in carousel order. */
 export const CLUB_SECTIONS: ClubSection[] = [
   {
     id: "it",

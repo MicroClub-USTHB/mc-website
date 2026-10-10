@@ -10,7 +10,7 @@ const PROJECTS = PROJECT_CATEGORIES.flatMap((category) =>
   category.projects.map((project) => ({ ...project, category: category.name })),
 )
 
-/** schema.org ItemList describing every project, with MicroClub as creator. */
+/** schema.org ItemList describing every project, with Micro Club as creator. */
 const PROJECTS_JSON_LD = {
   "@context": "https://schema.org",
   "@type": "ItemList",

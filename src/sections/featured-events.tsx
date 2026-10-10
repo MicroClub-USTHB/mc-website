@@ -12,7 +12,7 @@ import { siteConfig } from "@/config/site"
 import { FEATURED_EVENTS } from "@/const/featured-events"
 
 /**
- * schema.org ItemList of the club's events, with MicroClub as organizer. `EventSeries`: they are
+ * schema.org ItemList of the club's events, with Micro Club as organizer. `EventSeries`: they are
  * recurring editions without a single date or venue, which a plain `Event` would require. It also
  * carries the descriptions, otherwise only rendered in the client-side event card.
  */
