@@ -44,7 +44,7 @@ export const SOCIAL_TILES: ContactTile[] = [
   {
     id: "discord",
     label: "Micro Club on Discord",
-    href: "https://discord.gg/tKrYWgeDpY",
+    href: CONTACT.discord,
     external: true,
   },
 ]
