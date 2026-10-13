@@ -11,7 +11,12 @@ import { COMMUNITY, COMMUNITY_ACTIVITIES } from "@/const/community"
  */
 export function Community() {
   return (
-    <SectionContainer id="community" aria-labelledby="community-title" bleed>
+    <SectionContainer
+      id="community"
+      aria-labelledby="community-title"
+      bleed
+      className="cursor-[url(/MCC/cursor.svg)_2_1,crosshair]"
+    >
       <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20 lg:pb-32">
         <header className="flex flex-col items-start">
           <h2

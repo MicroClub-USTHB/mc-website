@@ -48,7 +48,7 @@ export function ActivityItem({
             aria-controls={panelId}
             onClick={onOpen}
             className={cn(
-              "cursor-pointer text-left transition-colors duration-500 outline-none after:absolute after:inset-0",
+              "cursor-[inherit] text-left transition-colors duration-500 outline-none after:absolute after:inset-0",
               "focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8",
               tone,
             )}

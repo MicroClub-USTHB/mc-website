@@ -3,6 +3,7 @@
 import { useLayoutEffect, useRef, useState } from "react"
 import { animate, useReducedMotion } from "motion/react"
 
+import { ActivityCursor } from "@/components/community/activity-cursor"
 import { ActivityItem } from "@/components/community/activity-item"
 import type { CommunityActivity } from "@/const/community"
 import { EASE_OUT_QUART } from "@/lib/easing"
@@ -11,13 +12,14 @@ const RESIZE_TRANSITION = { duration: 0.7, ease: EASE_OUT_QUART }
 
 /**
  * Activities accordion: one row open at a time (the first by default), opened by hovering it
- * with a mouse or by clicking / tapping its title.
+ * with a mouse or by clicking / tapping its title. The hovered row's icon follows the cursor.
  *
  * The open and closed heights come from CSS (responsive); on each change the rows animate from
  * the heights measured just before it to their new ones, then hand control back to CSS.
  */
 export function ActivityList({ activities }: { activities: CommunityActivity[] }) {
   const [active, setActive] = useState(0)
+  const [hovered, setHovered] = useState<number | null>(null)
   const listRef = useRef<HTMLOListElement>(null)
   /** Row heights measured right before the last change, the animation start points. */
   const fromHeights = useRef<number[]>([])
@@ -63,20 +65,25 @@ export function ActivityList({ activities }: { activities: CommunityActivity[] }
   }, [active, reduceMotion])
 
   return (
-    <ol ref={listRef} className="mt-10">
-      {activities.map((activity, index) => (
-        <ActivityItem
-          key={activity.title}
-          activity={activity}
-          index={index}
-          active={index === active}
-          onOpen={() => open(index)}
-          onHover={(event) => {
-            // Mouse only, and not while rows move under a still pointer.
-            if (event.pointerType === "mouse" && !animating.current) open(index)
-          }}
-        />
-      ))}
-    </ol>
+    <>
+      <ol ref={listRef} onPointerLeave={() => setHovered(null)} className="mt-10">
+        {activities.map((activity, index) => (
+          <ActivityItem
+            key={activity.title}
+            activity={activity}
+            index={index}
+            active={index === active}
+            onOpen={() => open(index)}
+            onHover={(event) => {
+              if (event.pointerType !== "mouse") return
+              setHovered(index)
+              // Not while rows move under a still pointer.
+              if (!animating.current) open(index)
+            }}
+          />
+        ))}
+      </ol>
+      <ActivityCursor activities={activities} index={hovered} />
+    </>
   )
 }
