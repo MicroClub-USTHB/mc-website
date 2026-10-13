@@ -65,11 +65,9 @@ export function ActivityItem({
             !active && "translate-y-3 opacity-0",
           )}
         >
-          {activity.description && (
-            <p className="paragraph-md text-foreground lg:max-w-262 lg:paragraph-lg">
-              {activity.description}
-            </p>
-          )}
+          <p className="paragraph-md text-foreground lg:max-w-262 lg:paragraph-lg">
+            {activity.description}
+          </p>
         </div>
       </div>
     </li>

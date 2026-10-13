@@ -3,7 +3,7 @@ import { CONTACT } from "@/const/contact"
 export type CommunityActivity = {
   title: string
   /** Shown under the title of the active activity. */
-  description?: string
+  description: string
 }
 
 /** MC Community copy (Figma "MC Community"). */
@@ -21,7 +21,19 @@ export const COMMUNITY_ACTIVITIES: CommunityActivity[] = [
     description:
       "Our workshops are built to get your hands dirty with real skills, real tools, real projects. From web dev to AI, cybersecurity to UI/UX design and from robotics to game dev, there's always something new to explore and master.",
   },
-  { title: "Exam revision sessions" },
-  { title: "Projects & Real Opportunities" },
-  { title: "Games & Movie Nights" },
+  {
+    title: "Exam revision sessions",
+    description:
+      "When exam season comes knocking, MCC shows up. Our members organize a couple of revision sessions where seniors help juniors, notes get shared and panic gets replaced with preparation. No one gets left behind.",
+  },
+  {
+    title: "Projects & Real Opportunities",
+    description:
+      "Built something cool? Show it off. Looking for a hackathon team, an internship lead, or a collab partner? This is where opportunities find you. The MCC family members are always building, always sharing, always opening doors for each other.",
+  },
+  {
+    title: "Games & Movie Nights",
+    description:
+      "Yes, we work hard. But we also know how to have fun. Our game and movie nights are legendary within the family.",
+  },
 ]
