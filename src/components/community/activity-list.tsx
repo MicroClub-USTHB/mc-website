@@ -8,7 +8,7 @@ import { ActivityItem } from "@/components/community/activity-item"
 import type { CommunityActivity } from "@/const/community"
 import { EASE_OUT_QUART } from "@/lib/easing"
 
-const RESIZE_TRANSITION = { duration: 0.7, ease: EASE_OUT_QUART }
+const RESIZE_TRANSITION = { duration: 0.4, ease: EASE_OUT_QUART }
 
 /**
  * Activities accordion: one row open at a time (the first by default), opened by hovering it

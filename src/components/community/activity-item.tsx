@@ -33,7 +33,7 @@ export function ActivityItem({
       <span
         aria-hidden
         className={cn(
-          "pt-2 header-xs tabular-nums transition-colors duration-500 sm:pt-2.5 sm:header-sm lg:pt-5 lg:header-md",
+          "pt-2 header-xs tabular-nums transition-colors duration-300 sm:pt-2.5 sm:header-sm lg:pt-5 lg:header-md",
           tone,
         )}
       >
@@ -48,7 +48,7 @@ export function ActivityItem({
             aria-controls={panelId}
             onClick={onOpen}
             className={cn(
-              "cursor-[inherit] text-left transition-colors duration-500 outline-none after:absolute after:inset-0",
+              "cursor-[inherit] text-left transition-colors duration-300 outline-none after:absolute after:inset-0",
               "focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8",
               tone,
             )}
@@ -61,7 +61,7 @@ export function ActivityItem({
           id={panelId}
           inert={!active}
           className={cn(
-            "pt-4 pb-4 transition-[opacity,translate] duration-700 ease-out-quart",
+            "pt-4 pb-4 transition-[opacity,translate] duration-400 ease-out-quart",
             !active && "translate-y-3 opacity-0",
           )}
         >

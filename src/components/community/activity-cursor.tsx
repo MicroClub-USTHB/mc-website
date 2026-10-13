@@ -24,9 +24,9 @@ const elasticOut: Easing = (t) =>
   t === 0 || t === 1 ? t : 2 ** (-10 * t) * Math.sin(((t - 0.1) * 2 * Math.PI) / 0.4) + 1
 
 /** Trails the pointer: each move restarts a short tween toward it (GSAP `quickTo`). */
-const FOLLOW_TRANSITION = { duration: 0.5, ease: EASE_OUT_QUART }
-const POP_IN_TRANSITION = { duration: 1.7, delay: 0.1, ease: elasticOut }
-const POP_OUT_TRANSITION = { duration: 0.3, ease: [0.37, 0, 0.63, 1] as const }
+const FOLLOW_TRANSITION = { duration: 0.3, ease: EASE_OUT_QUART }
+const POP_IN_TRANSITION = { duration: 1, ease: elasticOut }
+const POP_OUT_TRANSITION = { duration: 0.15, ease: [0.37, 0, 0.63, 1] as const }
 
 /**
  * Cursor bubble (ui.soralabs.studio/motion/cursor-bubble): while a row is hovered with a mouse,
