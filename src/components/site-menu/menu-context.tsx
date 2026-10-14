@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
+import { isBackdropDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
 /** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */
@@ -92,7 +93,11 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     open,
     toggle: () => {
       // Opens inverted: dark over a light section, light over a dark one. Kept while it closes.
-      if (!open) setDark(!isDarkBehind(toggleRef.current))
+      const toggle = toggleRef.current
+      if (!open && toggle) {
+        const { left, top, width, height } = toggle.getBoundingClientRect()
+        setDark(!isBackdropDark(left + width / 2, top + height / 2, toggle.closest("header")))
+      }
       setOpen(!open)
     },
     navigateTo: (target, { immediate = false } = {}) => {
@@ -112,17 +117,6 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       <header ref={headerRef}>{children}</header>
     </MenuContext>
   )
-}
-
-/** Whether the page content behind `toggle` (not the header itself) sits in a dark-themed section. */
-function isDarkBehind(toggle: HTMLElement | null) {
-  if (!toggle) return false
-  const { left, top, width, height } = toggle.getBoundingClientRect()
-  const header = toggle.closest("header")
-  const behind = document
-    .elementsFromPoint(left + width / 2, top + height / 2)
-    .find((el) => !header?.contains(el))
-  return !!behind?.closest(".dark")
 }
 
 /** Keeps Tab / Shift+Tab cycling inside `container`. */
