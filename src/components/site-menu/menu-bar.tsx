@@ -36,7 +36,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
           "top-(--menu-top) left-(--menu-left)",
-          "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
+          "group pointer-events-auto absolute flex ring-1 ring-border",
         )}
       >
         <button
@@ -100,7 +100,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
 function MenuWordmark() {
   const { dark } = useMenu()
   const ref = useRef<HTMLSpanElement>(null)
-  const clipPath = useWipeClip(ref, 2)
+  const clipPath = useWipeClip(ref, 1)
 
   return (
     // The ring stays in the light theme, like the toggle's, so both borders match over any panel.
@@ -108,7 +108,7 @@ function MenuWordmark() {
       ref={ref}
       aria-hidden
       style={{ clipPath }}
-      className="pointer-events-none absolute top-0 left-(--menu-size) h-(--menu-size) w-[calc(var(--menu-size)*3)] ring-1 ring-border transition-shadow group-data-open:ring-2"
+      className="pointer-events-none absolute top-0 left-(--menu-size) h-(--menu-size) w-[calc(var(--menu-size)*3)] ring-1 ring-border"
     >
       <span
         className={cn(
