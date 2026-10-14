@@ -103,18 +103,22 @@ function MenuWordmark() {
   const clipPath = useWipeClip(ref, 2)
 
   return (
+    // The ring stays in the light theme, like the toggle's, so both borders match over any panel.
     <motion.span
       ref={ref}
       aria-hidden
       style={{ clipPath }}
-      className={cn(
-        dark && "dark",
-        "flex h-(--menu-size) w-[calc(var(--menu-size)*3)] items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
-        "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
-        "pointer-events-none absolute top-0 left-(--menu-size) ring-2 ring-border",
-      )}
+      className="pointer-events-none absolute top-0 left-(--menu-size) h-(--menu-size) w-[calc(var(--menu-size)*3)] ring-1 ring-border transition-shadow group-data-open:ring-2"
     >
-      MICRO CLUB
+      <span
+        className={cn(
+          dark && "dark",
+          "flex size-full items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
+          "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
+        )}
+      >
+        MICRO CLUB
+      </span>
     </motion.span>
   )
 }
