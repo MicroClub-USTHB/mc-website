@@ -406,12 +406,16 @@
  */
 :root {
   --menu-size: clamp(3.5rem, min(5.9vw, 9.5vh), 5.3125rem);
-  --menu-top: clamp(1rem, calc(14vh - 2.5rem), 6rem);
+  --menu-top: clamp(1rem, min(calc(14vh - 2.5rem), 6.67vw), 6rem);
   --menu-left: clamp(1rem, 5.56vw, 5rem);
   --menu-icon: clamp(1.5rem, calc(var(--menu-size) * 0.376), 2rem);
   --menu-text: calc(var(--menu-size) * 0.4235);
   /* Menu links: 6 rows share the height left under the bar, 120px at most as in Figma. */
-  --menu-row: clamp(3.5rem, calc((100dvh - var(--menu-top) - var(--menu-size) - 2rem) / 6), 7.5rem);
+  --menu-row: clamp(
+    2.75rem,
+    calc((100dvh - var(--menu-top) - var(--menu-size) - 2rem) / 6),
+    7.5rem
+  );
   --menu-row-text: clamp(1.5rem, min(calc(var(--menu-row) * 0.6), 7.5vw), 4.5rem);
 }
 
