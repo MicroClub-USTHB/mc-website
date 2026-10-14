@@ -21,6 +21,8 @@ type MenuContextValue = {
   toggle: () => void
   /** Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling). */
   navigateTo: (target: string | number, options?: { immediate?: boolean }) => void
+  /** Whether the panel (and the bar over it) uses the dark tokens: the inverse of the section behind the toggle. */
+  dark: boolean
   /** Whether the in-page wordmark is still level with the fixed toggle. */
   attached: boolean
   /** 0 = closed, 1 = open. Drives the panel wipe and the menu wordmark with the same edge. */
@@ -48,6 +50,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const wordmarkRef = useRef<HTMLAnchorElement>(null)
   const [open, setOpen] = useState(false)
   const [attached, setAttached] = useState(true)
+  const [dark, setDark] = useState(false)
   const reveal = useMotionValue(0)
 
   // The in-page wordmark stays attached until its bottom edge scrolls past the toggle's top edge.
@@ -87,12 +90,17 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const value: MenuContextValue = {
     open,
-    toggle: () => setOpen((current) => !current),
+    toggle: () => {
+      // Opens inverted: dark over a light section, light over a dark one. Kept while it closes.
+      if (!open) setDark(!isDarkBehind(toggleRef.current))
+      setOpen(!open)
+    },
     navigateTo: (target, { immediate = false } = {}) => {
       setOpen(false)
       lenis?.start()
       lenis?.scrollTo(target, { immediate })
     },
+    dark,
     attached,
     reveal,
     toggleRef,
@@ -104,6 +112,17 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       <header ref={headerRef}>{children}</header>
     </MenuContext>
   )
+}
+
+/** Whether the page content behind `toggle` (not the header itself) sits in a dark-themed section. */
+function isDarkBehind(toggle: HTMLElement | null) {
+  if (!toggle) return false
+  const { left, top, width, height } = toggle.getBoundingClientRect()
+  const header = toggle.closest("header")
+  const behind = document
+    .elementsFromPoint(left + width / 2, top + height / 2)
+    .find((el) => !header?.contains(el))
+  return !!behind?.closest(".dark")
 }
 
 /** Keeps Tab / Shift+Tab cycling inside `container`. */
