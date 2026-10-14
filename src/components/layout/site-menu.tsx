@@ -22,7 +22,7 @@ export function SiteMenu() {
       <PageWordmark label={homeLabel} />
       <MenuBar homeLabel={homeLabel} />
       <MenuPanel>
-        <ul className="mx-auto max-w-site px-4 pt-18 pb-10 lg:px-20 lg:pt-[181px]">
+        <ul className="mx-auto max-w-site px-(--menu-left) pt-[calc(var(--menu-top)+var(--menu-size))] pb-8">
           {menuLinks.map((link) => (
             <li key={link.id}>
               <MenuLink sectionId={link.id}>{link.label}</MenuLink>
