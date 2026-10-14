@@ -19,7 +19,6 @@ export const homeSections = [
   { id: "featured-events", label: "Featured Events" },
   { id: "trusted-by", label: "Trusted By" },
   { id: "community", label: "MC Community" },
-  { id: "microbot", label: "Ask MicroBot" },
   { id: "contact", label: "Contact Us" },
 ] as const
 
