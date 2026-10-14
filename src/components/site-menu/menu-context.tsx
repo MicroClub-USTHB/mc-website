@@ -10,7 +10,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
-import { isBackdropDark } from "@/lib/backdrop"
+import { isDominantSectionDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
 /** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */
@@ -95,8 +95,8 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       // Opens inverted: dark over a light section, light over a dark one. Kept while it closes.
       const toggle = toggleRef.current
       if (!open && toggle) {
-        const { left, top, width, height } = toggle.getBoundingClientRect()
-        setDark(!isBackdropDark(left + width / 2, top + height / 2, toggle.closest("header")))
+        const { left, width } = toggle.getBoundingClientRect()
+        setDark(!isDominantSectionDark(left + width / 2, toggle.closest("header")))
       }
       setOpen(!open)
     },

@@ -49,3 +49,20 @@ export function isBackdropDark(x: number, y: number, ignore: Element | null) {
 
   return (0.2126 * r + 0.7152 * g + 0.0722 * b) / 255 < 0.5
 }
+
+/**
+ * Whether the section filling most of the viewport is dark. Picks the section with the largest
+ * visible height, then judges the backdrop at the middle of its visible part along the vertical
+ * line `x`, so the theme flips once a section takes over half the screen, not once the previous
+ * one is fully gone.
+ */
+export function isDominantSectionDark(x: number, ignore: Element | null) {
+  let best: { y: number; visible: number } | null = null
+  for (const section of document.querySelectorAll("main > section, footer")) {
+    const { top, bottom } = section.getBoundingClientRect()
+    const from = Math.max(top, 0)
+    const to = Math.min(bottom, window.innerHeight)
+    if (to - from > (best?.visible ?? 0)) best = { y: (from + to) / 2, visible: to - from }
+  }
+  return best ? isBackdropDark(x, best.y, ignore) : false
+}
