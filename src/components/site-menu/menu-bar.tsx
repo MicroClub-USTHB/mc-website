@@ -100,7 +100,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
 function MenuWordmark() {
   const { dark } = useMenu()
   const ref = useRef<HTMLSpanElement>(null)
-  const clipPath = useWipeClip(ref)
+  const clipPath = useWipeClip(ref, 2)
 
   return (
     <motion.span
@@ -111,7 +111,7 @@ function MenuWordmark() {
         dark && "dark",
         "flex h-(--menu-size) w-[calc(var(--menu-size)*3)] items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
         "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
-        "pointer-events-none absolute top-0 left-(--menu-size)",
+        "pointer-events-none absolute top-0 left-(--menu-size) ring-2 ring-border",
       )}
     >
       MICRO CLUB
