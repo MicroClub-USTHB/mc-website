@@ -14,9 +14,9 @@ import { cn } from "@/lib/utils"
  * (anchored right) slides out from behind the toggle while the cell widens.
  */
 const LOGO_CELL = cn(
-  "relative h-14 w-0 overflow-hidden bg-foreground outline-none lg:h-[85px] lg:w-0",
+  "relative h-(--menu-size) w-0 overflow-hidden bg-foreground outline-none",
   "transition-[width] duration-800 ease-out-expo",
-  "group-data-[logo=compact]:w-14 lg:group-data-[logo=compact]:w-[85px]",
+  "group-data-[logo=compact]:w-(--menu-size)",
 )
 
 /**
@@ -32,7 +32,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-open={open || undefined}
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
-          "top-4 left-4 lg:top-24 lg:left-20",
+          "top-(--menu-top) left-(--menu-left)",
           "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
         )}
       >
@@ -44,12 +44,12 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
           aria-controls="site-menu-panel"
           onClick={toggle}
           className={cn(
-            "size-14 lg:size-[85px]",
+            "size-(--menu-size)",
             "relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
             "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
           )}
         >
-          <MenuToggleIcon className="size-6 lg:size-8" />
+          <MenuToggleIcon className="size-(--menu-icon)" />
         </button>
 
         <Link
@@ -72,7 +72,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
             height={39}
             preload
             loading="eager"
-            className="absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none lg:w-[55px]"
+            className="absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none"
           />
         </Link>
 
@@ -102,9 +102,9 @@ function MenuWordmark() {
       aria-hidden
       style={{ clipPath }}
       className={cn(
-        "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-4.5",
-        "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
-        "pointer-events-none absolute top-0 left-14 lg:left-[85px]",
+        "flex h-(--menu-size) w-[calc(var(--menu-size)*3)] items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
+        "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
+        "pointer-events-none absolute top-0 left-(--menu-size)",
       )}
     >
       MICRO CLUB
