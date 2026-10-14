@@ -24,7 +24,7 @@ const LOGO_CELL = cn(
  * the logo, clipped by the same viewport edge as the panel wipe.
  */
 export function MenuBar({ homeLabel }: { homeLabel: string }) {
-  const { open, toggle, navigateTo, attached, toggleRef } = useMenu()
+  const { open, dark, toggle, navigateTo, attached, toggleRef } = useMenu()
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
@@ -33,6 +33,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
           "top-(--menu-top) left-(--menu-left)",
+          open && dark && "dark",
           "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
         )}
       >
