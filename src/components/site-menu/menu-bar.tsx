@@ -3,10 +3,11 @@
 import { useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, useTransform } from "motion/react"
+import { motion } from "motion/react"
 
 import { useMenu } from "@/components/site-menu/menu-context"
 import { MenuToggleIcon } from "@/components/site-menu/menu-toggle-icon"
+import { useWipeClip } from "@/components/site-menu/use-wipe-clip"
 import { cn } from "@/lib/utils"
 
 /**
@@ -25,6 +26,8 @@ const LOGO_CELL = cn(
  */
 export function MenuBar({ homeLabel }: { homeLabel: string }) {
   const { open, dark, toggle, navigateTo, attached, toggleRef } = useMenu()
+  const darkToggleRef = useRef<HTMLSpanElement>(null)
+  const darkToggleClip = useWipeClip(darkToggleRef)
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
@@ -33,7 +36,6 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
           "top-(--menu-top) left-(--menu-left)",
-          open && dark && "dark",
           "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
         )}
       >
@@ -46,11 +48,22 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
           onClick={toggle}
           className={cn(
             "size-(--menu-size)",
-            "relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
+            "group/toggle relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
             "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
           )}
         >
           <MenuToggleIcon className="size-(--menu-icon)" />
+          {/* Dark-theme copy, wiped in with the panel so the icon never changes before it. */}
+          {dark && (
+            <motion.span
+              ref={darkToggleRef}
+              aria-hidden
+              style={{ clipPath: darkToggleClip }}
+              className="dark pointer-events-none absolute inset-0 grid place-items-center bg-background text-foreground transition-colors duration-300 group-hover/toggle:bg-accent group-hover/toggle:text-accent-foreground"
+            >
+              <MenuToggleIcon className="size-(--menu-icon)" />
+            </motion.span>
+          )}
         </button>
 
         <Link
@@ -85,17 +98,9 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
 
 /** "MICRO CLUB" over the logo cell, revealed by the panel's wipe edge. */
 function MenuWordmark() {
-  const { reveal } = useMenu()
+  const { dark } = useMenu()
   const ref = useRef<HTMLSpanElement>(null)
-
-  const clipPath = useTransform(reveal, (progress) => {
-    const el = ref.current
-    if (!el) return "inset(0 100% 0 0)"
-    const { left, width } = el.getBoundingClientRect()
-    const edge = progress * document.documentElement.clientWidth
-    const hidden = Math.min(width, Math.max(0, left + width - edge))
-    return `inset(0 ${hidden}px 0 0)`
-  })
+  const clipPath = useWipeClip(ref)
 
   return (
     <motion.span
@@ -103,6 +108,7 @@ function MenuWordmark() {
       aria-hidden
       style={{ clipPath }}
       className={cn(
+        dark && "dark",
         "flex h-(--menu-size) w-[calc(var(--menu-size)*3)] items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
         "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
         "pointer-events-none absolute top-0 left-(--menu-size)",
