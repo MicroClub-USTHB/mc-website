@@ -52,6 +52,8 @@ export function ActivityCursor({
   const iconsRef = useRef<HTMLDivElement>(null)
   /** Icon currently drawn (the first one at mount); kept while it shrinks away. */
   const shown = useRef(0)
+  /** Latest pointer target, recorded while hidden (no style writes) and applied on pop-in. */
+  const target = useRef({ x: 0, y: 0 })
 
   useEffect(() => {
     if (reduceMotion) return
@@ -60,14 +62,11 @@ export function ActivityCursor({
       if (event.pointerType !== "mouse") return
       const targetX = event.clientX + OFFSET.x
       const targetY = event.clientY + OFFSET.y
-      // Hidden: jump, so the icon pops in at the pointer instead of flying in.
-      if (scale.get() === 0) {
-        x.jump(targetX)
-        y.jump(targetY)
-      } else {
-        animate(x, targetX, FOLLOW_TRANSITION)
-        animate(y, targetY, FOLLOW_TRANSITION)
-      }
+      target.current = { x: targetX, y: targetY }
+      // Hidden: nothing to move; the pop-in jumps to the recorded target.
+      if (scale.get() === 0) return
+      animate(x, targetX, FOLLOW_TRANSITION)
+      animate(y, targetY, FOLLOW_TRANSITION)
     }
 
     window.addEventListener("pointermove", follow, { passive: true })
@@ -104,6 +103,11 @@ export function ActivityCursor({
         await pop(false)
         if (cancelled) return
       }
+      // Popping in from zero: start at the pointer instead of flying in.
+      if (scale.get() === 0) {
+        x.jump(target.current.x)
+        y.jump(target.current.y)
+      }
       draw(index)
       return pop(true)
     }
@@ -113,7 +117,7 @@ export function ActivityCursor({
       cancelled = true
       for (const control of controls) control.stop()
     }
-  }, [index, reduceMotion, scale, rotate])
+  }, [index, reduceMotion, scale, rotate, x, y])
 
   if (reduceMotion) return null
 
