@@ -163,8 +163,8 @@ export function MicroBotWidget({
             transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
             style={{ transformOrigin: "bottom right" }}
             className={cn(
-              "pointer-events-auto flex flex-col overflow-hidden rounded-[14px] border bg-linear-to-b from-secondary to-background to-[87.6%]",
-              "h-162.25 max-h-[calc(100dvh-11rem)] w-[min(495px,calc(100vw-2rem))] sm:w-[min(495px,calc(100vw-3rem))]",
+              "pointer-events-auto flex flex-col overflow-hidden rounded-[0.875rem] border bg-linear-to-b from-secondary to-background to-[87.6%]",
+              "h-162.25 max-h-[calc(100dvh-11rem)] w-[min(30.9375rem,calc(100vw-2rem))] sm:w-[min(30.9375rem,calc(100vw-3rem))]",
               "max-sm:fixed max-sm:inset-0 max-sm:h-auto max-sm:max-h-none max-sm:w-auto max-sm:rounded-none max-sm:border-0",
             )}
           >

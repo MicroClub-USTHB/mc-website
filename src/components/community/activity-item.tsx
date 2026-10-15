@@ -27,7 +27,7 @@ export function ActivityItem({
       onPointerMove={onHover}
       className={cn(
         "relative grid grid-cols-[3rem_1fr] overflow-hidden border-b border-border sm:grid-cols-[8rem_1fr] lg:grid-cols-[12.5rem_1fr]",
-        !active && "h-10 sm:h-11 lg:h-[53px]",
+        !active && "h-10 sm:h-11 lg:h-13.25",
       )}
     >
       <span
@@ -61,7 +61,7 @@ export function ActivityItem({
           id={panelId}
           inert={!active}
           className={cn(
-            "pt-4 pb-4 transition-[opacity,translate] duration-400 ease-out-quart lg:pb-[15px]",
+            "pt-4 pb-4 transition-[opacity,translate] duration-400 ease-out-quart lg:pb-3.75",
             !active && "translate-y-3 opacity-0",
           )}
         >

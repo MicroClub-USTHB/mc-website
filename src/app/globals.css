@@ -4,9 +4,9 @@
 
 @custom-variant dark (&:where(.dark, .dark *));
 /* Short landscape screens (phones turned sideways, short windows): side-by-side layouts. */
-@custom-variant short (@media (orientation: landscape) and (max-height: 540px));
+@custom-variant short (@media (orientation: landscape) and (max-height: 33.75rem));
 /* Short portrait screens (small phones, Safari with its toolbars): tighter text. */
-@custom-variant compact (@media (orientation: portrait) and (max-height: 600px));
+@custom-variant compact (@media (orientation: portrait) and (max-height: 37.5rem));
 
 /* Trusted By logo tile width: registered as a length, so it is computed where it is declared
    (from the content box, in `cqw`) and inherited as is, also by the full-bleed marquee row. */

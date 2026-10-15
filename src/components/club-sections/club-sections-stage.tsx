@@ -174,7 +174,7 @@ export function ClubSectionsStage({
       ref={stageRef}
       // As wide as possible within the width (minus room for the hovered robot, which pokes out
       // on the right), the Figma size (840px) and the parent container's height.
-      className="relative aspect-[840/440] w-[min(100%_-_1rem,840px,100cqh*840/440)]"
+      className="relative aspect-[840/440] w-[min(100%_-_1rem,52.5rem,100cqh*840/440)]"
       onPointerLeave={() => onHover(null)}
     >
       {sections.map(({ id, title, looks }, index) => {

@@ -62,7 +62,7 @@ export function TrustedBy() {
             <HoveredPartnerName nameClassName="header-md font-medium text-accent-foreground lg:header-lg" />
           </h2>
 
-          <PartnerHoverArea className="mt-8 flex flex-col gap-[11px] [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:13px] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-9">
+          <PartnerHoverArea className="mt-8 flex flex-col gap-2.75 [--logo-cell:min(12rem,calc((100cqw-var(--logo-gap))/2))] [--logo-gap:0.8125rem] md:[--logo-cell:min(14rem,calc((100cqw-4*var(--logo-gap))/5))] lg:mt-9">
             {TRUSTED_BY_ROWS.map((row) => {
               if (row.motion === "static") {
                 return (

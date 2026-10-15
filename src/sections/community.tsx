@@ -53,7 +53,7 @@ export function Community() {
             iconDefinition={<DiscordIcon />}
             nativeButton={false}
             render={<a href={COMMUNITY.cta.href} target="_blank" rel="noopener noreferrer" />}
-            className="mt-6 font-bold lg:py-[11px] [&_[data-slot=leading-icon]]:size-5"
+            className="mt-6 font-bold lg:py-2.75 [&_[data-slot=leading-icon]]:size-5"
           >
             {COMMUNITY.cta.label}
             <span className="sr-only"> (opens in a new tab)</span>

@@ -50,7 +50,7 @@ export function FeaturedProjects() {
           >
             Hall of Projects
           </h2>
-          <p className="header-sm text-muted-foreground lg:py-[13px] lg:header-lg">
+          <p className="header-sm text-muted-foreground lg:py-3.25 lg:header-lg">
             {PROJECTS.length} projects
           </p>
         </header>

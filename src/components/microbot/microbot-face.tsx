@@ -1,7 +1,7 @@
 import { cn } from "@/lib/utils"
 
 const glyph =
-  "absolute top-[-6.31px] font-heading text-[26.128px] leading-[34.837px] font-medium text-primary-foreground"
+  "absolute -top-[0.39437rem] font-heading text-[1.633rem] leading-[2.17731rem] font-medium text-primary-foreground"
 /** One loop of the face: 12 frames of 420ms (see the `microbot-*` keyframes in globals.css). */
 const loop =
   "[animation-duration:5.04s] [animation-iteration-count:infinite] [animation-timing-function:step-end] motion-reduce:animate-none"
@@ -18,7 +18,7 @@ export function MicroBotFace({ className }: { className?: string }) {
     <div
       aria-hidden
       className={cn(
-        "absolute top-[5.89px] left-[5.89px] h-[28.948px] w-[58.268px] overflow-hidden rounded-[11.876px] border-[0.742px] border-primary-foreground/12",
+        "absolute top-[0.36812rem] left-[0.36812rem] h-[1.80925rem] w-[3.64175rem] overflow-hidden rounded-[0.74225rem] border-[0.742px] border-primary-foreground/12",
         className,
       )}
     >
@@ -28,7 +28,7 @@ export function MicroBotFace({ className }: { className?: string }) {
         className={cn(
           glyph,
           loop,
-          "invisible left-[6.49px] animate-[microbot-prompt_5.04s_step-end_infinite]",
+          "invisible left-[0.40563rem] animate-[microbot-prompt_5.04s_step-end_infinite]",
         )}
       >
         {">"}
@@ -37,7 +37,7 @@ export function MicroBotFace({ className }: { className?: string }) {
         className={cn(
           glyph,
           loop,
-          "left-[5px] animate-[microbot-underscore_5.04s_step-end_infinite]",
+          "left-1.25 animate-[microbot-underscore_5.04s_step-end_infinite]",
         )}
       >
         {">"}
@@ -45,26 +45,26 @@ export function MicroBotFace({ className }: { className?: string }) {
       <span
         className={cn(
           loop,
-          "absolute top-[22px] left-5 h-0.5 w-[14.845px] animate-[microbot-underscore_5.04s_step-end_infinite] bg-primary-foreground",
+          "absolute top-5.5 left-5 h-0.5 w-[0.92781rem] animate-[microbot-underscore_5.04s_step-end_infinite] bg-primary-foreground",
         )}
       />
       <span
         className={cn(
           loop,
-          "invisible absolute top-[16.26px] left-[21.49px] h-2.5 w-[14.845px] animate-[microbot-prompt-block_5.04s_step-end_infinite] bg-primary-foreground",
+          "invisible absolute top-[1.01625rem] left-[1.34312rem] h-2.5 w-[0.92781rem] animate-[microbot-prompt-block_5.04s_step-end_infinite] bg-primary-foreground",
         )}
       />
       <span
         className={cn(
           loop,
-          "absolute top-[16.26px] left-[37.5px] h-2.5 w-[14.845px] animate-[microbot-underscore-block_5.04s_step-end_infinite] bg-primary-foreground",
+          "absolute top-[1.01625rem] left-[2.34375rem] h-2.5 w-[0.92781rem] animate-[microbot-underscore-block_5.04s_step-end_infinite] bg-primary-foreground",
         )}
       />
       <span
         className={cn(
           glyph,
           loop,
-          "invisible left-[37.5px] animate-[microbot-wink_5.04s_step-end_infinite]",
+          "invisible left-[2.34375rem] animate-[microbot-wink_5.04s_step-end_infinite]",
         )}
       >
         {"<"}

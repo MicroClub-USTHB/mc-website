@@ -14,9 +14,9 @@ const RIGHT = "right-4 text-right sm:right-6 lg:right-28"
  * side margins and these widths). Narrower screens give each one half the width.
  */
 const PARAGRAPH_LAYOUT = [
-  { top: spiralClearSide("left", 0), className: cn(LEFT, "lg:max-w-[363px]") },
-  { top: spiralClearSide("right", 0), className: cn(RIGHT, "lg:max-w-[365px]") },
-  { top: spiralClearSide("left", 1), className: cn(LEFT, "lg:max-w-[511px]") },
+  { top: spiralClearSide("left", 0), className: cn(LEFT, "lg:max-w-90.75") },
+  { top: spiralClearSide("right", 0), className: cn(RIGHT, "lg:max-w-91.25") },
+  { top: spiralClearSide("left", 1), className: cn(LEFT, "lg:max-w-127.75") },
 ]
 
 /** schema.org Organization facts from the About Us story. */

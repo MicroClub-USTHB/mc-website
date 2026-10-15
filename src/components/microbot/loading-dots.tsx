@@ -14,7 +14,7 @@ export function LoadingDots() {
   return (
     <span
       aria-hidden
-      className="grid h-[19.613px] w-[18px] shrink-0 grid-cols-3 grid-rows-3 place-items-center px-[3px] py-[3px]"
+      className="grid h-[1.22581rem] w-4.5 shrink-0 grid-cols-3 grid-rows-3 place-items-center px-0.75 py-0.75"
     >
       {Array.from({ length: ROWS * COLS }, (_, i) => {
         const row = Math.floor(i / COLS)
@@ -22,7 +22,7 @@ export function LoadingDots() {
         return (
           <motion.span
             key={i}
-            className="size-[2.4px] rounded-full bg-primary"
+            className="size-[0.15rem] rounded-full bg-primary"
             style={{ opacity: 1 - row * 0.3 }}
             animate={reduceMotion ? undefined : { opacity: [1 - row * 0.3, 0.15, 1 - row * 0.3] }}
             transition={{

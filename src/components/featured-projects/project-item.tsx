@@ -21,9 +21,9 @@ export function ProjectItem({ project }: { project: Project }) {
   return (
     <Accordion.Item className="border-b border-border">
       <div className="group relative flex items-start justify-between gap-4 py-4.5 pr-4 transition-colors duration-200 ease-in hover:bg-accent has-focus-visible:bg-accent lg:pr-11">
-        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-[175px]">
+        <div className="flex flex-col gap-3 lg:flex-row lg:items-center lg:gap-43.75">
           <Accordion.Header
-            render={<h4 className="paragraph-xl font-medium lg:w-[203px] lg:whitespace-nowrap" />}
+            render={<h4 className="paragraph-xl font-medium lg:w-50.75 lg:whitespace-nowrap" />}
           >
             <Accordion.Trigger className="cursor-pointer text-left text-foreground transition-colors duration-200 ease-in outline-none group-hover:text-accent-foreground after:absolute after:inset-0 focus-visible:text-accent-foreground">
               {project.name}
