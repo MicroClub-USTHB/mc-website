@@ -6,7 +6,6 @@ import { Departments } from "@/sections/departments"
 import { FeaturedEvents } from "@/sections/featured-events"
 import { FeaturedProjects } from "@/sections/featured-projects"
 import { Hero } from "@/sections/hero"
-import { MicroBot } from "@/sections/microbot"
 import { Statistics } from "@/sections/statistics"
 import { TrustedBy } from "@/sections/trusted-by"
 
@@ -23,7 +22,6 @@ export default function HomePage() {
       <FeaturedEvents />
       <TrustedBy />
       <Community />
-      <MicroBot />
       <Contact />
     </>
   )

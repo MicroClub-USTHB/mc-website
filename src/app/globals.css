@@ -525,3 +525,61 @@
     background: var(--muted-foreground);
   }
 }
+
+/*
+ * MicroBot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice, `>_▬` three times,
+ * then the `>_<` wink. Each glyph shows on its own frames (`step-end` holds every keyframe).
+ */
+@keyframes microbot-prompt {
+  0% {
+    visibility: visible;
+  }
+  33.333%,
+  100% {
+    visibility: hidden;
+  }
+}
+@keyframes microbot-underscore {
+  0% {
+    visibility: hidden;
+  }
+  33.333%,
+  100% {
+    visibility: visible;
+  }
+}
+@keyframes microbot-prompt-block {
+  0%,
+  16.667%,
+  33.333%,
+  100% {
+    visibility: hidden;
+  }
+  8.333%,
+  25% {
+    visibility: visible;
+  }
+}
+@keyframes microbot-underscore-block {
+  0%,
+  50%,
+  66.667%,
+  83.333%,
+  100% {
+    visibility: hidden;
+  }
+  41.667%,
+  58.333%,
+  75% {
+    visibility: visible;
+  }
+}
+@keyframes microbot-wink {
+  0% {
+    visibility: hidden;
+  }
+  83.333%,
+  100% {
+    visibility: visible;
+  }
+}
