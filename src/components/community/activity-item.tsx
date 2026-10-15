@@ -48,7 +48,7 @@ export function ActivityItem({
             aria-controls={panelId}
             onClick={onToggle}
             className={cn(
-              "cursor-pointer text-left transition-colors duration-300 outline-none after:absolute after:inset-0",
+              "cursor-default text-left transition-colors duration-300 outline-none after:absolute after:inset-0",
               "focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8",
               tone,
             )}
