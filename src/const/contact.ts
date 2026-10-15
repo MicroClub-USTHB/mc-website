@@ -10,6 +10,7 @@ export const CONTACT = {
     instructions: "Please fill out the form below with your details and your message",
   },
   email: "microclub.contact@usthb.edu.dz",
+  discord: "https://discord.gg/tKrYWgeDpY",
   address: {
     streetAddress: "CS Faculty, USTHB, BP32",
     addressLocality: "Bab Ezzouar",
