@@ -22,7 +22,9 @@ type MicroBotWidgetProps = {
 
 /**
  * Client island of the Ask MicroBot assistant: open state, conversation and answer loading. Fixed
- * bottom right: launcher, and the panel above it (full screen on phones).
+ * bottom right: launcher, and the panel above it (full screen on phones), in a complementary
+ * landmark outside `<main>`. The panel only renders while open, so the chat never adds content to
+ * the page that search engines index.
  */
 export function MicroBotWidget({
   greeting,
@@ -82,7 +84,8 @@ export function MicroBotWidget({
   const showChips = !loading && chips.length > 0
 
   return (
-    <div
+    <aside
+      aria-label={MICROBOT_NAME}
       className={cn(
         "pointer-events-none fixed right-4 bottom-4 z-30 flex flex-col items-end gap-7.5 sm:right-6 sm:bottom-6 lg:right-20 lg:bottom-16",
         open && "max-sm:z-60",
@@ -185,6 +188,6 @@ export function MicroBotWidget({
         aria-controls={open ? panelId : undefined}
         className={cn("pointer-events-auto", open && "max-sm:hidden")}
       />
-    </div>
+    </aside>
   )
 }
