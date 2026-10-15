@@ -11,8 +11,9 @@ import { useWipeClip } from "@/components/site-menu/use-wipe-clip"
 import { cn } from "@/lib/utils"
 
 /**
- * Logo cell: no width while the in-page wordmark is attached to the toggle, then the MC mark
- * (anchored right) slides out from behind the toggle while the cell widens.
+ * Logo cell: no width while the in-page wordmark is attached to the toggle, then the navy cell
+ * widens from behind the toggle. The MC mark is placed by the final cell size, so it stays still
+ * and is uncovered by the widening cell instead of sliding with it.
  */
 const LOGO_CELL = cn(
   "relative h-(--menu-size) w-0 overflow-hidden bg-foreground outline-none",
@@ -86,7 +87,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
             height={39}
             preload
             loading="eager"
-            className="absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none"
+            className="absolute top-[27%] left-[calc(var(--menu-size)*0.174)] h-auto w-[calc(var(--menu-size)*0.65)] max-w-none"
           />
         </Link>
 
