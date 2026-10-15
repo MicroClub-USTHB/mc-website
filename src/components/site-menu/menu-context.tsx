@@ -10,6 +10,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
+import { isDominantSectionDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
 /** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */
@@ -21,6 +22,8 @@ type MenuContextValue = {
   toggle: () => void
   /** Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling). */
   navigateTo: (target: string | number, options?: { immediate?: boolean }) => void
+  /** Whether the panel (and the bar over it) uses the dark tokens: the inverse of the section behind the toggle. */
+  dark: boolean
   /** Whether the in-page wordmark is still level with the fixed toggle. */
   attached: boolean
   /** 0 = closed, 1 = open. Drives the panel wipe and the menu wordmark with the same edge. */
@@ -48,6 +51,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const wordmarkRef = useRef<HTMLAnchorElement>(null)
   const [open, setOpen] = useState(false)
   const [attached, setAttached] = useState(true)
+  const [dark, setDark] = useState(false)
   const reveal = useMotionValue(0)
 
   // The in-page wordmark stays attached until its bottom edge scrolls past the toggle's top edge.
@@ -87,12 +91,21 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
 
   const value: MenuContextValue = {
     open,
-    toggle: () => setOpen((current) => !current),
+    toggle: () => {
+      // Opens inverted: dark over a light section, light over a dark one. Kept while it closes.
+      const toggle = toggleRef.current
+      if (!open && toggle) {
+        const { left, width } = toggle.getBoundingClientRect()
+        setDark(!isDominantSectionDark(left + width / 2, toggle.closest("header")))
+      }
+      setOpen(!open)
+    },
     navigateTo: (target, { immediate = false } = {}) => {
       setOpen(false)
       lenis?.start()
       lenis?.scrollTo(target, { immediate })
     },
+    dark,
     attached,
     reveal,
     toggleRef,
