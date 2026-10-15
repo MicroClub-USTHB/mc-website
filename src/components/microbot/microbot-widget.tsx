@@ -3,8 +3,8 @@
 import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
 import { useLenis } from "lenis/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
-import { XIcon } from "lucide-react"
 
+import { XIcon } from "@/components/icons/x"
 import { MessageInput } from "@/components/microbot/message-input"
 import { MicroBotLauncher } from "@/components/microbot/microbot-launcher"
 import { SuggestionChip } from "@/components/microbot/suggestion-chip"
@@ -182,7 +182,7 @@ export function MicroBotWidget({
                 aria-label={`Close ${MICROBOT_NAME}`}
                 className="sticky top-0 z-10 ml-auto grid size-6 shrink-0 cursor-pointer place-items-center rounded-sm text-foreground outline-none focus-visible:ring-4 focus-visible:ring-secondary"
               >
-                <XIcon className="size-6" />
+                <XIcon size={24} />
               </button>
 
               <div

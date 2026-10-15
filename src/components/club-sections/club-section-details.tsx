@@ -1,6 +1,6 @@
 import Link from "next/link"
-import { ArrowUpRightIcon } from "lucide-react"
 
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right"
 import { McButton } from "@/components/ui/mc-button"
 import type { ClubSection } from "@/const/club-sections"
 

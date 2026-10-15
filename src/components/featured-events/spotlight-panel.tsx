@@ -1,10 +1,10 @@
 "use client"
 
 import { AnimatePresence, motion } from "motion/react"
-import { ArrowUpRightIcon } from "lucide-react"
 
 import { useActiveEvent } from "@/components/featured-events/active-event"
 import { useOpenEvent } from "@/components/featured-events/event-dialog"
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right"
 import { McButton } from "@/components/ui/mc-button"
 import { EVENT_CATEGORY_LABELS, type FeaturedEvent } from "@/const/featured-events"
 import { EASE_OUT_QUART } from "@/lib/easing"

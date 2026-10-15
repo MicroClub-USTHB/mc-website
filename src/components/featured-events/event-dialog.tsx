@@ -3,9 +3,9 @@
 import { createContext, useContext, useEffect, useState } from "react"
 import { Dialog } from "@base-ui/react/dialog"
 import { useLenis } from "lenis/react"
-import { XIcon } from "lucide-react"
 
 import { EventCard } from "@/components/featured-events/event-card"
+import { XIcon } from "@/components/icons/x"
 import { McButton } from "@/components/ui/mc-button"
 import type { FeaturedEvent } from "@/const/featured-events"
 

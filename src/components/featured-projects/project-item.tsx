@@ -1,6 +1,6 @@
 import { Accordion } from "@base-ui/react/accordion"
-import { ArrowUpRightIcon } from "lucide-react"
 
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right"
 import { McBadge } from "@/components/ui/mc-badge"
 import { McButton } from "@/components/ui/mc-button"
 import type { Project } from "@/const/featured-projects"

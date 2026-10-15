@@ -1,8 +1,8 @@
 "use client"
 
 import { useState } from "react"
-import { ArrowUpIcon } from "lucide-react"
 
+import { ArrowUpIcon } from "@/components/icons/arrow-up"
 import { McButton } from "@/components/ui/mc-button"
 
 type MessageInputProps = {
@@ -47,7 +47,7 @@ export function MessageInput({ ref, placeholder, busy, onSend }: MessageInputPro
         icon="only"
         disabled={!canSend}
         aria-label="Send message"
-        iconDefinition={<ArrowUpIcon className="size-5" />}
+        iconDefinition={<ArrowUpIcon size={20} />}
         className="shrink-0 disabled:opacity-100"
       />
     </form>

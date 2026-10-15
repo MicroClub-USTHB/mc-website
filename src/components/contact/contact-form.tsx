@@ -1,9 +1,10 @@
 "use client"
 
 import { useActionState, useState, type FormEvent } from "react"
-import { MailIcon, SendIcon, UserRoundIcon } from "lucide-react"
+import { MailIcon, UserRoundIcon } from "lucide-react"
 
 import { sendContactMessage, type ContactState } from "@/actions/send-contact-message"
+import { SendIcon } from "@/components/icons/send"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
 import { McTextarea } from "@/components/ui/mc-textarea"

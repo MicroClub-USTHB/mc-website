@@ -1,8 +1,9 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ChevronLeftIcon, ChevronRightIcon } from "lucide-react"
 
+import { ChevronLeftIcon } from "@/components/icons/chevron-left"
+import { ChevronRightIcon } from "@/components/icons/chevron-right"
 import { McButton } from "@/components/ui/mc-button"
 import type { ClubSectionId } from "@/const/club-sections"
 import { cn } from "@/lib/utils"
