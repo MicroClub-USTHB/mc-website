@@ -405,8 +405,8 @@
  * (landscape phones, small or zoomed laptops) and keeps the Figma sizes on large ones.
  */
 :root {
-  --menu-size: clamp(3.5rem, min(5.9vw, 9.5vh), 5.3125rem);
-  --menu-top: clamp(1rem, min(calc(14vh - 2.5rem), 6.67vw), 6rem);
+  --menu-size: clamp(3rem, min(5.9vw, 9.5vh), 5.3125rem);
+  --menu-top: clamp(0.75rem, min(calc(18vh - 5.5rem), 6.67vw), 6rem);
   --menu-left: clamp(1rem, 5.56vw, 5rem);
   --menu-icon: clamp(1.5rem, calc(var(--menu-size) * 0.376), 2rem);
   --menu-text: calc(var(--menu-size) * 0.4235);
