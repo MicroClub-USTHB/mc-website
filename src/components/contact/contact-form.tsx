@@ -1,7 +1,7 @@
 "use client"
 
 import { useActionState, useState, type FormEvent } from "react"
-import { CircleIcon, MailIcon, UserRoundIcon } from "lucide-react"
+import { MailIcon, SendIcon, UserRoundIcon } from "lucide-react"
 
 import { sendContactMessage, type ContactState } from "@/actions/send-contact-message"
 import { McButton } from "@/components/ui/mc-button"
@@ -95,7 +95,7 @@ export function ContactForm() {
           type="submit"
           size="lg"
           icon="trailing"
-          iconDefinition={<CircleIcon />}
+          iconDefinition={<SendIcon />}
           isLoading={pending}
           className="w-full border-0"
         >
