@@ -40,15 +40,16 @@ export function ClubSections() {
       theme="dark"
       aria-labelledby="club-sections-title"
       bleed
-      className="h-svh max-h-screen overflow-x-clip"
+      className="h-[111svh] overflow-x-clip"
     >
       <JsonLd data={SECTIONS_JSON_LD} />
 
       {/*
-        One screen tall: the illustrations shrink to fit. The top padding clears the fixed menu
-        toggle, the bottom one follows the screen height.
+        Pinned one screen tall while the section scrolls by (a short hold, like Statistics): the
+        illustrations shrink to fit. The top padding clears the fixed menu toggle, the bottom one
+        follows the screen height.
       */}
-      <div className="mx-auto flex h-full max-w-site flex-col px-4 pt-24 pb-[min(5.25rem,8svh)] sm:px-6 lg:px-20 lg:pt-20 short:py-[min(2.5rem,6svh)]">
+      <div className="sticky top-0 mx-auto flex h-svh max-h-screen max-w-site flex-col px-4 pt-24 pb-[min(5.25rem,8svh)] sm:px-6 lg:px-20 lg:pt-20 short:py-[min(2.5rem,6svh)]">
         <ClubSectionsShowcase
           heading={
             <h2
