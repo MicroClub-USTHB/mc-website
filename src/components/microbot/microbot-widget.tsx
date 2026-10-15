@@ -129,7 +129,7 @@ export function MicroBotWidget({
                 )}
               >
                 {messages.length === 0 && (
-                  <p className="w-78 max-w-full font-heading text-2xl leading-8 font-medium text-primary uppercase">
+                  <p className="w-78 max-w-full header-xs font-medium text-primary uppercase">
                     {greeting}
                   </p>
                 )}
