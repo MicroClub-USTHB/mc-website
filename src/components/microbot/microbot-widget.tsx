@@ -1,6 +1,7 @@
 "use client"
 
-import { useCallback, useEffect, useId, useRef, useState } from "react"
+import { useCallback, useEffect, useId, useRef, useState, useSyncExternalStore } from "react"
+import { useLenis } from "lenis/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 import { XIcon } from "lucide-react"
 
@@ -13,6 +14,21 @@ import { EASE_OUT_EXPO } from "@/lib/easing"
 import { ask } from "@/lib/microbot"
 import { cn } from "@/lib/utils"
 
+/** Below `sm` the panel covers the whole screen, so it behaves as a modal dialog. */
+const PHONE_QUERY = "(width < 40rem)"
+
+function subscribePhone(onChange: () => void) {
+  const query = window.matchMedia(PHONE_QUERY)
+  query.addEventListener("change", onChange)
+  return () => query.removeEventListener("change", onChange)
+}
+
+const isPhone = () => window.matchMedia(PHONE_QUERY).matches
+
+/** Elements the Tab key can reach inside the panel. */
+const FOCUSABLE =
+  'button:not([disabled]), input:not([disabled]), [href], [tabindex]:not([tabindex="-1"])'
+
 type MicroBotWidgetProps = {
   greeting: string
   placeholder: string
@@ -22,9 +38,13 @@ type MicroBotWidgetProps = {
 
 /**
  * Client island of the Ask MicroBot assistant: open state, conversation and answer loading. Fixed
- * bottom right: launcher, and the panel above it (full screen on phones), in a complementary
+ * bottom right: launcher, and the panel above it, in a complementary
  * landmark outside `<main>`. The panel only renders while open, so the chat never adds content to
  * the page that search engines index.
+ *
+ * On phones the open panel covers the whole screen and is a modal dialog: focus stays inside it
+ * and Lenis is stopped, so the page behind does not scroll (like the Event Hub card). Larger
+ * screens keep it as a non-modal panel next to the page.
  */
 export function MicroBotWidget({
   greeting,
@@ -40,12 +60,20 @@ export function MicroBotWidget({
   const launcherRef = useRef<HTMLButtonElement>(null)
   const inputRef = useRef<HTMLInputElement>(null)
   const scrollRef = useRef<HTMLDivElement>(null)
+  const panelRef = useRef<HTMLElement>(null)
   const nextId = useRef(0)
+  const wasOpen = useRef(false)
+  const lenis = useLenis()
+  const phone = useSyncExternalStore(subscribePhone, isPhone, () => false)
+  const modal = open && phone
 
-  const close = useCallback(() => {
-    setOpen(false)
-    launcherRef.current?.focus()
-  }, [])
+  const close = useCallback(() => setOpen(false), [])
+
+  // Back to the launcher once closed (after the render that shows it again on phones).
+  useEffect(() => {
+    if (!open && wasOpen.current) launcherRef.current?.focus()
+    wasOpen.current = open
+  }, [open])
 
   useEffect(() => {
     if (!open) return
@@ -56,6 +84,36 @@ export function MicroBotWidget({
     document.addEventListener("keydown", onKeyDown)
     return () => document.removeEventListener("keydown", onKeyDown)
   }, [open, close])
+
+  // Modal on phones: page scroll stopped, Tab cycles inside the panel.
+  useEffect(() => {
+    if (!modal) return
+    lenis?.stop()
+    const onKeyDown = (e: KeyboardEvent) => {
+      const panel = panelRef.current
+      if (e.key !== "Tab" || !panel) return
+      // `:disabled` too: a disabled McButton keeps its `tabindex`.
+      const focusable = Array.from(panel.querySelectorAll<HTMLElement>(FOCUSABLE)).filter(
+        (element) => !element.matches(":disabled"),
+      )
+      const first = focusable[0]
+      const last = focusable.at(-1)
+      if (!first || !last) return
+      const inside = panel.contains(document.activeElement)
+      if (e.shiftKey && (document.activeElement === first || !inside)) {
+        e.preventDefault()
+        last.focus()
+      } else if (!e.shiftKey && (document.activeElement === last || !inside)) {
+        e.preventDefault()
+        first.focus()
+      }
+    }
+    document.addEventListener("keydown", onKeyDown)
+    return () => {
+      document.removeEventListener("keydown", onKeyDown)
+      lenis?.start()
+    }
+  }, [modal, lenis])
 
   useEffect(() => {
     const el = scrollRef.current
@@ -94,8 +152,10 @@ export function MicroBotWidget({
       <AnimatePresence>
         {open && (
           <motion.section
+            ref={panelRef}
             id={panelId}
             role="dialog"
+            aria-modal={modal || undefined}
             aria-label={`${MICROBOT_NAME} assistant`}
             initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 16, scale: 0.96 }}
             animate={{ opacity: 1, y: 0, scale: 1 }}
