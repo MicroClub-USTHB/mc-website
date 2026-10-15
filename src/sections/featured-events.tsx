@@ -37,7 +37,7 @@ const EVENTS_JSON_LD = {
 /**
  * Pinned full-viewport section (like Statistics): the section is taller than the screen and its
  * content sticks full screen while it scrolls by, so the user sees it whole for a moment instead
- * of scrolling past it. Pinned for 60% of a screen from `md`, 30% below (shorter on touch, where
+ * of scrolling past it. Pinned for 40% of a screen from `md`, 20% below (shorter on touch, where
  * a long pin feels stuck). `overflow-hidden` sits on the sticky box: on the section it would break
  * the sticky. `scroll-mt-0` so `/#featured-events` lands straight on the pinned view.
  *
@@ -58,7 +58,7 @@ export function FeaturedEvents() {
       bleed
       theme="dark"
       aria-labelledby="featured-events-title"
-      className="relative h-[130svh] cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair] scroll-mt-0 md:h-[160svh]"
+      className="relative h-[120svh] cursor-[url(/EventsHub/cursor/Cursor.svg)_2_1,crosshair] scroll-mt-0 md:h-[140svh]"
     >
       {/* Pinned full screen while the section scrolls by (see the doc comment above). */}
       <JsonLd data={EVENTS_JSON_LD} />
