@@ -10,7 +10,8 @@ export type CommunityActivity = {
 
 /** MC Community copy (Figma "MC Community"). */
 export const COMMUNITY = {
-  title: "MC Community",
+  // Two spaces, as in Figma (kept by `whitespace-pre` on the title).
+  title: "MC  Community",
   intro:
     "Don't miss our biggest announcements: events, registrations, activities… and stay always up to date and experience it, not just IT.",
   cta: { label: "Join MCC on Discord Now!", href: CONTACT.discord },

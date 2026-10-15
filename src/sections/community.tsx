@@ -36,15 +36,15 @@ export function Community() {
   return (
     <SectionContainer id="community" aria-labelledby="community-title" bleed>
       <JsonLd data={COMMUNITY_JSON_LD} />
-      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20 lg:pb-32">
+      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20 lg:pb-52">
         <header className="flex flex-col items-start">
           <h2
             id="community-title"
-            className="header-md text-primary uppercase sm:header-lg lg:header-xl"
+            className="header-md font-medium whitespace-pre text-primary uppercase sm:header-lg lg:header-xl"
           >
             {COMMUNITY.title}
           </h2>
-          <p className="mt-2 max-w-296 paragraph-lg text-muted-foreground lg:header-xs">
+          <p className="mt-2.5 max-w-296 paragraph-lg font-medium text-muted-foreground lg:max-w-none lg:header-xs">
             {COMMUNITY.intro}
           </p>
           <McButton
@@ -53,7 +53,7 @@ export function Community() {
             iconDefinition={<DiscordIcon />}
             nativeButton={false}
             render={<a href={COMMUNITY.cta.href} target="_blank" rel="noopener noreferrer" />}
-            className="mt-5"
+            className="mt-6 font-bold lg:py-[11px] [&_[data-slot=leading-icon]]:size-5"
           >
             {COMMUNITY.cta.label}
             <span className="sr-only"> (opens in a new tab)</span>

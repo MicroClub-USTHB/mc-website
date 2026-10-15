@@ -75,7 +75,7 @@ export function ActivityList({ activities }: { activities: CommunityActivity[] }
           setHovered(null)
           open(null)
         }}
-        className="mt-10"
+        className="mt-10 lg:mt-[63px] lg:flex lg:flex-col lg:gap-5"
       >
         {activities.map((activity, index) => (
           <ActivityItem
