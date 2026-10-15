@@ -380,7 +380,11 @@ export function ChainViewport({ className, ...props }: React.ComponentProps<"div
             onPointerLeave={clearHover}
             onClick={openClickedEvent}
             // Drags move the chain: no text or image selection, no long-press menu on touch.
-            className={cn("touch-pan-y select-none [-webkit-touch-callout:none]", className)}
+            className={cn(
+              "touch-pan-y select-none [-webkit-touch-callout:none]",
+              dragging && "cursor-grabbing",
+              className,
+            )}
             {...props}
           />
         </ChainSlicesContext>
