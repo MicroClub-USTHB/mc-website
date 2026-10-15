@@ -10,13 +10,13 @@ export function ActivityItem({
   activity,
   index,
   active,
-  onOpen,
+  onToggle,
   onHover,
 }: {
   activity: CommunityActivity
   index: number
   active: boolean
-  onOpen: () => void
+  onToggle: (event: React.MouseEvent) => void
   onHover: (event: React.PointerEvent) => void
 }) {
   const panelId = `community-activity-${index}`
@@ -46,7 +46,7 @@ export function ActivityItem({
             type="button"
             aria-expanded={active}
             aria-controls={panelId}
-            onClick={onOpen}
+            onClick={onToggle}
             className={cn(
               "cursor-pointer text-left transition-colors duration-300 outline-none after:absolute after:inset-0",
               "focus-visible:underline focus-visible:decoration-2 focus-visible:underline-offset-8",

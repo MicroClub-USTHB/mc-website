@@ -11,14 +11,16 @@ import { EASE_OUT_QUART } from "@/lib/easing"
 const RESIZE_TRANSITION = { duration: 0.4, ease: EASE_OUT_QUART }
 
 /**
- * Activities accordion: one row open at a time (the first by default), opened by hovering it
- * with a mouse or by clicking / tapping its title. The hovered row's icon follows the cursor.
+ * Activities accordion: at most one row open, all closed by default. With a mouse the hovered row
+ * opens and every row closes again when the pointer leaves the list; on touch screens (no hover)
+ * and with the keyboard, tapping / activating a title toggles its row. The hovered row's icon
+ * follows the cursor.
  *
  * The open and closed heights come from CSS (responsive); on each change the rows animate from
  * the heights measured just before it to their new ones, then hand control back to CSS.
  */
 export function ActivityList({ activities }: { activities: CommunityActivity[] }) {
-  const [active, setActive] = useState(0)
+  const [active, setActive] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
   const listRef = useRef<HTMLOListElement>(null)
   /** Row heights measured right before the last change, the animation start points. */
@@ -26,7 +28,7 @@ export function ActivityList({ activities }: { activities: CommunityActivity[] }
   const animating = useRef(false)
   const reduceMotion = useReducedMotion()
 
-  function open(index: number) {
+  function open(index: number | null) {
     if (index === active) return
     const rows = listRef.current?.children
     fromHeights.current = rows ? Array.from(rows, (row) => (row as HTMLElement).offsetHeight) : []
@@ -66,14 +68,26 @@ export function ActivityList({ activities }: { activities: CommunityActivity[] }
 
   return (
     <>
-      <ol ref={listRef} onPointerLeave={() => setHovered(null)} className="mt-10">
+      <ol
+        ref={listRef}
+        onPointerLeave={(event) => {
+          if (event.pointerType !== "mouse") return
+          setHovered(null)
+          open(null)
+        }}
+        className="mt-10"
+      >
         {activities.map((activity, index) => (
           <ActivityItem
             key={activity.title}
             activity={activity}
             index={index}
             active={index === active}
-            onOpen={() => open(index)}
+            onToggle={(event) => {
+              // A mouse click lands on the row its hover already opened: keep it open.
+              const mouse = (event.nativeEvent as PointerEvent).pointerType === "mouse"
+              open(mouse || index !== active ? index : null)
+            }}
             onHover={(event) => {
               if (event.pointerType !== "mouse") return
               setHovered(index)
