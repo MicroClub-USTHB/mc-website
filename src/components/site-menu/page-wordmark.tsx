@@ -1,8 +1,11 @@
 "use client"
 
+import { useRef } from "react"
 import Link from "next/link"
+import { motion } from "motion/react"
 
 import { useMenu } from "@/components/site-menu/menu-context"
+import { useWipeClip } from "@/components/site-menu/use-wipe-clip"
 import { cn } from "@/lib/utils"
 
 /**
@@ -10,7 +13,9 @@ import { cn } from "@/lib/utils"
  * page (not sticky) and stays above the open panel.
  */
 export function PageWordmark({ label }: { label: string }) {
-  const { wordmarkRef } = useMenu()
+  const { wordmarkRef, dark } = useMenu()
+  const darkRef = useRef<HTMLSpanElement>(null)
+  const darkClip = useWipeClip(darkRef)
 
   return (
     <div className="absolute inset-x-0 top-0 z-50 mx-auto max-w-site">
@@ -19,13 +24,24 @@ export function PageWordmark({ label }: { label: string }) {
         href="/"
         aria-label={label}
         className={cn(
-          "top-4 left-4 lg:top-24 lg:left-20",
-          "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-4.5",
-          "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
-          "absolute translate-x-14 ring-1 ring-border lg:translate-x-[85px]",
+          "top-(--menu-top) left-(--menu-left)",
+          "flex h-(--menu-size) w-[calc(var(--menu-size)*3)] items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
+          "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
+          "absolute translate-x-(--menu-size) ring-1 ring-border",
         )}
       >
         MICRO CLUB
+        {/* Dark-theme copy, wiped in with the panel when the menu opens in the dark theme. */}
+        {dark && (
+          <motion.span
+            ref={darkRef}
+            aria-hidden
+            style={{ clipPath: darkClip }}
+            className="dark pointer-events-none absolute inset-0 flex items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background"
+          >
+            MICRO CLUB
+          </motion.span>
+        )}
       </Link>
     </div>
   )

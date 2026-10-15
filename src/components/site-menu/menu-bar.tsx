@@ -3,20 +3,22 @@
 import { useRef } from "react"
 import Image from "next/image"
 import Link from "next/link"
-import { motion, useTransform } from "motion/react"
+import { motion } from "motion/react"
 
 import { useMenu } from "@/components/site-menu/menu-context"
 import { MenuToggleIcon } from "@/components/site-menu/menu-toggle-icon"
+import { useWipeClip } from "@/components/site-menu/use-wipe-clip"
 import { cn } from "@/lib/utils"
 
 /**
- * Logo cell: no width while the in-page wordmark is attached to the toggle, then the MC mark
- * (anchored right) slides out from behind the toggle while the cell widens.
+ * Logo cell: no width while the in-page wordmark is attached to the toggle, then the navy cell
+ * widens from behind the toggle. The MC mark is placed by the final cell size, so it stays still
+ * and is uncovered by the widening cell instead of sliding with it.
  */
 const LOGO_CELL = cn(
-  "relative h-14 w-0 overflow-hidden bg-foreground outline-none lg:h-[85px] lg:w-0",
+  "relative h-(--menu-size) w-0 overflow-hidden bg-foreground outline-none",
   "transition-[width] duration-800 ease-out-expo",
-  "group-data-[logo=compact]:w-14 lg:group-data-[logo=compact]:w-[85px]",
+  "group-data-[logo=compact]:w-(--menu-size)",
 )
 
 /**
@@ -24,7 +26,9 @@ const LOGO_CELL = cn(
  * the logo, clipped by the same viewport edge as the panel wipe.
  */
 export function MenuBar({ homeLabel }: { homeLabel: string }) {
-  const { open, toggle, navigateTo, attached, toggleRef } = useMenu()
+  const { open, dark, toggle, navigateTo, attached, toggleRef } = useMenu()
+  const darkToggleRef = useRef<HTMLSpanElement>(null)
+  const darkToggleClip = useWipeClip(darkToggleRef)
 
   return (
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
@@ -32,8 +36,8 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         data-open={open || undefined}
         data-logo={attached ? "hidden" : "compact"}
         className={cn(
-          "top-4 left-4 lg:top-24 lg:left-20",
-          "group pointer-events-auto absolute flex ring-1 ring-border transition-shadow data-open:ring-2",
+          "top-(--menu-top) left-(--menu-left)",
+          "group pointer-events-auto absolute flex ring-1 ring-border",
         )}
       >
         <button
@@ -44,12 +48,23 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
           aria-controls="site-menu-panel"
           onClick={toggle}
           className={cn(
-            "size-14 lg:size-[85px]",
-            "relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
+            "size-(--menu-size)",
+            "group/toggle relative z-10 grid cursor-pointer place-items-center bg-background text-foreground transition-colors duration-300 outline-none",
             "hover:bg-accent hover:text-accent-foreground focus-visible:bg-accent focus-visible:text-accent-foreground",
           )}
         >
-          <MenuToggleIcon className="size-6 lg:size-8" />
+          <MenuToggleIcon className="size-(--menu-icon)" />
+          {/* Dark-theme copy, wiped in with the panel so the icon never changes before it. */}
+          {dark && (
+            <motion.span
+              ref={darkToggleRef}
+              aria-hidden
+              style={{ clipPath: darkToggleClip }}
+              className="dark pointer-events-none absolute inset-0 grid place-items-center bg-background text-foreground transition-colors duration-300 group-hover/toggle:bg-accent group-hover/toggle:text-accent-foreground"
+            >
+              <MenuToggleIcon className="size-(--menu-icon)" />
+            </motion.span>
+          )}
         </button>
 
         <Link
@@ -72,7 +87,7 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
             height={39}
             preload
             loading="eager"
-            className="absolute top-[27%] right-[17.6%] h-auto w-[65%] max-w-none lg:w-[55px]"
+            className="absolute top-[27%] left-[calc(var(--menu-size)*0.174)] h-auto w-[calc(var(--menu-size)*0.65)] max-w-none"
           />
         </Link>
 
@@ -84,30 +99,27 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
 
 /** "MICRO CLUB" over the logo cell, revealed by the panel's wipe edge. */
 function MenuWordmark() {
-  const { reveal } = useMenu()
+  const { dark } = useMenu()
   const ref = useRef<HTMLSpanElement>(null)
-
-  const clipPath = useTransform(reveal, (progress) => {
-    const el = ref.current
-    if (!el) return "inset(0 100% 0 0)"
-    const { left, width } = el.getBoundingClientRect()
-    const edge = progress * document.documentElement.clientWidth
-    const hidden = Math.min(width, Math.max(0, left + width - edge))
-    return `inset(0 ${hidden}px 0 0)`
-  })
+  const clipPath = useWipeClip(ref, 1)
 
   return (
+    // The ring stays in the light theme, like the toggle's, so both borders match over any panel.
     <motion.span
       ref={ref}
       aria-hidden
       style={{ clipPath }}
-      className={cn(
-        "flex h-14 w-42 items-center bg-foreground pl-3 text-background lg:h-[85px] lg:w-[255px] lg:pl-4.5",
-        "header-xs font-medium whitespace-nowrap uppercase lg:header-md",
-        "pointer-events-none absolute top-0 left-14 lg:left-[85px]",
-      )}
+      className="pointer-events-none absolute top-0 left-(--menu-size) h-(--menu-size) w-[calc(var(--menu-size)*3)] ring-1 ring-border"
     >
-      MICRO CLUB
+      <span
+        className={cn(
+          dark && "dark",
+          "flex size-full items-center bg-foreground pl-[calc(var(--menu-size)*0.2)] text-background",
+          "font-heading text-(length:--menu-text) leading-[1.22] font-medium tracking-[-0.02em] whitespace-nowrap uppercase",
+        )}
+      >
+        MICRO CLUB
+      </span>
     </motion.span>
   )
 }
