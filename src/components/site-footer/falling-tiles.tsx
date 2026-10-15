@@ -94,7 +94,14 @@ export function FallingTiles({
   }, [knocked, reduceMotion, near])
 
   return (
-    <div ref={box} className={cn("relative", className)}>
+    <div
+      ref={box}
+      // Mouse drag cursors, set by `startPile`: open hand on tiles, closed hand while dragging.
+      className={cn(
+        "relative data-dragging:[&_[data-tile]]:cursor-grabbing! data-pile:[&_[data-tile]]:cursor-grab data-dragging:[&_[data-tile]_*]:cursor-grabbing! data-pile:[&_[data-tile]_*]:cursor-grab",
+        className,
+      )}
+    >
       {children}
     </div>
   )
@@ -198,6 +205,7 @@ function startPile(matter: MatterModule, box: HTMLElement, { animate }: { animat
   }
 
   // Drag and throw, mouse only: on touch, a swipe over the tiles keeps scrolling the page.
+  box.dataset.pile = ""
   function toBox(event: PointerEvent): Matter.Vector {
     const rect = box.getBoundingClientRect()
     return { x: event.clientX - rect.left, y: event.clientY - rect.top }
@@ -222,6 +230,7 @@ function startPile(matter: MatterModule, box: HTMLElement, { animate }: { animat
     })
     Composite.add(engine.world, constraint)
     drag = { constraint, start: point, moved: false }
+    box.dataset.dragging = ""
     // Captured by the tile, so the click (if any) still lands on its link.
     tiles[index].setPointerCapture(event.pointerId)
   }
@@ -240,6 +249,7 @@ function startPile(matter: MatterModule, box: HTMLElement, { animate }: { animat
     Composite.remove(engine.world, drag.constraint)
     suppressClick = drag.moved
     drag = null
+    delete box.dataset.dragging
   }
 
   function onClick(event: MouseEvent) {
@@ -279,6 +289,8 @@ function startPile(matter: MatterModule, box: HTMLElement, { animate }: { animat
     box.removeEventListener("pointerup", drop)
     box.removeEventListener("pointercancel", drop)
     box.removeEventListener("click", onClick, true)
+    delete box.dataset.pile
+    delete box.dataset.dragging
     reset()
   }
 }
