@@ -19,7 +19,9 @@ export type DepartmentPanel = {
 
 /** The panel row from `lg`, an accordion below. */
 const DESKTOP = "(width >= 64rem)"
-/** Width of an open panel in rem (Figma 606px), as `lg:w-151.5`. */
+/** Figma sizes, in rem: panel height (828px), gap between strips (24px), open card (606px). */
+const DESIGN_HEIGHT = 51.75
+const GAP = 1.5
 const OPEN_WIDTH = 37.875
 /** Visible part of the strip next to the open panel at either edge of the row, in rem. */
 const PEEK = 3
@@ -39,8 +41,9 @@ const art = {
     "lg:motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
   ),
   open: "lg:[&_[data-el=out]]:[transform:var(--open,none)]",
+  // Strips are wider than the art's 135px design strip once scaled down: centred in them.
   closed:
-    "lg:[&_[data-el]]:[transform:var(--closed,none)] lg:[&_[data-el=in]]:opacity-0 lg:[&_[data-el=out]]:opacity-100",
+    "lg:[&_[data-el]]:[transform:translateX(var(--art-inset))_var(--closed,translate(0))] lg:[&_[data-el=in]]:opacity-0 lg:[&_[data-el=out]]:opacity-100",
 }
 
 /**
@@ -66,12 +69,14 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
     const strip = trackRef.current?.children[index]
     if (!viewport || !strip) return 0
 
+    // Mirrors the row's CSS: gaps and cards scaled with its height (`--k`), strips fill the rest.
     const rem = parseFloat(getComputedStyle(document.documentElement).fontSize)
-    const gap = parseFloat(getComputedStyle(trackRef.current!).columnGap) || 0
     const width = viewport.clientWidth
     const count = panels.length
+    const scale = Math.min(1, viewport.clientHeight / (DESIGN_HEIGHT * rem))
+    const gap = GAP * rem * scale
     const pitch = (width - (count - 1) * gap) / count + gap
-    const openWidth = OPEN_WIDTH * rem
+    const openWidth = OPEN_WIDTH * rem * scale
     const peek = PEEK * rem + gap
 
     const left = strip.getBoundingClientRect().left - viewport.getBoundingClientRect().left
@@ -93,10 +98,11 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
   useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport || open === null) return
-    let width = viewport.clientWidth
+    const size = () => `${viewport.clientWidth}x${viewport.clientHeight}`
+    let last = size()
     const observer = new ResizeObserver(() => {
-      if (viewport.clientWidth === width) return
-      width = viewport.clientWidth
+      if (size() === last) return
+      last = size()
       setShift(window.matchMedia(DESKTOP).matches ? rowShift(open) : 0)
     })
     observer.observe(viewport)
@@ -112,7 +118,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
   }
 
   return (
-    <div ref={viewportRef} onKeyDown={handleKeyDown} className="lg:overflow-x-clip">
+    <div ref={viewportRef} onKeyDown={handleKeyDown} className="lg:h-[100cqh] lg:overflow-x-clip">
       <div
         ref={trackRef}
         style={
@@ -122,10 +128,16 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
           } as React.CSSProperties
         }
         className={cn(
-          "flex flex-col gap-3 [--gap:1.5rem]",
-          // Closed strips share the content width; the open panel overflows it to the right.
-          "[--strip:calc((100%-(var(--count)-1)*var(--gap))/var(--count))]",
-          "lg:h-207 lg:translate-x-(--shift) lg:flex-row lg:gap-(--gap) lg:motion-safe:transition-transform",
+          "flex flex-col gap-3",
+          // From `lg` the row fills its size container (the section's leftover height, at most the
+          // 828px design): `--k` is its height over the design's, the scale of cards, tabs and art.
+          "lg:h-full lg:[--k:tan(atan2(100cqh,51.75rem))]",
+          // Strips share the content width (`100cqw`) with the design's gaps, scaled; the open card
+          // overflows it. `--art-inset` centres the 135px design strip art in them (art units).
+          "lg:[--gap:calc(1.5rem*var(--k))]",
+          "lg:[--strip:calc((100cqw-(var(--count)-1)*var(--gap))/var(--count))]",
+          "lg:[--art-inset:calc((var(--strip)/var(--k)-8.4375rem)/2)]",
+          "lg:translate-x-(--shift) lg:flex-row lg:gap-(--gap) lg:motion-safe:transition-transform",
           transition,
         )}
       >
@@ -140,11 +152,11 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width]",
                 transition,
                 art.base,
-                isOpen ? cn("lg:w-151.5", art.open) : art.closed,
+                isOpen ? cn("lg:w-[calc(37.875rem*var(--k))]", art.open) : art.closed,
               )}
             >
               {/* First in the DOM (accordion header), the footer tab of the row from `lg`. */}
-              <h3 className="lg:order-last">
+              <h3 className="lg:order-last lg:[zoom:var(--k)]">
                 <button
                   type="button"
                   id={`department-${panel.id}`}
@@ -182,10 +194,13 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 )}
               >
                 <div className="min-h-0 overflow-hidden">
-                  {/* Card width from the start: the text never reflows while the panel widens. */}
+                  {/*
+                    Card width from the start: the text never reflows while the panel widens.
+                    Zoomed with the row, it keeps the design's line breaks at any height.
+                  */}
                   <div
                     className={cn(
-                      "transition-opacity motion-reduce:transition-none lg:w-151.5",
+                      "transition-opacity motion-reduce:transition-none lg:w-151.5 lg:[zoom:var(--k)]",
                       isOpen
                         ? "duration-500 ease-out-quart lg:delay-200"
                         : "duration-200 ease-out-quart lg:opacity-0",

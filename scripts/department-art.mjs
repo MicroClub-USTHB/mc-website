@@ -446,7 +446,8 @@ function artShapes(svg, frameWidth) {
   return content.filter((element) => {
     if (element.tag === "defs") return false
     const n = (name) => Number(element.attrs[name] ?? 0)
-    return !(element.tag === "rect" && n("width") >= frameWidth - 4 && n("height") >= 700)
+    // The frame's white background (606 or 135 wide inside a 2-3px stroke).
+    return !(element.tag === "rect" && n("width") >= frameWidth - 8 && n("height") >= 700)
   })
 }
 
@@ -502,17 +503,27 @@ function buildArt(id, closedSource, openSource) {
     ...pairs.map((pair) => [pair.open, invert(pair.matrix)]),
     ...morphs.map((morph) => [morph.open, invert(morph.matrix)]),
   ])
-  const body = openShapes.map((shape) => {
+  // Strip-only shapes, drawn at their strip place, travel to their morph partner while open.
+  // Layered as in the strip: right above the open twin of the strip shape they sit on.
+  const openTwin = new Map([...pairs, ...morphs].map(({ closed, open }) => [closed, open]))
+  const above = new Map()
+  let anchor = null
+  for (const shape of closedShapes) {
+    if (openTwin.has(shape)) anchor = openTwin.get(shape)
+    if (!closedOnly.includes(shape)) continue
+    const morph = morphs.find((candidate) => candidate.closed === shape)
+    const style = morph ? ` style="--open:${css(morph.matrix)}"` : ""
+    const markup = `<g data-el="out"${style}>${compact(raw(shape.element))}</g>`
+    above.set(anchor, [...(above.get(anchor) ?? []), markup])
+  }
+
+  const body = [...(above.get(null) ?? [])]
+  for (const shape of openShapes) {
     const matrix = closedPlace.get(shape)
     const type = pairs.some((pair) => pair.open === shape) ? "move" : "in"
     const style = matrix ? ` style="--closed:${css(matrix)}"` : ""
-    return `<g data-el="${type}"${style}>${compact(raw(shape.element))}</g>`
-  })
-  // Strip-only shapes, drawn at their strip place, travel to their morph partner while open.
-  for (const shape of closedOnly) {
-    const morph = morphs.find((candidate) => candidate.closed === shape)
-    const style = morph ? ` style="--open:${css(morph.matrix)}"` : ""
-    body.push(`<g data-el="out"${style}>${compact(raw(shape.element))}</g>`)
+    body.push(`<g data-el="${type}"${style}>${compact(raw(shape.element))}</g>`)
+    body.push(...(above.get(shape) ?? []))
   }
 
   const usedDefs = [...defs.values()].map((element) => compact(raw(element))).join("")

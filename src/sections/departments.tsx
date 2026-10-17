@@ -28,24 +28,36 @@ const DEPARTMENTS_JSON_LD = {
  */
 export function Departments() {
   return (
-    <SectionContainer id="departments" aria-labelledby="departments-title" bleed>
+    <SectionContainer
+      id="departments"
+      aria-labelledby="departments-title"
+      bleed
+      // One screen tall from `lg`: anchors land flush with the top.
+      className="lg:scroll-mt-0"
+    >
       <JsonLd data={DEPARTMENTS_JSON_LD} />
 
-      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20 lg:pb-22">
-        <header className="flex flex-col gap-2">
+      {/*
+        From `lg`, one screen tall: the panel row takes the height the header leaves (a grid row:
+        a flex item would not size its container query units), between a legible floor and its
+        828px design height, and scales its cards and art to it. Laptops (`low`) put the intro
+        beside the title to leave the panels more room.
+      */}
+      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:grid lg:min-h-svh lg:grid-rows-[auto_minmax(30rem,1fr)] lg:px-20 lg:pt-[min(6rem,10svh)] lg:pb-[min(2.5rem,5svh)]">
+        <header className="flex flex-col gap-2 low:flex-row low:items-end low:justify-between low:gap-12">
           <h2
             id="departments-title"
-            className="header-md text-primary uppercase md:header-lg lg:header-xl"
+            className="header-md text-primary uppercase md:header-lg lg:header-xl low:shrink-0 low:header-lg"
           >
             Our Departments
           </h2>
-          <p className="max-w-297 paragraph-lg text-muted-foreground lg:paragraph-xl">
+          <p className="max-w-297 paragraph-lg text-muted-foreground lg:paragraph-xl low:max-w-xl low:paragraph-md">
             Behind every successful event, project, and achievement, there’s a team of motivated
             members working through different departments. Discover the teams behind.
           </p>
         </header>
 
-        <div className="mt-10 lg:mt-14">
+        <div className="mt-10 lg:[container-type:size] lg:mt-[min(2.5rem,4svh)] lg:max-h-207">
           <DepartmentPanels
             panels={DEPARTMENTS.map((department) => ({
               id: department.id,
