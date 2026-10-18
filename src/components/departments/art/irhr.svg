@@ -3,7 +3,7 @@
 </g></g><g data-el="in"><g filter="url(#irhr-filter1_ii_79_2059)">
 <path d="M599.4 53.8C604.2 74.4 591.3 95.1 570.7 99.8C550 104.6 529.4 91.8 524.6 71.1C519.8 50.5 532.7 29.8 553.3 25C574 20.3 594.6 33.1 599.4 53.8Z" stroke-width="4.04" stroke="#000585"/>
 <rect x="584.1" y="95.08" width="8.78" height="61.31" transform="rotate(-43.48 584.1 95.08)" fill="#000585"/>
-</g></g><g data-el="in" style="--closed:matrix(1,0,0,1,-453,-277)"><g filter="url(#irhr-filter3_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-453,-277)"><g filter="url(#irhr-filter3_ii_79_2059)">
 <g clip-path="url(#irhr-clip1_79_2059)">
 <rect width="141" height="186" transform="translate(526 340.81) rotate(-26)" fill="#B5BEFF"/>
 <g clip-path="url(#irhr-clip2_79_2059)">
@@ -23,7 +23,7 @@
 <path d="M599.6 457.6L642.2 436.8" stroke-width="1.08" stroke="#0006B1"/>
 <path d="M603.4 465.3L634.4 450.2" stroke-width="1.08" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(1,0,0,1,453,277)"><g filter="url(#irhr-filter0_ii_79_939)">
+</g></g><g data-el="out" style="--closed:scale(var(--ax),1);--open:matrix(1,0,0,1,453,277)"><g filter="url(#irhr-filter0_ii_79_939)">
 <g clip-path="url(#irhr-clip1_79_939)">
 <rect width="141" height="186" transform="translate(73 63.81) rotate(-26)" fill="#B5BEFF"/>
 <g clip-path="url(#irhr-clip2_79_939)">
@@ -37,7 +37,7 @@
 <path d="M117.4 120.6L160 99.8" stroke-width="1.08" stroke="#0006B1"/>
 <path d="M121.2 128.3L152.1 113.2" stroke-width="1.08" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="in" style="--closed:matrix(1,0,0,1,197,-100.999)"><g filter="url(#irhr-filter5_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,197,-100.999)"><g filter="url(#irhr-filter5_ii_79_2059)">
 <g clip-path="url(#irhr-clip3_79_2059)">
 <rect width="141" height="186" transform="matrix(-0.9 -0.44 -0.44 0.9 87.27 726.81)" fill="#B5BEFF"/>
 <g clip-path="url(#irhr-clip4_79_2059)">
@@ -56,7 +56,7 @@
 <path d="M39.1 791.3L8.1 776.2" stroke-width="1.08" stroke="#0006B1"/>
 <path d="M3.3 773.9L-27.6 758.8" stroke-width="1.08" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(1,0,0,1,-197,100.999)"><g filter="url(#irhr-filter2_ii_79_939)">
+</g></g><g data-el="out" style="--closed:scale(var(--ax),1);--open:matrix(1,0,0,1,-197,100.999)"><g filter="url(#irhr-filter2_ii_79_939)">
 <g clip-path="url(#irhr-clip3_79_939)">
 <rect width="141" height="186" transform="translate(76 625.81) rotate(-26)" fill="#B5BEFF"/>
 <g clip-path="url(#irhr-clip4_79_939)">
@@ -70,7 +70,7 @@
 <path d="M120.4 682.6L163 661.8" stroke-width="1.08" stroke="#0006B1"/>
 <path d="M124.2 690.3L155.1 675.2" stroke-width="1.08" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="in" style="--closed:matrix(0.875,0,0,0.741,0.591,94.217)"><g filter="url(#irhr-filter7_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:translate(calc(-19.958px*var(--ax)),464.489px) scale(var(--fit)) translate(19.958px,-464.489px) matrix(0.875,0,0,0.741,0.591,94.217)"><g filter="url(#irhr-filter7_ii_79_2059)">
 <g clip-path="url(#irhr-clip5_79_2059)">
 <rect width="140.99" height="186.19" transform="matrix(-0.9 -0.44 -0.44 0.9 81.04 447.65)" fill="#0006B1"/>
 <g clip-path="url(#irhr-clip6_79_2059)">
@@ -92,7 +92,7 @@
 <path d="M1.8 571.1L-29.1 555.8" stroke-width="1.08" stroke="#F9FAFF"/>
 <path d="M8.6 458L-22.2 442.7" stroke-width="1.08" stroke="#F9FAFF"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(1.143,0,0,1.35,-0.675,-127.157)"><g filter="url(#irhr-filter10_ii_79_939)">
+</g></g><g data-el="out" style="--closed:translate(calc(-19.958px*var(--ax)),464.489px) scale(var(--fit)) translate(19.958px,-464.489px);--open:matrix(1.143,0,0,1.35,-0.675,-127.157)"><g filter="url(#irhr-filter10_ii_79_939)">
 <g clip-path="url(#irhr-clip10_79_939)">
 <rect x="-111.44" y="475.72" width="111.28" height="146.95" transform="rotate(-59.86 -111.44 475.72)" fill="#0006B1"/>
 <path d="M9.1 483.8L22.7 460.3" stroke-width="0.85" stroke="#0006B1"/>
@@ -103,7 +103,7 @@
 <path d="M10.3 495.3L23.9 471.8" stroke-width="0.85" stroke="#0006B1"/>
 <path d="M37.7 488.6L46.3 473.9" stroke-width="0.85" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="in" style="--closed:matrix(1.021,0,0,1.008,-697.135,-503.736)"><g filter="url(#irhr-filter9_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:scale(var(--ax),1) matrix(1.021,0,0,1.008,-697.135,-503.736)"><g filter="url(#irhr-filter9_ii_79_2059)">
 <g clip-path="url(#irhr-clip7_79_2059)">
 <rect x="532" y="623.6" width="140.99" height="186.19" transform="rotate(-24.11 532 623.6)" fill="#0006B1"/>
 <g clip-path="url(#irhr-clip8_79_2059)">
@@ -125,7 +125,7 @@
 <path d="M606.3 750.1L637.8 736" stroke-width="1.08" stroke="#F9FAFF"/>
 <path d="M603.9 636.8L635.4 622.7" stroke-width="1.08" stroke="#F9FAFF"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(0.979,0,0,0.992,682.842,499.556)"><g filter="url(#irhr-filter4_ii_79_939)">
+</g></g><g data-el="out" style="--closed:scale(var(--ax),1);--open:matrix(0.979,0,0,0.992,682.842,499.556)"><g filter="url(#irhr-filter4_ii_79_939)">
 <g clip-path="url(#irhr-clip5_79_939)">
 <rect width="140.99" height="186.19" transform="matrix(-0.9 -0.44 -0.44 0.9 55.04 129.65)" fill="#0006B1"/>
 <g clip-path="url(#irhr-clip6_79_939)">
@@ -139,7 +139,7 @@
 <path d="M9.3 185.6L-33.2 164.6" stroke-width="1.08" stroke="#F9FAFF"/>
 <path d="M5.4 193.3L-25.4 178" stroke-width="1.08" stroke="#F9FAFF"/>
 </g>
-</g></g><g data-el="in" style="--closed:matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter11_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:translate(calc(121.167px*var(--ax)),406.103px) scale(var(--fit)) translate(-121.167px,-406.103px) matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter11_ii_79_2059)">
 <g clip-path="url(#irhr-clip9_79_2059)">
 <rect x="323.45" y="463" width="132.32" height="174.74" transform="rotate(17.32 323.45 463)" fill="#0006B1"/>
 <path d="M377 498.2L430 514.8" stroke-width="1.01" stroke="#0006B1"/>
@@ -164,7 +164,7 @@
 <path d="M365.9 517L396.7 526.6" stroke-width="1.01" stroke="#0006B1"/>
 <path d="M401.6 528.1L432.4 537.7" stroke-width="1.01" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(1,0,0,1,239.435,160)"><g filter="url(#irhr-filter8_ii_79_939)">
+</g></g><g data-el="out" style="--closed:translate(calc(121.167px*var(--ax)),406.103px) scale(var(--fit)) translate(-121.167px,-406.103px);--open:matrix(1,0,0,1,239.435,160)"><g filter="url(#irhr-filter8_ii_79_939)">
 <g clip-path="url(#irhr-clip9_79_939)">
 <rect x="84.01" y="303" width="132.32" height="174.74" transform="rotate(17.32 84.01 303)" fill="#0006B1"/>
 <path d="M128.2 351.2L159.1 360.8" stroke-width="1.01" stroke="#0006B1"/>
@@ -185,9 +185,9 @@
 <path d="M127 385.7L157.9 395.3" stroke-width="1.01" stroke="#0006B1"/>
 <path d="M126.4 357L157.3 366.6" stroke-width="1.01" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter12_ii_79_2059)">
+</g></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter12_ii_79_2059)">
 <rect width="141" height="186" transform="translate(141.44 498.36) rotate(-29)" fill="#B5BEFF"/>
-</g></g><g data-el="in" style="--closed:matrix(1.143,0,0,1.35,-300.251,-86.096)"><g filter="url(#irhr-filter13_ii_79_2059)">
+</g></g><g data-el="in" style="--closed:scale(var(--ax),1) matrix(1.143,0,0,1.35,-300.251,-86.096)"><g filter="url(#irhr-filter13_ii_79_2059)">
 <g clip-path="url(#irhr-clip10_79_2059)">
 <rect x="128" y="635.72" width="111.28" height="146.95" transform="rotate(-59.86 128 635.72)" fill="#0006B1"/>
 <path d="M166.9 598.4L190.3 558" stroke-width="0.85" stroke="#0006B1"/>
@@ -212,7 +212,7 @@
 <path d="M180.2 611L193.8 587.5" stroke-width="0.85" stroke="#0006B1"/>
 <path d="M195.9 583.8L209.6 560.3" stroke-width="0.85" stroke="#0006B1"/>
 </g>
-</g></g><g data-el="out" style="--open:matrix(0.875,0,0,0.741,262.781,63.793)"><g filter="url(#irhr-filter6_ii_79_939)">
+</g></g><g data-el="out" style="--closed:scale(var(--ax),1);--open:matrix(0.875,0,0,0.741,262.781,63.793)"><g filter="url(#irhr-filter6_ii_79_939)">
 <g clip-path="url(#irhr-clip7_79_939)">
 <rect width="140.99" height="186.19" transform="matrix(-0.9 -0.44 -0.44 0.9 55.04 704.65)" fill="#0006B1"/>
 <g clip-path="url(#irhr-clip8_79_939)">
@@ -226,15 +226,15 @@
 <path d="M9.3 760.6L-33.2 739.6" stroke-width="1.08" stroke="#F9FAFF"/>
 <path d="M5.4 768.3L-25.4 753" stroke-width="1.08" stroke="#F9FAFF"/>
 </g>
-</g></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter14_ii_79_2059)">
+</g></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter14_ii_79_2059)">
 <rect width="141" height="186" transform="translate(271.64 540.69) rotate(-12)" fill="#B5BEFF"/>
-</g></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><rect x="261.44" y="508" width="121" height="175" fill="#D9DDFF"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><rect x="261.44" y="508" width="121" height="175" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><g clip-path="url(#irhr-clip11_79_2059)">
+</g></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><rect x="261.44" y="508" width="121" height="175" fill="#D9DDFF"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><rect x="261.44" y="508" width="121" height="175" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><g clip-path="url(#irhr-clip11_79_2059)">
 <rect width="43.06" height="43.06" transform="translate(282.68 524.96)" fill="#E6E9FF"/>
 <g filter="url(#irhr-filter15_ii_79_2059)">
 <path d="M313 539.1C313 543.9 309.1 547.8 304.3 547.8C299.5 547.8 295.5 543.9 295.5 539.1C295.5 534.3 299.5 530.3 304.3 530.3C309.1 530.3 313 534.3 313 539.1ZM311.3 539.1C311.3 540.9 310.5 542.7 309.2 544C307.9 545.4 306.1 546.1 304.3 546.1C302.4 546.1 300.7 545.4 299.3 544C298 542.7 297.3 540.9 297.3 539.1C297.3 537.2 298 535.5 299.3 534.1C300.7 532.8 302.4 532.1 304.3 532.1C306.1 532.1 307.9 532.8 309.2 534.1C310.5 535.5 311.3 537.2 311.3 539.1Z" fill-rule="evenodd" clip-rule="evenodd" fill="#000585"/>
 <path d="M310 549.6C309.9 549.6 309.8 549.6 309.7 549.6C309.6 549.7 309.5 549.7 309.5 549.8L306 559.7V556.6L305.5 553.1C305.7 553 305.8 553 306 552.8C306.1 552.7 306.2 552.6 306.2 552.4L306.6 550.7C306.7 550.5 306.7 550.4 306.6 550.3C306.6 550.2 306.6 550 306.5 549.9C306.4 549.8 306.3 549.7 306.2 549.7C306.1 549.6 305.9 549.6 305.8 549.6H302.8C302.7 549.6 302.5 549.6 302.4 549.7C302.3 549.7 302.2 549.8 302.1 549.9C302 550 302 550.2 301.9 550.3C301.9 550.4 301.9 550.5 301.9 550.7L302.4 552.4C302.4 552.6 302.5 552.7 302.6 552.8C302.7 553 302.9 553 303 553.1L302.5 556.6V558.9L299.1 549.8C299 549.7 299 549.7 298.9 549.6C298.8 549.6 298.7 549.6 298.6 549.6C298.3 549.7 297.9 549.8 297.6 549.8C295.6 550.3 293.2 550.9 291.9 551.7C290.3 552.7 289.4 553.9 289.4 555.3V568H319.2V555.3C319.2 553.9 318.2 552.7 316.7 551.7C315.4 550.9 313 550.3 311 549.8C310.6 549.7 310.3 549.7 310 549.6Z" fill="#000585"/>
 </g>
-</g></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 526.1H338.3" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 535.9H344.8" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 545.7H348.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M339.9 530.1H372.2" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M281.1 576.8L336.6 576.8" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M289.2 584.9H330.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 553.9H348.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M343.2 536.6H375.5" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M344.8 543.2H377.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><path d="M344.8 549.7H377.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter16_ii_79_2059)">
+</g></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 526.1H338.3" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 535.9H344.8" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 545.7H348.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M339.9 530.1H372.2" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M281.1 576.8L336.6 576.8" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M289.2 584.9H330.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M330.1 553.9H348.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M343.2 536.6H375.5" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M344.8 543.2H377.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><path d="M344.8 549.7H377.1" stroke-width="1.01" stroke="#0006B1"/></g><g data-el="move" style="--closed:scale(var(--ax),1) matrix(1,0,0,1,-239.435,-160)"><g filter="url(#irhr-filter16_ii_79_2059)">
 <path d="M346.6 550.5C346.6 571.7 329.4 588.9 308.2 588.9C287 588.9 269.8 571.7 269.8 550.5C269.8 529.3 287 512.1 308.2 512.1C329.4 512.1 346.6 529.3 346.6 550.5Z" stroke-width="4.04" stroke="#000585"/>
 <rect x="322.38" y="587.25" width="8.78" height="61.31" transform="rotate(-30.42 322.38 587.25)" fill="#000585"/>
 </g></g><defs><filter id="irhr-filter0_ii_79_939" x="73" y="2" width="208.27" height="228.99" filterUnits="userSpaceOnUse" color-interpolation-filters="sRGB">

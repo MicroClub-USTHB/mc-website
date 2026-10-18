@@ -8,7 +8,8 @@
  * move together, so a glyph or a label travels as one piece.
  *
  * Output: one SVG per department, drawn in open-card coordinates, where every shape is tagged:
- * - `data-el="move"`: in both variants; `--closed` is the CSS transform to its strip place;
+ * - `data-el="move"`: in both variants; `--closed` is the CSS transform to its strip place
+ *   (responsive: see `stripLayout`, with the page's `--ax` and `--fit`);
  * - `data-el="in"`: only in the open card, fades in (from its morph partner's place, `--closed`);
  * - `data-el="out"`: only in the closed strip, drawn there, fades out (towards `--open`).
  * The card texts, tab and frame are dropped: the page renders them.
@@ -26,6 +27,13 @@ const ART_BOTTOM = 785
 const TEXT_PAINTS = new Set(["#1E1B4B", "#54588B", "#000350"])
 /** Card texts sit in this top-left block of the open card. */
 const TEXT_BLOCK = { right: 470, bottom: 420 }
+/** Strip layout: connectors ink less than this share of their box, backgrounds cover more than
+ * this share of the strip, objects overlapping by more than this share of the smaller merge. */
+const CONNECTOR_INK = 0.15
+const BACKGROUND_AREA = 0.35
+const OVERLAP = 0.5
+/** Distance (px) within which a strip piece counts as touching an object. */
+const NEAR = 6
 /** Max fit error between two shapes, as a fraction of their size, to call them the same. */
 const FIT_TOLERANCE = 0.015
 
@@ -101,10 +109,13 @@ function parseTransform(text = "") {
 
 const apply = ([a, b, c, d, e, f], [x, y]) => [a * x + c * y + e, b * x + d * y + f]
 
-/** End and control points of a path: their hull contains the curve, enough to compare shapes. */
+/**
+ * End and control points of a path: their hull contains the curve, enough to compare shapes.
+ * `points.starts` marks where each subpath begins.
+ */
 function pathPoints(d) {
   const tokens = d.match(/[a-zA-Z]|-?(?:\d+\.?\d*|\.\d+)(?:[eE][-+]?\d+)?/g) ?? []
-  const points = []
+  const points = Object.assign([], { starts: [] })
   let [x, y, startX, startY] = [0, 0, 0, 0]
   let command = ""
   let i = 0
@@ -119,7 +130,10 @@ function pathPoints(d) {
       case "T":
         x = ox + next()
         y = oy + next()
-        if (command.toUpperCase() === "M") [startX, startY] = [x, y]
+        if (command.toUpperCase() === "M") {
+          ;[startX, startY] = [x, y]
+          points.starts.push(points.length)
+        }
         points.push([x, y])
         if (command === "M") command = "L"
         if (command === "m") command = "l"
@@ -206,8 +220,11 @@ function shapePoints(element) {
   }
 }
 
-/** Every drawn shape under `element`, with its paint and points in frame coordinates. */
-function leaves(element, defs, matrix = IDENTITY, inherited = "") {
+/**
+ * Every drawn shape under `element`, with its paint, its points in frame coordinates, the box of
+ * the clip paths around it and its painted area (shoelace over the path outline).
+ */
+function leaves(element, defs, matrix = IDENTITY, inherited = "", clip = null) {
   const own = multiply(matrix, parseTransform(element.attrs.transform))
   const paint = [
     inherited,
@@ -219,14 +236,65 @@ function leaves(element, defs, matrix = IDENTITY, inherited = "") {
   ]
     .filter(Boolean)
     .join("|")
-  if (element.tag === "g") return element.children.flatMap((c) => leaves(c, defs, own, paint))
+  const clipPath = defs.get(element.attrs["clip-path"]?.match(/#([^)]+)/)?.[1])
+  if (clipPath) {
+    const region = clipPath.children.flatMap((child) => leaves(child, defs, own))
+    if (region.length) clip = intersect(clip, bounds(region.flatMap((leaf) => leaf.points)))
+  }
+  if (element.tag === "g") {
+    return element.children.flatMap((child) => leaves(child, defs, own, paint, clip))
+  }
   if (element.tag === "use") {
     const target = defs.get((element.attrs["xlink:href"] ?? element.attrs.href ?? "").slice(1))
-    return target ? leaves(target, defs, own, paint) : []
+    return target ? leaves(target, defs, own, paint, clip) : []
   }
-  const points = shapePoints(element).map((point) => apply(own, point))
-  return points.length ? [{ paint, points }] : []
+  const local = shapePoints(element)
+  const points = local.map((point) => apply(own, point))
+  return points.length ? [{ paint, points, clip, area: area(points, local.starts) }] : []
 }
+
+/** Painted area of a leaf's outline (each subpath's shoelace area). */
+function area(points, starts = [0]) {
+  const ends = [...starts.slice(1), points.length]
+  return starts.reduce((total, start, k) => {
+    const ring = points.slice(start, ends[k])
+    const twice = ring.reduce((sum, [x, y], j) => {
+      const [nx, ny] = ring[(j + 1) % ring.length]
+      return sum + x * ny - nx * y
+    }, 0)
+    return total + Math.abs(twice) / 2
+  }, 0)
+}
+
+function intersect(a, b) {
+  if (!a) return b
+  const box = { x: Math.max(a.x, b.x), y: Math.max(a.y, b.y) }
+  box.right = Math.max(box.x, Math.min(a.right, b.right))
+  box.bottom = Math.max(box.y, Math.min(a.bottom, b.bottom))
+  box.size = Math.max(box.right - box.x, box.bottom - box.y, 1e-6)
+  return box
+}
+
+function union(boxes) {
+  const box = {
+    x: Math.min(...boxes.map((b) => b.x)),
+    y: Math.min(...boxes.map((b) => b.y)),
+    right: Math.max(...boxes.map((b) => b.right)),
+    bottom: Math.max(...boxes.map((b) => b.bottom)),
+  }
+  box.size = Math.max(box.right - box.x, box.bottom - box.y, 1e-6)
+  return box
+}
+
+const boxArea = (box) => (box.right - box.x) * (box.bottom - box.y)
+
+const grow = (box, by) => ({
+  x: box.x - by,
+  y: box.y - by,
+  right: box.right + by,
+  bottom: box.bottom + by,
+  size: box.size + 2 * by,
+})
 
 /** A filter's primitives, without ids: two inner shadows match whatever their node id. */
 function filterKind(reference, defs) {
@@ -250,7 +318,11 @@ function describe(element, defs) {
   const parts = leaves(element, defs)
   const points = parts.flatMap((part) => part.points)
   const key = parts.map((part) => `${part.paint}#${part.points.length}`).join(";")
-  return { element, points, key, box: bounds(points) }
+  const box = bounds(points)
+  // What shows: each part cut by its clip paths (Figma clips shapes to their frames).
+  const visible = union(parts.map((part) => intersect(part.clip, bounds(part.points))))
+  const ink = parts.reduce((total, part) => total + part.area, 0)
+  return { element, points, key, box, visible, ink }
 }
 
 /**
@@ -431,6 +503,59 @@ function boxMatrix(from, to) {
   return [sx, 0, 0, sy, to.x - sx * from.x, to.y - sy * from.y]
 }
 
+/**
+ * Responsive layout of the closed strip. The strip is drawn for 135×783px; on screen it is scaled
+ * with the panel height and may be wider or narrower than that. Each strip object (a group that
+ * moves as one, or a strip-only shape, merged with the objects it mostly overlaps: a card and its
+ * pin, a glyph on its square) keeps its shape: its centre follows the width (`--ax`) and it scales
+ * around it (`--fit`). Connectors (lines spanning the strip, mostly empty boxes) and backgrounds
+ * stretch with the width instead, so they still reach the objects they join.
+ * Returns each strip shape's layout: `{ stretch: true }` or `{ cx, cy }` (centre, strip units).
+ */
+function stripLayout(units, stripArea) {
+  const layout = new Map()
+  const objects = []
+  for (const unit of units) {
+    const box = union(unit.map((shape) => shape.visible))
+    const ink = unit.reduce((total, shape) => total + shape.ink, 0)
+    const [w, h] = [box.right - box.x, box.bottom - box.y]
+    const isConnector = w > 20 && h > 20 && ink < CONNECTOR_INK * boxArea(box)
+    if (isConnector || boxArea(box) > BACKGROUND_AREA * stripArea) {
+      for (const shape of unit) layout.set(shape, { stretch: true })
+    } else objects.push({ unit, box })
+  }
+  // Merge objects that mostly overlap (union-find), then centre each merged object.
+  const parent = objects.map((_, k) => k)
+  const root = (k) => (parent[k] === k ? k : (parent[k] = root(parent[k])))
+  objects.forEach((a, i) =>
+    objects.slice(i + 1).forEach((b, j) => {
+      // Touching counts: a small piece just beside an object (speed lines by a box) sticks to it.
+      const shared = boxArea(intersect(grow(a.box, NEAR), b.box))
+      if (shared > OVERLAP * Math.min(boxArea(a.box), boxArea(b.box)))
+        parent[root(i + 1 + j)] = root(i)
+    }),
+  )
+  const merged = new Map()
+  objects.forEach((object, k) => merged.set(root(k), [...(merged.get(root(k)) ?? []), object]))
+  for (const group of merged.values()) {
+    const box = union(group.map((object) => object.box))
+    const center = { cx: (box.x + box.right) / 2, cy: (box.y + box.bottom) / 2 }
+    for (const object of group) for (const shape of object.unit) layout.set(shape, center)
+  }
+  return layout
+}
+
+/** CSS transform placing a strip shape responsively (see `stripLayout`), before `matrix`. */
+function stripTransform(place, matrix) {
+  const tail = matrix ? ` matrix(${matrix.map(round).join(",")})` : ""
+  if (place.stretch) return `scale(var(--ax),1)${tail}`
+  const [cx, cy] = [round(place.cx), round(place.cy)]
+  return (
+    `translate(calc(${cx}px*var(--ax)),${cy}px) scale(var(--fit)) ` +
+    `translate(${-cx}px,${-cy}px)${tail}`
+  )
+}
+
 function invert([a, b, c, d, e, f]) {
   const det = a * d - b * c
   return [d / det, -b / det, -c / det, a / det, (c * f - d * e) / det, (b * e - a * f) / det]
@@ -498,11 +623,23 @@ function buildArt(id, closedSource, openSource) {
   const morphs = pairMorphs(closedOnly, openOnly, frame(closedSvg), frame(openSvg))
 
   const css = (matrix) => `matrix(${matrix.map(round).join(",")})`
-  // Open shapes, drawn at their strip place while closed: the inverse of the closed-to-open fit.
-  const closedPlace = new Map([
-    ...pairs.map((pair) => [pair.open, invert(pair.matrix)]),
-    ...morphs.map((morph) => [morph.open, invert(morph.matrix)]),
-  ])
+  // Strip objects: the groups that move as one, and the strip-only shapes.
+  const groups = new Map()
+  for (const pair of pairs)
+    groups.set(pair.matrix, [...(groups.get(pair.matrix) ?? []), pair.closed])
+  const [stripWidth, stripHeight] = [Number(closedSvg.attrs.width) - 4, ART_BOTTOM - 2]
+  const layout = stripLayout(
+    [...groups.values(), ...closedOnly.map((shape) => [shape])],
+    stripWidth * stripHeight,
+  )
+  // Open shapes, drawn at their strip place while closed: the inverse of the closed-to-open fit,
+  // then the strip's responsive layout.
+  const closedPlace = new Map(
+    [...pairs, ...morphs].map(({ closed, open, matrix }) => [
+      open,
+      stripTransform(layout.get(closed), invert(matrix)),
+    ]),
+  )
   // Strip-only shapes, drawn at their strip place, travel to their morph partner while open.
   // Layered as in the strip: right above the open twin of the strip shape they sit on.
   const openTwin = new Map([...pairs, ...morphs].map(({ closed, open }) => [closed, open]))
@@ -512,16 +649,17 @@ function buildArt(id, closedSource, openSource) {
     if (openTwin.has(shape)) anchor = openTwin.get(shape)
     if (!closedOnly.includes(shape)) continue
     const morph = morphs.find((candidate) => candidate.closed === shape)
-    const style = morph ? ` style="--open:${css(morph.matrix)}"` : ""
+    const open = morph ? `;--open:${css(morph.matrix)}` : ""
+    const style = ` style="--closed:${stripTransform(layout.get(shape))}${open}"`
     const markup = `<g data-el="out"${style}>${compact(raw(shape.element))}</g>`
     above.set(anchor, [...(above.get(anchor) ?? []), markup])
   }
 
   const body = [...(above.get(null) ?? [])]
   for (const shape of openShapes) {
-    const matrix = closedPlace.get(shape)
+    const closed = closedPlace.get(shape)
     const type = pairs.some((pair) => pair.open === shape) ? "move" : "in"
-    const style = matrix ? ` style="--closed:${css(matrix)}"` : ""
+    const style = closed ? ` style="--closed:${closed}"` : ""
     body.push(`<g data-el="${type}"${style}>${compact(raw(shape.element))}</g>`)
     body.push(...(above.get(shape) ?? []))
   }
@@ -538,10 +676,9 @@ function buildArt(id, closedSource, openSource) {
     .replace(/url\(#([^)]+)\)/g, `url(#${id}-$1)`)
     .replace(/href="#([^"]+)"/g, `href="#${id}-$1"`)
 
-  const groups = new Set(pairs.map((pair) => pair.matrix)).size
   const fades = closedOnly.length + openOnly.length - 2 * morphs.length
   const report =
-    `${pairs.length} moved (${groups} groups), ${morphs.length} morphed, ${fades} faded, ` +
+    `${pairs.length} moved (${groups.size} groups), ${morphs.length} morphed, ${fades} faded, ` +
     `${Math.round(svg.length / 1024)} KB`
   return { svg, report }
 }

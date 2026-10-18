@@ -41,9 +41,8 @@ const art = {
     "lg:motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
   ),
   open: "lg:[&_[data-el=out]]:[transform:var(--open,none)]",
-  // Strips are wider than the art's 135px design strip once scaled down: centred in them.
   closed:
-    "lg:[&_[data-el]]:[transform:translateX(var(--art-inset))_var(--closed,translate(0))] lg:[&_[data-el=in]]:opacity-0 lg:[&_[data-el=out]]:opacity-100",
+    "lg:[&_[data-el]]:[transform:var(--closed,none)] lg:[&_[data-el=in]]:opacity-0 lg:[&_[data-el=out]]:opacity-100",
 }
 
 /**
@@ -133,10 +132,11 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
           // 828px design): `--k` is its height over the design's, the scale of cards, tabs and art.
           "lg:h-full lg:[--k:tan(atan2(100cqh,51.75rem))]",
           // Strips share the content width (`100cqw`) with the design's gaps, scaled; the open card
-          // overflows it. `--art-inset` centres the 135px design strip art in them (art units).
+          // overflows it. The strip art lays itself out (see `scripts/department-art.mjs`): `--ax`
+          // is the strip's width over the scaled 135px design strip, `--fit` its objects' scale.
           "lg:[--gap:calc(1.5rem*var(--k))]",
           "lg:[--strip:calc((100cqw-(var(--count)-1)*var(--gap))/var(--count))]",
-          "lg:[--art-inset:calc((var(--strip)/var(--k)-8.4375rem)/2)]",
+          "lg:[--ax:tan(atan2(var(--strip),8.4375rem*var(--k)))] lg:[--fit:min(var(--ax),1.25)]",
           "lg:translate-x-(--shift) lg:flex-row lg:gap-(--gap) lg:motion-safe:transition-transform",
           transition,
         )}
