@@ -19,6 +19,10 @@ export type MicroBotApiEvent =
  * importing it from client code fails the build). Asks a question with `stream: true` and yields
  * the answer as it is written.
  *
+ * The API cites the documents an answer comes from as `[Title]` (`[Title A; Title B]`) after
+ * sentences and list items. Those are internal document names, not something to show a visitor,
+ * so they are removed, while streaming too (see `CitationFilter`).
+ *
  * Errors raised before the stream starts (auth, validation, the API's rate limit) come back as an
  * HTTP status and `{error: {code, message}}`; once streaming, they come as an `error` event. Both
  * end the iteration with one `error` event.
@@ -66,15 +70,17 @@ export async function* streamAnswer(
     return
   }
 
+  const citations = new CitationFilter()
   try {
     for await (const { event, data } of readEvents(response.body)) {
       if (event === "delta" && typeof data.text === "string") {
-        yield { type: "delta", text: data.text }
+        const text = citations.push(data.text)
+        if (text) yield { type: "delta", text }
       } else if (event === "done") {
-        // Sources stay here: the answer already cites them inline as `[Title]`.
+        // Sources stay here: their titles are internal document names.
         yield {
           type: "done",
-          answer: typeof data.answer === "string" ? data.answer : "",
+          answer: typeof data.answer === "string" ? stripCitations(data.answer) : "",
           conversationId: typeof data.conversation_id === "string" ? data.conversation_id : "",
         }
         return
@@ -125,6 +131,41 @@ async function* readEvents(body: ReadableStream<Uint8Array>) {
         yield { event, data: parsed as Record<string, unknown> }
       }
     }
+  }
+}
+
+/**
+ * A citation: brackets with no bracket inside, and the spaces before it (`October [Title].` reads
+ * `October.`). The API's prompt allows nothing else in square brackets; a Markdown link
+ * (`[text](url)`) is kept.
+ */
+const CITATION = /[ \t]*\[[^[\]\n]*\](?!\()/g
+/** An opening bracket longer than this without its closing one is plain text, not a citation. */
+const CITATION_MAX_LENGTH = 300
+
+function stripCitations(text: string) {
+  return text.replace(CITATION, "")
+}
+
+/**
+ * Removes citations from a streamed answer. A citation can arrive split across deltas
+ * (`… [General Info` then `rmations]`): text from an unclosed `[` (and the spaces before it) is
+ * held back until its `]` arrives, so a citation never flashes on screen.
+ */
+class CitationFilter {
+  private held = ""
+
+  push(delta: string) {
+    const text = this.held + delta
+    const open = text.lastIndexOf("[")
+    const unclosed = open !== -1 && !text.includes("]", open)
+    if (unclosed && text.length - open < CITATION_MAX_LENGTH) {
+      const start = text.slice(0, open).search(/[ \t]*$/)
+      this.held = text.slice(start)
+      return stripCitations(text.slice(0, start))
+    }
+    this.held = ""
+    return stripCitations(text)
   }
 }
 
