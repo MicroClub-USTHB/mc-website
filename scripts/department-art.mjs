@@ -15,11 +15,17 @@
  * - `data-el="out"`: only in the closed strip, drawn there, fades out (towards `--open`).
  * The card texts, tab and frame are dropped: the page renders them.
  *
+ * Every SVG is then minified with SVGO (`optimizeArt`): unused defs dropped, shorter path data,
+ * the tagged groups, their styles and the ids they reference kept as they are.
+ *
  * Usage: node scripts/department-art.mjs <exports dir> [out dir]
  * The exports dir holds Figma's `dep=<id>, state=<closed|open>.svg` files.
+ * Or: node scripts/department-art.mjs --optimize [art dir], to re-run only the final pass on the
+ * generated files.
  */
 import { readFileSync, writeFileSync } from "node:fs"
 import { join } from "node:path"
+import { optimize } from "svgo"
 
 const DEPARTMENTS = ["design", "marketing", "dev", "comm", "multi", "relex", "irhr", "ops"]
 /** Bottom of the art area in the frames: the footer tab starts below. */
@@ -731,17 +737,58 @@ function buildArt(id, closedSource, openSource) {
   return { svg, report }
 }
 
-// --- Run ---------------------------------------------------------------------------------------
+// --- Final pass --------------------------------------------------------------------------------
 
-const [inputDir, outputDir = "src/components/departments/art"] = process.argv.slice(2)
-if (!inputDir) {
-  console.error("Usage: node scripts/department-art.mjs <exports dir> [out dir]")
-  process.exit(1)
+/**
+ * SVGO, limited to lossless-looking size cuts: the Figma exports carry the defs of both variants
+ * (clips, filters) whether a kept shape uses them or not, and verbose absolute path data. Nothing
+ * that could change the tagged groups runs (no group collapsing, transform or style rewriting),
+ * and ids keep their department prefix. Path data keeps two decimals: one drifted visibly once
+ * converted to relative commands.
+ */
+function optimizeArt(svg) {
+  const { data } = optimize(svg, {
+    multipass: true,
+    plugins: [
+      { name: "cleanupIds", params: { remove: true, minify: false } },
+      "removeUselessDefs",
+      {
+        name: "convertPathData",
+        params: { floatPrecision: 2, transformPrecision: 3, applyTransforms: false },
+      },
+      { name: "cleanupNumericValues", params: { floatPrecision: 2 } },
+      "removeEmptyContainers",
+    ],
+  })
+  return `${data}\n`
 }
 
-for (const id of DEPARTMENTS) {
-  const read = (state) => readFileSync(join(inputDir, `dep=${id}, state=${state}.svg`), "utf8")
-  const { svg, report } = buildArt(id, read("closed"), read("open"))
-  writeFileSync(join(outputDir, `${id}.svg`), svg)
-  console.log(`${id.padEnd(10)} ${report}`)
+// --- Run ---------------------------------------------------------------------------------------
+
+const ART_DIR = "src/components/departments/art"
+const kb = (text) => `${Math.round(text.length / 1024)} KB`
+
+if (process.argv[2] === "--optimize") {
+  const dir = process.argv[3] ?? ART_DIR
+  for (const id of DEPARTMENTS) {
+    const file = join(dir, `${id}.svg`)
+    const before = readFileSync(file, "utf8")
+    const after = optimizeArt(before)
+    writeFileSync(file, after)
+    console.log(`${id.padEnd(10)} ${kb(before)} -> ${kb(after)}`)
+  }
+} else {
+  const [inputDir, outputDir = ART_DIR] = process.argv.slice(2)
+  if (!inputDir) {
+    console.error("Usage: node scripts/department-art.mjs <exports dir> [out dir]")
+    console.error("   or: node scripts/department-art.mjs --optimize [art dir]")
+    process.exit(1)
+  }
+  for (const id of DEPARTMENTS) {
+    const read = (state) => readFileSync(join(inputDir, `dep=${id}, state=${state}.svg`), "utf8")
+    const { svg, report } = buildArt(id, read("closed"), read("open"))
+    const optimized = optimizeArt(svg)
+    writeFileSync(join(outputDir, `${id}.svg`), optimized)
+    console.log(`${id.padEnd(10)} ${report}, ${kb(optimized)} optimized`)
+  }
 }
