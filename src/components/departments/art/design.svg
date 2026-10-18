@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="0 0 610 832" fill="none" aria-hidden="true" focusable="false"><g data-el="in"><g filter="url(#design-filter0_f_79_1527)">
 <ellipse cx="14.5" cy="492.5" rx="66.5" ry="92.5" fill="#001EFF" fill-opacity="0.13"/>
-</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter1_ii_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146);--bar:translate(calc((var(--bl) + 290*var(--bax))*1px),-44.375px) scale(var(--bfit)) translate(-92.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter1_ii_79_1527)">
 <g clip-path="url(#design-clip1_79_1527)">
 <rect x="195" y="544" width="163" height="194" fill="#0B11BF"/>
 <g filter="url(#design-filter2_i_79_1527)">
@@ -18,16 +18,16 @@
 </g></g><g data-el="in"><g filter="url(#design-filter4_i_79_1527)">
 <rect x="353" y="540" width="10" height="10" fill="white"/>
 <rect x="352.25" y="539.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter5_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146);--bar:translate(calc((var(--bl) + 290*var(--bax))*1px),-44.375px) scale(var(--bfit)) translate(-92.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter5_i_79_1527)">
 <rect x="192" y="541" width="10" height="10" fill="white"/>
 <rect x="191.25" y="540.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
 </g></g><g data-el="in"><g filter="url(#design-filter6_i_79_1527)">
 <rect x="351" y="731" width="10" height="10" fill="white"/>
 <rect x="350.25" y="730.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter7_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(131.625px*var(--ax)),495px) scale(var(--fit)) translate(-131.625px,-495px) matrix(1,0,0,1,-143,-146);--bar:translate(calc((var(--bl) + 290*var(--bax))*1px),-44.375px) scale(var(--bfit)) translate(-92.625px,-495px) matrix(1,0,0,1,-143,-146)"><g filter="url(#design-filter7_i_79_1527)">
 <rect x="192" y="731" width="10" height="10" fill="white"/>
 <rect x="191.25" y="730.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="in" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter8_ii_79_1527)">
+</g></g><g data-el="in" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225);--bar:translate(calc((var(--bl) + 75*var(--bax))*1px),-86.625px) scale(var(--bfit)) translate(-50.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter8_ii_79_1527)">
 <g clip-path="url(#design-clip2_79_1527)">
 <rect x="407" y="433" width="137" height="102" fill="#0B11BF"/>
 <g filter="url(#design-filter9_i_79_1527)">
@@ -43,7 +43,7 @@
 </g>
 </g>
 <rect x="407.75" y="433.75" width="135.5" height="100.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="out" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px);--open:matrix(1,0,0,1,449,-225)"><g filter="url(#design-filter7_ii_79_1471)">
+</g></g><g data-el="out" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px);--bar:translate(calc((var(--bl) + 75*var(--bax))*1px),-86.625px) scale(var(--bfit)) translate(-50.375px,-710px);--open:matrix(1,0,0,1,449,-225)"><g filter="url(#design-filter7_ii_79_1471)">
 <g clip-path="url(#design-clip2_79_1471)">
 <rect x="-42" y="658" width="137" height="102" fill="#0B11BF"/>
 <g filter="url(#design-filter8_i_79_1471)">
@@ -55,19 +55,19 @@
 </g>
 </g>
 <rect x="-41.25" y="658.75" width="135.5" height="100.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter11_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225);--bar:translate(calc((var(--bl) + 75*var(--bax))*1px),-86.625px) scale(var(--bfit)) translate(-50.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter11_i_79_1527)">
 <rect x="537" y="530" width="10" height="10" fill="white"/>
 <rect x="536.25" y="529.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
 </g></g><g data-el="in"><g filter="url(#design-filter12_i_79_1527)">
 <rect x="405" y="530" width="10" height="10" fill="white"/>
 <rect x="404.25" y="529.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter13_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(28.375px*var(--ax)),710px) scale(var(--fit)) translate(-28.375px,-710px) matrix(1,0,0,1,-449,225);--bar:translate(calc((var(--bl) + 75*var(--bax))*1px),-86.625px) scale(var(--bfit)) translate(-50.375px,-710px) matrix(1,0,0,1,-449,225)"><g filter="url(#design-filter13_i_79_1527)">
 <rect x="537" y="430" width="10" height="10" fill="white"/>
 <rect x="536.25" y="429.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
 </g></g><g data-el="in"><g filter="url(#design-filter14_i_79_1527)">
 <rect x="405" y="428" width="10" height="10" fill="white"/>
 <rect x="404.25" y="427.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter15_ii_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415);--bar:translate(calc((var(--bl) + 499*var(--bax))*1px),-80.625px) scale(var(--bfit)) translate(-56.375px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter15_ii_79_1527)">
 <g clip-path="url(#design-clip3_79_1527)">
 <rect x="6.7" y="413.28" width="118.6" height="183.6" fill="#0B11BF"/>
 <g filter="url(#design-filter16_i_79_1527)">
@@ -85,15 +85,15 @@
 </g>
 </g>
 <rect x="7.56" y="414.14" width="116.89" height="181.89" stroke="#E6E9FF" stroke-width="1.71"/>
-</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter19_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415);--bar:translate(calc((var(--bl) + 499*var(--bax))*1px),-80.625px) scale(var(--bfit)) translate(-56.375px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter19_i_79_1527)">
 <rect x="117.32" y="411" width="11.4" height="11.4" fill="white"/>
 <rect x="116.46" y="410.14" width="13.11" height="13.11" stroke="#E6E9FF" stroke-width="1.71"/>
-</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter20_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(55.875px*var(--ax)),286px) scale(var(--fit)) translate(-55.875px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415);--bar:translate(calc((var(--bl) + 499*var(--bax))*1px),-80.625px) scale(var(--bfit)) translate(-56.375px,-286px) matrix(0.877,0,0,0.877,-4.877,-157.415)"><g filter="url(#design-filter20_i_79_1527)">
 <rect x="119.6" y="588.89" width="11.4" height="11.4" fill="white"/>
 <rect x="118.74" y="588.04" width="13.11" height="13.11" stroke="#E6E9FF" stroke-width="1.71"/>
-</g></g><g data-el="move" style="--closed:translate(calc(-19px*var(--ax)),620px) scale(var(--fit)) translate(19px,-620px) matrix(1,0,0,1,-33,-57)"><g filter="url(#design-filter21_ii_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(-19px*var(--ax)),620px) scale(var(--fit)) translate(19px,-620px) matrix(1,0,0,1,-33,-57);--bar:translate(calc((var(--bl) + 165*var(--bax))*1px),-116.5px) scale(var(--bfit)) translate(-20.5px,-620px) matrix(1,0,0,1,-33,-57)"><g filter="url(#design-filter21_ii_79_1527)">
 <rect width="116" height="32" transform="translate(-44 661)" fill="#0006B1"/>
-</g></g><g data-el="move" style="--closed:translate(calc(121.625px*var(--ax)),65.875px) scale(var(--fit)) translate(-121.625px,-65.875px) matrix(1,0,0,1,-473,-621)"><g filter="url(#design-filter22_ii_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(121.625px*var(--ax)),65.875px) scale(var(--fit)) translate(-121.625px,-65.875px) matrix(1,0,0,1,-473,-621);--bar:translate(calc((var(--bl) + 718.125*var(--bax))*1px),-49.375px) scale(var(--bfit)) translate(-87.625px,-66.875px) matrix(1,0,0,1,-473,-621)"><g filter="url(#design-filter22_ii_79_1527)">
 <g clip-path="url(#design-clip4_79_1527)">
 <rect x="515" y="621" width="163" height="128" fill="#0B11BF"/>
 <g filter="url(#design-filter23_i_79_1527)">
@@ -105,10 +105,10 @@
 </g></g><g data-el="in"><g filter="url(#design-filter24_i_79_1527)">
 <rect x="510" y="617" width="10" height="10" fill="white"/>
 <rect x="509.25" y="616.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(121.625px*var(--ax)),65.875px) scale(var(--fit)) translate(-121.625px,-65.875px) matrix(1,0,0,1,-473,-621)"><g filter="url(#design-filter25_i_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(121.625px*var(--ax)),65.875px) scale(var(--fit)) translate(-121.625px,-65.875px) matrix(1,0,0,1,-473,-621);--bar:translate(calc((var(--bl) + 718.125*var(--bax))*1px),-49.375px) scale(var(--bfit)) translate(-87.625px,-66.875px) matrix(1,0,0,1,-473,-621)"><g filter="url(#design-filter25_i_79_1527)">
 <rect x="512" y="742" width="10" height="10" fill="white"/>
 <rect x="511.25" y="741.25" width="11.5" height="11.5" stroke="#E6E9FF" stroke-width="1.5"/>
-</g></g><g data-el="move" style="--closed:translate(calc(141px*var(--ax)),167px) scale(var(--fit)) translate(-141px,-167px) matrix(0.734,0,0,1,-300.975,-212)"><g filter="url(#design-filter26_ii_79_1527)">
+</g></g><g data-el="move" style="--closed:translate(calc(141px*var(--ax)),167px) scale(var(--fit)) translate(-141px,-167px) matrix(0.734,0,0,1,-300.975,-212);--bar:translate(calc((var(--bl) + 618*var(--bax))*1px),-27px) scale(var(--bfit)) translate(-110px,-167px) matrix(0.734,0,0,1,-300.975,-212)"><g filter="url(#design-filter26_ii_79_1527)">
 <rect width="158" height="32" transform="translate(523 363)" fill="#0006B1"/>
 </g></g><g data-el="in"><g filter="url(#design-filter27_ii_79_1527)">
 <path d="M636.2 40.3L610.3 56.6L606.9 21.6L601.8 49.6L571.2 17.3L589.6 57.3L557.4 39.9L582.9 71L554.3 72.9L581.5 83.3L558.5 100.3L584.8 93.9L573.2 124.9L597.7 103.5L608.2 132.9L615.1 102.4L642.1 115.4L621.3 83.9L652.9 74.4L620.6 67.8L636.2 40.3Z" fill="#0006B1"/>

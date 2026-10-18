@@ -30,19 +30,24 @@ const PEEK = 3
 const transition = "motion-safe:duration-700 motion-safe:ease-out-expo"
 
 /**
- * Illustration shapes, tagged by `scripts/department-art.mjs`. From `lg`, a closed strip draws
- * each shape at its strip place (`--closed`); opening moves them into the card along with the
- * widening, fades in the card-only shapes and fades out the strip-only ones towards their
- * partner (`--open`). The accordion always shows the card.
+ * Illustration shapes, tagged by `scripts/department-art.mjs`. A closed panel draws each shape at
+ * its place in the strip from `lg` (`--closed`), in the accordion's bar below (`--bar`); opening
+ * moves them into the card along with the widening, fades in the card-only shapes and fades out
+ * the strip-only ones towards their partner (`--open`).
  */
 const art = {
   base: cn(
     "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0] [&_[data-el]]:[transform-box:view-box]",
-    "lg:motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
+    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
   ),
-  open: "lg:[&_[data-el=out]]:[transform:var(--open,none)]",
-  closed:
-    "lg:[&_[data-el]]:[transform:var(--closed,none)] lg:[&_[data-el=in]]:opacity-0 lg:[&_[data-el=out]]:opacity-100",
+  open: "[&_[data-el=out]]:[transform:var(--open,none)]",
+  closed: cn(
+    "[&_[data-el=in]]:opacity-0 [&_[data-el=out]]:opacity-100",
+    // The bar's places are in strip units from its bottom-left corner, the top of the card art's
+    // window at y 362.2 (see `DepartmentArt`): `--bu` turns them into art units.
+    "[&_[data-el]]:[transform:translate(0,362.2px)_scale(var(--bu))_var(--bar)]",
+    "lg:[&_[data-el]]:[transform:var(--closed,none)]",
+  ),
 }
 
 /**
@@ -149,10 +154,21 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
               data-panel
               className={cn(
                 "relative isolate flex flex-col overflow-hidden border border-border bg-background",
+                // The accordion bar lays out the strip art (see `barTransform` in
+                // `scripts/department-art.mjs`), in the 135px strip's units: `--bu` is one in
+                // art units (the art spans the panel, 610 units), `--bl` the label's width,
+                // `--bax` the strip's length squeezed into the bar beside it, `--bfit` the scale
+                // of its objects. `--hh` is the header's height: the bar's, then the open card's.
+                "max-lg:[container-type:inline-size] max-lg:[--bh:6rem] max-lg:[--hh:var(--bh)]",
+                "max-lg:[--bw:8rem] sm:max-lg:[--bw:10rem]",
+                "max-lg:[--bl:tan(atan2(var(--bw)*135,var(--bh)))] max-lg:[--bu:tan(atan2(var(--bh)*610,100cqw*135))]",
+                "max-lg:[--bax:clamp(0.4,tan(atan2((100cqw-var(--bw))*135,var(--bh)*785)),1)] max-lg:[--bfit:clamp(0.55,var(--bax)*1.25,1)]",
                 "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width]",
                 transition,
                 art.base,
-                isOpen ? cn("lg:w-[calc(37.875rem*var(--k))]", art.open) : art.closed,
+                isOpen
+                  ? cn("max-lg:[--hh:3.5rem] lg:w-[calc(37.875rem*var(--k))]", art.open)
+                  : art.closed,
               )}
             >
               {/* First in the DOM (accordion header), the footer tab of the row from `lg`. */}
@@ -164,22 +180,32 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   aria-controls={`department-${panel.id}-card`}
                   onClick={() => show(isOpen ? null : index)}
                   className={cn(
-                    "flex w-full cursor-pointer items-center justify-between gap-3 border-border bg-accent px-6 py-3 paragraph-xl text-accent-foreground uppercase outline-none lg:justify-center lg:border-t lg:px-2 lg:py-2",
-                    "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset",
-                    // From `lg` the whole strip is the button, its focus ring framing the panel.
-                    "lg:after:absolute lg:after:inset-0 lg:focus-visible:ring-0 lg:focus-visible:after:ring-2 lg:focus-visible:after:ring-ring lg:focus-visible:after:ring-inset",
-                    isOpen && "border-b lg:border-b-0 lg:after:pointer-events-none",
+                    "flex h-(--hh) w-full cursor-pointer outline-none motion-safe:transition-[height] lg:h-auto",
+                    transition,
+                    // The whole strip (bar below `lg`) is the button, its focus ring framing it.
+                    "after:absolute after:inset-0 focus-visible:after:ring-2 focus-visible:after:ring-ring focus-visible:after:ring-inset",
+                    isOpen && "after:pointer-events-none",
                   )}
                 >
-                  {panel.tab}
-                  <span className="sr-only">, {panel.name}</span>
-                  <ChevronDownIcon
-                    aria-hidden
+                  {/* The tab: the bar's label at its start, the header once open. */}
+                  <span
                     className={cn(
-                      "size-5 shrink-0 transition-transform duration-300 ease-out-quart motion-reduce:transition-none lg:hidden",
-                      isOpen && "rotate-180",
+                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width] sm:paragraph-xl",
+                      "max-lg:border-r lg:w-full lg:justify-center lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
+                      transition,
+                      isOpen && "w-full border-b max-lg:border-r-0 lg:border-b-0",
                     )}
-                  />
+                  >
+                    {panel.tab}
+                    <span className="sr-only">, {panel.name}</span>
+                    <ChevronDownIcon
+                      aria-hidden
+                      className={cn(
+                        "ml-auto size-5 shrink-0 rotate-180 transition-opacity duration-300 ease-out-quart motion-reduce:transition-none lg:hidden",
+                        !isOpen && "opacity-0",
+                      )}
+                    />
+                  </span>
                 </button>
               </h3>
 
@@ -193,7 +219,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   isOpen && "grid-rows-[1fr]",
                 )}
               >
-                <div className="min-h-0 overflow-hidden">
+                <div className="flex min-h-0 flex-col overflow-hidden lg:block">
                   {/*
                     Card width from the start: the text never reflows while the panel widens.
                     Zoomed with the row, it keeps the design's line breaks at any height.

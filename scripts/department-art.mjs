@@ -9,7 +9,8 @@
  *
  * Output: one SVG per department, drawn in open-card coordinates, where every shape is tagged:
  * - `data-el="move"`: in both variants; `--closed` is the CSS transform to its strip place
- *   (responsive: see `stripLayout`, with the page's `--ax` and `--fit`);
+ *   (responsive: see `stripLayout`, with the page's `--ax` and `--fit`), `--bar` to its place in
+ *   the accordion's horizontal bar (see `barTransform`);
  * - `data-el="in"`: only in the open card, fades in (from its morph partner's place, `--closed`);
  * - `data-el="out"`: only in the closed strip, drawn there, fades out (towards `--open`).
  * The card texts, tab and frame are dropped: the page renders them.
@@ -23,6 +24,8 @@ import { join } from "node:path"
 const DEPARTMENTS = ["design", "marketing", "dev", "comm", "multi", "relex", "irhr", "ops"]
 /** Bottom of the art area in the frames: the footer tab starts below. */
 const ART_BOTTOM = 785
+/** The strip's design width (between its borders), the art's depth across the accordion bar. */
+const BAR_DEPTH = 135
 /** Colours of the outlined card texts (title, tagline, description, link). */
 const TEXT_PAINTS = new Set(["#1E1B4B", "#54588B", "#000350"])
 /** Card texts sit in this top-left block of the open card. */
@@ -510,19 +513,32 @@ function boxMatrix(from, to) {
  * pin, a glyph on its square) keeps its shape: its centre follows the width (`--ax`) and it scales
  * around it (`--fit`). Connectors (lines spanning the strip, mostly empty boxes) and backgrounds
  * stretch with the width instead, so they still reach the objects they join.
- * Returns each strip shape's layout: `{ stretch: true }` or `{ cx, cy }` (centre, strip units).
+ * Returns each strip shape's layout, in strip units: `{ stretch: true }` (connectors), or the
+ * centre of its object `{ cx, cy }`, with `{ bx, by }` the centre of its part inside the strip
+ * (the bar's, see `barTransform`); backgrounds are both `stretch` and centred.
  */
-function stripLayout(units, stripArea) {
+function stripLayout(units, strip) {
   const layout = new Map()
   const objects = []
+  const center = (box) => {
+    const inside = intersect(box, strip)
+    return {
+      cx: (box.x + box.right) / 2,
+      cy: (box.y + box.bottom) / 2,
+      bx: (inside.x + inside.right) / 2,
+      by: (inside.y + inside.bottom) / 2,
+    }
+  }
   for (const unit of units) {
     const box = union(unit.map((shape) => shape.visible))
     const ink = unit.reduce((total, shape) => total + shape.ink, 0)
     const [w, h] = [box.right - box.x, box.bottom - box.y]
     const isConnector = w > 20 && h > 20 && ink < CONNECTOR_INK * boxArea(box)
-    if (isConnector || boxArea(box) > BACKGROUND_AREA * stripArea) {
-      for (const shape of unit) layout.set(shape, { stretch: true })
-    } else objects.push({ unit, box })
+    const place = isConnector
+      ? { stretch: true }
+      : boxArea(box) > BACKGROUND_AREA * boxArea(strip) && { stretch: true, ...center(box) }
+    if (place) for (const shape of unit) layout.set(shape, place)
+    else objects.push({ unit, box })
   }
   // Merge objects that mostly overlap (union-find), then centre each merged object.
   const parent = objects.map((_, k) => k)
@@ -538,9 +554,8 @@ function stripLayout(units, stripArea) {
   const merged = new Map()
   objects.forEach((object, k) => merged.set(root(k), [...(merged.get(root(k)) ?? []), object]))
   for (const group of merged.values()) {
-    const box = union(group.map((object) => object.box))
-    const center = { cx: (box.x + box.right) / 2, cy: (box.y + box.bottom) / 2 }
-    for (const object of group) for (const shape of object.unit) layout.set(shape, center)
+    const place = center(union(group.map((object) => object.box)))
+    for (const object of group) for (const shape of object.unit) layout.set(shape, place)
   }
   return layout
 }
@@ -552,6 +567,32 @@ function stripTransform(place, matrix) {
   const [cx, cy] = [round(place.cx), round(place.cy)]
   return (
     `translate(calc(${cx}px*var(--ax)),${cy}px) scale(var(--fit)) ` +
+    `translate(${-cx}px,${-cy}px)${tail}`
+  )
+}
+
+/**
+ * The strip turned into the accordion's horizontal bar: a quarter turn clockwise, so the strip's
+ * foot (by its tab) lies by the bar's label, its width across the bar's height. Objects stay
+ * upright (backgrounds too): the centre of their part inside the strip follows the turn, the
+ * length squeezed by `--bax`, and they scale by `--bfit` around it, so an object hanging off the
+ * strip keeps its visible part in the bar. Connectors turn with the strip.
+ * In strip units from the bar's bottom-left corner (the page scales them, see
+ * `department-panels.tsx`); the art starts at `--bl`, the label's width.
+ */
+function barTransform(place, matrix, frameWidth) {
+  const tail = matrix ? ` matrix(${matrix.map(round).join(",")})` : ""
+  // The strip's middle on the bar's.
+  const across = -frameWidth / 2 - BAR_DEPTH / 2
+  if (place.stretch && place.bx === undefined)
+    return (
+      `translate(calc((var(--bl) + ${ART_BOTTOM}*var(--bax))*1px),${round(across)}px) ` +
+      `scale(var(--bax),1) rotate(90deg)${tail}`
+    )
+  const [cx, cy] = [round(place.bx), round(place.by)]
+  const along = `calc((var(--bl) + ${round(ART_BOTTOM - cy)}*var(--bax))*1px)`
+  return (
+    `translate(${along},${round(cx + across)}px) scale(var(--bfit)) ` +
     `translate(${-cx}px,${-cy}px)${tail}`
   )
 }
@@ -628,16 +669,21 @@ function buildArt(id, closedSource, openSource) {
   for (const pair of pairs)
     groups.set(pair.matrix, [...(groups.get(pair.matrix) ?? []), pair.closed])
   const [stripWidth, stripHeight] = [Number(closedSvg.attrs.width) - 4, ART_BOTTOM - 2]
-  const layout = stripLayout(
-    [...groups.values(), ...closedOnly.map((shape) => [shape])],
-    stripWidth * stripHeight,
-  )
+  const layout = stripLayout([...groups.values(), ...closedOnly.map((shape) => [shape])], {
+    // Inside the frame's 2px stroke.
+    x: 2,
+    y: 2,
+    right: 2 + stripWidth,
+    bottom: 2 + stripHeight,
+  })
   // Open shapes, drawn at their strip place while closed: the inverse of the closed-to-open fit,
   // then the strip's responsive layout.
+  const frameWidth = Number(closedSvg.attrs.width)
   const closedPlace = new Map(
     [...pairs, ...morphs].map(({ closed, open, matrix }) => [
       open,
-      stripTransform(layout.get(closed), invert(matrix)),
+      `--closed:${stripTransform(layout.get(closed), invert(matrix))};` +
+        `--bar:${barTransform(layout.get(closed), invert(matrix), frameWidth)}`,
     ]),
   )
   // Strip-only shapes, drawn at their strip place, travel to their morph partner while open.
@@ -650,7 +696,9 @@ function buildArt(id, closedSource, openSource) {
     if (!closedOnly.includes(shape)) continue
     const morph = morphs.find((candidate) => candidate.closed === shape)
     const open = morph ? `;--open:${css(morph.matrix)}` : ""
-    const style = ` style="--closed:${stripTransform(layout.get(shape))}${open}"`
+    const place = layout.get(shape)
+    const bar = barTransform(place, null, frameWidth)
+    const style = ` style="--closed:${stripTransform(place)};--bar:${bar}${open}"`
     const markup = `<g data-el="out"${style}>${compact(raw(shape.element))}</g>`
     above.set(anchor, [...(above.get(anchor) ?? []), markup])
   }
@@ -659,7 +707,7 @@ function buildArt(id, closedSource, openSource) {
   for (const shape of openShapes) {
     const closed = closedPlace.get(shape)
     const type = pairs.some((pair) => pair.open === shape) ? "move" : "in"
-    const style = closed ? ` style="--closed:${closed}"` : ""
+    const style = closed ? ` style="${closed}"` : ""
     body.push(`<g data-el="${type}"${style}>${compact(raw(shape.element))}</g>`)
     body.push(...(above.get(shape) ?? []))
   }
