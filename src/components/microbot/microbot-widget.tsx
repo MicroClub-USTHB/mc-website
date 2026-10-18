@@ -5,6 +5,7 @@ import { useLenis } from "lenis/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { XIcon } from "@/components/icons/x"
+import { AnswerText } from "@/components/microbot/answer-text"
 import { MessageInput } from "@/components/microbot/message-input"
 import { MicroBotLauncher } from "@/components/microbot/microbot-launcher"
 import { SuggestionChip } from "@/components/microbot/suggestion-chip"
@@ -229,6 +230,7 @@ export function MicroBotWidget({
                   message.role === "user" ? (
                     <motion.p
                       key={message.id}
+                      dir="auto"
                       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
@@ -237,17 +239,17 @@ export function MicroBotWidget({
                       {message.text}
                     </motion.p>
                   ) : (
-                    <motion.p
+                    <motion.div
                       key={message.id}
                       // Announced once complete, not word by word while it is written.
                       aria-busy={message.streaming || undefined}
                       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
-                      className="px-3 paragraph-md [overflow-wrap:anywhere] whitespace-pre-line text-muted-foreground"
+                      className="px-3"
                     >
-                      {message.text}
-                    </motion.p>
+                      <AnswerText text={message.text} streaming={message.streaming} />
+                    </motion.div>
                   ),
                 )}
 
