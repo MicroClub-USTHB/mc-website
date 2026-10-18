@@ -55,7 +55,7 @@ const art = {
  * Space) widens it into its card while the illustration's shapes travel from their strip layout
  * to the card's, like the Figma variants. The open row is wider than the content: it slides so
  * the open card stays in view, with a slice of its neighbours left to click. Clicking the open
- * card's tab or Escape folds the row back into the overview. Below `lg`, an accordion.
+ * card again (anywhere on it) or Escape folds the row back into the overview. Below `lg`, an accordion.
  * Client island: only the open state lives here, the content comes from the server.
  */
 export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
@@ -113,6 +113,16 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
     return () => observer.disconnect()
   })
 
+  /**
+   * Closes the open card on a click on it, except on its links and tab (they act on their own)
+   * or at the end of a text selection.
+   */
+  function closeOnClick(event: React.MouseEvent) {
+    if (event.target instanceof Element && event.target.closest("a, button")) return
+    if (window.getSelection()?.toString()) return
+    show(null)
+  }
+
   function handleKeyDown(event: React.KeyboardEvent) {
     if (event.key !== "Escape" || open === null) return
     const button = trackRef.current?.children[open]?.querySelector("button")
@@ -152,6 +162,8 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
             <div
               key={panel.id}
               data-panel
+              // Clicking anywhere on the open card closes it (its tab already does).
+              onClick={isOpen ? (event) => closeOnClick(event) : undefined}
               className={cn(
                 "relative isolate flex flex-col overflow-hidden border border-border bg-background",
                 // The accordion bar lays out the strip art (see `barTransform` in
@@ -167,7 +179,10 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 transition,
                 art.base,
                 isOpen
-                  ? cn("max-lg:[--hh:3.5rem] lg:w-[calc(37.875rem*var(--k))]", art.open)
+                  ? cn(
+                      "cursor-pointer max-lg:[--hh:3.5rem] lg:w-[calc(37.875rem*var(--k))]",
+                      art.open,
+                    )
                   : art.closed,
               )}
             >
