@@ -16,7 +16,8 @@
  * The card texts, tab and frame are dropped: the page renders them.
  *
  * Every SVG is then minified with SVGO (`optimizeArt`): unused defs dropped, shorter path data,
- * the tagged groups, their styles and the ids they reference kept as they are.
+ * the tagged groups, their styles and the ids they reference kept as they are. Colours that are
+ * mcoli-ui tokens become `var(--token)` (`THEME_COLORS`); the illustration-only ones stay.
  *
  * Usage: node scripts/department-art.mjs <exports dir> [out dir]
  * The exports dir holds Figma's `dep=<id>, state=<closed|open>.svg` files.
@@ -739,6 +740,45 @@ function buildArt(id, closedSource, openSource) {
 
 // --- Final pass --------------------------------------------------------------------------------
 
+/** Figma colours that are mcoli-ui tokens (light theme, `globals.css`), by upper-case hex. */
+const THEME_COLORS = {
+  "#0006B1": "--primary",
+  "#E6E9FF": "--secondary",
+  "#1E1B4B": "--card-foreground",
+  "#000585": "--secondary-foreground",
+  "#F9FAFF": "--muted",
+  "#D9DDFF": "--ring",
+}
+
+/**
+ * Paints the token colours with their CSS variable, so the art follows the theme. `var()` does
+ * not work in SVG presentation attributes (`fill="…"`), only in CSS: the paint moves into the
+ * element's `style`.
+ */
+function applyThemeTokens(svg) {
+  return svg.replace(/<([a-zA-Z][\w:-]*)(\s[^<>]*?)?(\/?)>/g, (tag, name, attrs = "", close) => {
+    const declarations = []
+    let rest = attrs.replace(
+      /\s(fill|stroke|stop-color|flood-color)="(#[0-9a-fA-F]{6})"/g,
+      (all, property, hex) => {
+        const token = THEME_COLORS[hex.toUpperCase()]
+        if (!token) return all
+        declarations.push(`${property}:var(${token})`)
+        return ""
+      },
+    )
+    if (!declarations.length) return tag
+    const style = rest.match(/\sstyle="([^"]*)"/)
+    if (style) {
+      const merged = `${style[1].replace(/;?$/, ";")}${declarations.join(";")}`
+      rest = rest.replace(style[0], ` style="${merged}"`)
+    } else {
+      rest += ` style="${declarations.join(";")}"`
+    }
+    return `<${name}${rest}${close}>`
+  })
+}
+
 /**
  * SVGO, limited to lossless-looking size cuts: the Figma exports carry the defs of both variants
  * (clips, filters) whether a kept shape uses them or not, and verbose absolute path data. Nothing
@@ -760,7 +800,7 @@ function optimizeArt(svg) {
       "removeEmptyContainers",
     ],
   })
-  return `${data}\n`
+  return `${applyThemeTokens(data)}\n`
 }
 
 // --- Run ---------------------------------------------------------------------------------------
