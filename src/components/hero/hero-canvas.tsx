@@ -9,6 +9,9 @@ import { CanvasNavigator, type NavigatorHandle } from "@/components/hero/canvas-
 import { HERO_CANVAS } from "@/const/hero"
 import { cn } from "@/lib/utils"
 
+/** Elements whose pointer presses are theirs, not a canvas drag. */
+const INTERACTIVE = "button, a, input, label, textarea, [contenteditable='true'], audio"
+
 const { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, gridSpacing } = HERO_CANVAS
 
 /**
@@ -93,6 +96,8 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
   /** Mouse (and pen) drag to pan; touch is left to the page, or to native scrolling while exploring. */
   function onPointerDown(event: React.PointerEvent<HTMLDivElement>) {
     if (event.pointerType === "touch" || event.button !== 0) return
+    // Controls on the canvas keep their own clicks, text selection and editing.
+    if ((event.target as Element).closest(INTERACTIVE)) return
     const viewport = event.currentTarget
     viewport.setPointerCapture(event.pointerId)
     setGrabbing(true)

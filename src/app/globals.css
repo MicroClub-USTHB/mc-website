@@ -21,6 +21,18 @@
 /* Two-column event card: large screens, and phones held sideways (short landscape). */
 @custom-variant wide (@media (width >= 64rem) or ((orientation: landscape) and (height <= 40rem)));
 
+/* Hero canvas illustrations (Figma "Elements"): the paper notes and their cards. Not mcoli-ui
+   colors: they only paint those drawings. */
+@theme {
+  --color-note: #fff6e5;
+  --color-note-ink: #d3c69a;
+  --color-note-highlight: #ffe9d0;
+  --color-todo-from: #ffedb0;
+  --color-todo-to: #eed47d;
+  --color-sticky-from: #ebb47c;
+  --color-sticky-to: #be854c;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);

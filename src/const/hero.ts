@@ -9,12 +9,26 @@ export const HERO_CANVAS = {
   gridSpacing: 38,
 } as const
 
+export type HeroCanvasItemId = "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card"
+
 export type HeroCanvasItem = {
-  id: string
+  id: HeroCanvasItemId
   /** Top-left corner on the canvas, in px from its top-left corner. */
   x: number
   y: number
+  /** Slight tilt, in degrees, like things pinned on a board. */
+  rotate?: number
 }
 
-/** Elements placed on the canvas, found while exploring it. Empty for now. */
-export const HERO_ITEMS: HeroCanvasItem[] = []
+/**
+ * Elements on the canvas. The first view (canvas centre, about 1440×900 on desktop) shows the
+ * sticky note, the to-do list and the top of the photobooth, so the board reads as a board with
+ * things to play with; the voice note and the AR card wait just off screen, found by exploring.
+ */
+export const HERO_ITEMS: HeroCanvasItem[] = [
+  { id: "sticky-note", x: 1010, y: 1170, rotate: -3 },
+  { id: "todo-list", x: 1760, y: 1220, rotate: 2 },
+  { id: "photobooth", x: 1400, y: 1560 },
+  { id: "voice-note", x: 2330, y: 960, rotate: -2 },
+  { id: "ar-card", x: 470, y: 1520, rotate: 4 },
+]
