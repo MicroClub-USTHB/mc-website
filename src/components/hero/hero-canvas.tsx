@@ -141,8 +141,8 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           style={{
             width: CANVAS_WIDTH,
             height: CANVAS_HEIGHT,
-            // Figma's dot grid, drawn with the border token.
-            backgroundImage: "radial-gradient(var(--border) 2.25px, transparent 2.5px)",
+            // Figma dot grid: 4px dots, measured #f7f7f7 on white.
+            backgroundImage: "radial-gradient(var(--color-canvas-dot) 2px, transparent 2.25px)",
             backgroundSize: `${gridSpacing}px ${gridSpacing}px`,
           }}
         >
