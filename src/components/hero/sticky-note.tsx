@@ -469,6 +469,8 @@ export function StickyNote() {
 
   return (
     <div className="relative h-[279px] w-[262.61px] rounded-[25px] bg-linear-to-b from-sticky-from to-sticky-to">
+      {/* Second sheet under the note: the light background behind the toolbar. */}
+      <div className="absolute top-[30.73px] left-[19.62px] h-[225.857px] w-[223.2px] rounded-[7.971px] bg-note" />
       <Image
         src={noteShape}
         alt=""
