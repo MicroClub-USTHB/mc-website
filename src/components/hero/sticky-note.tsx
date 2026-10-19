@@ -1,15 +1,15 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import {
-  BoldIcon,
-  ItalicIcon,
-  SquareCheckIcon,
-  StrikethroughIcon,
-  UnderlineIcon,
-} from "lucide-react"
+import Image, { type StaticImageData } from "next/image"
 
 import { cn } from "@/lib/utils"
+import boldIcon from "@/assets/hero/sticky-note/bold.svg"
+import checklistIcon from "@/assets/hero/sticky-note/checklist.svg"
+import italicIcon from "@/assets/hero/sticky-note/italic.svg"
+import noteShape from "@/assets/hero/sticky-note/note.svg"
+import strikethroughIcon from "@/assets/hero/sticky-note/strikethrough.svg"
+import underlineIcon from "@/assets/hero/sticky-note/underline.svg"
 
 /**
  * The note is a small rich text model (lines of characters with format bits) rendered into a
@@ -40,13 +40,32 @@ const INITIAL_TEXT = [
   "Pure relief from exams",
 ]
 
-const TOOLS = [
-  { id: "checklist", label: "Checklist", Icon: SquareCheckIcon },
-  { id: BOLD, label: "Bold", Icon: BoldIcon },
-  { id: ITALIC, label: "Italic", Icon: ItalicIcon },
-  { id: STRIKE, label: "Strikethrough", Icon: StrikethroughIcon },
-  { id: UNDERLINE, label: "Underline", Icon: UnderlineIcon },
-] as const
+/** Figma toolbar controls: icon and its box (px), the glyph drawn in the `note-icon` color. */
+const TOOLS: {
+  id: "checklist" | number
+  label: string
+  icon: StaticImageData
+  box: number
+  glyph: [number, number]
+}[] = [
+  { id: "checklist", label: "Checklist", icon: checklistIcon, box: 21.334, glyph: [17.78, 17.78] },
+  { id: BOLD, label: "Bold", icon: boldIcon, box: 20, glyph: [20, 20] },
+  { id: ITALIC, label: "Italic", icon: italicIcon, box: 20, glyph: [20, 20] },
+  {
+    id: STRIKE,
+    label: "Strikethrough",
+    icon: strikethroughIcon,
+    box: 21.334,
+    glyph: [21.334, 21.334],
+  },
+  {
+    id: UNDERLINE,
+    label: "Underline",
+    icon: underlineIcon,
+    box: 21.334,
+    glyph: [17.43, 17.82],
+  },
+]
 
 function toChars(text: string, f = 0): Char[] {
   return [...text].map((ch) => ({ ch, f }))
@@ -62,7 +81,7 @@ function render(editor: HTMLElement, lines: Line[]) {
     ...lines.map((line) => {
       const row = document.createElement("div")
       row.dataset.line = ""
-      row.className = "group flex items-start gap-2"
+      row.className = "group flex items-start gap-[7.659px]"
       if (line.check !== null) {
         row.dataset.checked = String(line.check)
         const box = document.createElement("span")
@@ -71,7 +90,7 @@ function render(editor: HTMLElement, lines: Line[]) {
         box.setAttribute("role", "checkbox")
         box.setAttribute("aria-checked", String(line.check))
         box.className =
-          "mt-1 size-3.25 shrink-0 cursor-pointer rounded-[0.2rem] border border-note-ink transition-colors group-data-[checked=true]:bg-note-ink"
+          "mt-[1.33px] size-[12.652px] shrink-0 cursor-pointer rounded-[3.282px] border-[1.094px] border-note-ink transition-colors group-data-[checked=true]:bg-note-ink"
         row.append(box)
       }
       const text = document.createElement("span")
@@ -449,61 +468,72 @@ export function StickyNote() {
   }, [])
 
   return (
-    <div className="grid size-80 place-items-center rounded-[2.125rem] bg-linear-to-b from-sticky-from to-sticky-to">
-      <div className="flex h-64 w-64 rotate-[4deg] flex-col rounded-lg bg-note p-4 shadow-[0_0.625rem_1rem_rgb(0_0_0/0.25)]">
-        <p className="font-sans text-2xl leading-none font-medium tracking-tighter text-note-ink uppercase">
-          <span aria-hidden>📌 </span>MC Events
-        </p>
-        <div
-          ref={editorRef}
-          contentEditable="true"
-          suppressContentEditableWarning
-          role="textbox"
-          aria-multiline="true"
-          aria-label="MC events note"
-          spellCheck={false}
-          onInput={() => {
-            if (editorRef.current) linesRef.current = parse(editorRef.current)
-          }}
-          onCompositionEnd={() => {
-            const selection = readSelection()
-            if (selection) commit(selection.start, selection.end)
-          }}
-          onPaste={onPaste}
-          onDrop={(event) => event.preventDefault()}
-          onMouseDown={onMouseDown}
-          className="mt-4 flex min-h-0 flex-1 cursor-text flex-col gap-1 overflow-y-auto font-sans text-sm leading-5 text-muted-foreground outline-none select-text [&_strong]:font-semibold"
-        />
-        <div
-          role="toolbar"
-          aria-label="Text formatting"
-          className="mt-3 flex items-center gap-1 border-t border-note-ink/40 pt-2"
-        >
-          {TOOLS.map(({ id, label, Icon }) => {
-            const pressed = id === "checklist" ? active.checklist : Boolean(active.formats & id)
-            return (
-              <button
-                key={label}
-                type="button"
-                aria-label={label}
-                aria-pressed={pressed}
-                // Keep the text selection: formats apply to it.
-                onMouseDown={(event) => event.preventDefault()}
-                onClick={() => {
-                  editorRef.current?.focus()
-                  if (id === "checklist") toggleChecklist()
-                  else toggleFormat(id)
-                }}
-                className={cn(
-                  "grid size-8 cursor-pointer place-items-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-note-highlight focus-visible:ring-2 focus-visible:ring-primary",
-                  pressed && "bg-note-highlight text-primary",
-                )}
-              >
-                <Icon aria-hidden className="size-4" />
-              </button>
-            )
-          })}
-        </div>
+    <div className="relative h-[279px] w-[262.61px] rounded-[25px] bg-linear-to-b from-sticky-from to-sticky-to">
+      <Image
+        src={noteShape}
+        alt=""
+        unoptimized
+        draggable={false}
+        className="absolute top-[10.75px] left-[4.01px] max-w-none"
+      />
+      <p className="absolute top-[14.92px] left-[33.72px] font-sans text-[23.299px] leading-[87.869px] font-medium tracking-[-1.398px] whitespace-nowrap text-note-ink uppercase">
+        MC Events
+      </p>
+      <div
+        ref={editorRef}
+        contentEditable="true"
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        aria-label="MC events note"
+        spellCheck={false}
+        onInput={() => {
+          if (editorRef.current) linesRef.current = parse(editorRef.current)
+        }}
+        onCompositionEnd={() => {
+          const selection = readSelection()
+          if (selection) commit(selection.start, selection.end)
+        }}
+        onPaste={onPaste}
+        onDrop={(event) => event.preventDefault()}
+        onMouseDown={onMouseDown}
+        className="absolute top-[98.55px] left-[36.27px] flex max-h-[104px] w-[182.19px] cursor-text [scrollbar-width:none] flex-col gap-[7px] overflow-y-auto font-sans text-sm leading-[15.318px] tracking-[-0.84px] text-muted-foreground outline-none select-text [&_strong]:font-semibold"
+      />
+      <div
+        role="toolbar"
+        aria-label="Text formatting"
+        className="absolute top-[223.71px] left-[61.83px] flex h-6 items-center gap-[6.222px]"
+      >
+        {TOOLS.map(({ id, label, icon, box, glyph }) => {
+          const pressed = id === "checklist" ? active.checklist : Boolean(active.formats & id)
+          return (
+            <button
+              key={label}
+              type="button"
+              aria-label={label}
+              aria-pressed={pressed}
+              // Keep the text selection: formats apply to it.
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={() => {
+                editorRef.current?.focus()
+                if (id === "checklist") toggleChecklist()
+                else toggleFormat(id as number)
+              }}
+              style={{ width: box, height: box }}
+              className={cn(
+                "-m-0.5 box-content grid cursor-pointer place-items-center rounded-md p-0.5 text-note-icon transition-colors outline-none hover:bg-note-highlight focus-visible:ring-2 focus-visible:ring-primary",
+                pressed && "bg-note-highlight",
+              )}
+            >
+              {/* The Figma icon as a mask, so it takes the token color. */}
+              <span
+                aria-hidden
+                className="bg-current mask-contain mask-center mask-no-repeat"
+                style={{ width: glyph[0], height: glyph[1], maskImage: `url(${icon.src})` }}
+              />
+            </button>
+          )
+        })}
       </div>
     </div>
   )

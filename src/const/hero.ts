@@ -26,8 +26,8 @@ export type HeroCanvasItem = {
  * things to play with; the voice note and the AR card wait just off screen, found by exploring.
  */
 export const HERO_ITEMS: HeroCanvasItem[] = [
-  { id: "sticky-note", x: 1010, y: 1170, rotate: -3 },
-  { id: "todo-list", x: 1760, y: 1220, rotate: 2 },
+  { id: "sticky-note", x: 1010, y: 1170 },
+  { id: "todo-list", x: 1760, y: 1220 },
   { id: "photobooth", x: 1400, y: 1560 },
   { id: "voice-note", x: 2330, y: 960 },
   { id: "ar-card", x: 470, y: 1520 },
