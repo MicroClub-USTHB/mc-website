@@ -30,5 +30,5 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "todo-list", x: 1760, y: 1220, rotate: 2 },
   { id: "photobooth", x: 1400, y: 1560 },
   { id: "voice-note", x: 2330, y: 960, rotate: -2 },
-  { id: "ar-card", x: 470, y: 1520, rotate: 4 },
+  { id: "ar-card", x: 470, y: 1520 },
 ]
