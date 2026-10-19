@@ -1,17 +1,40 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { PauseIcon, PlayIcon } from "lucide-react"
+import Image from "next/image"
 
 import { cn } from "@/lib/utils"
+import pauseIcon from "@/assets/hero/voice/pause.svg"
+import playIcon from "@/assets/hero/voice/play.svg"
 
-/** Waveform bar heights (px), drawn once like a recorded message. */
-const BARS = [
-  8, 14, 22, 12, 28, 18, 10, 24, 30, 16, 9, 20, 26, 14, 8, 18, 28, 22, 12, 16, 24, 10, 20, 14, 8,
+const AUDIO_SRC = "/hero/micro.mp3"
+
+/** Figma waveform: bar count and height range (px). */
+const BAR_COUNT = 23
+const BAR_MIN = 2
+const BAR_MAX = 16
+
+/** Figma bar heights, shown until the real audio is decoded. */
+const FIGMA_BARS = [
+  8, 14, 4, 16, 14, 10, 10, 10, 14, 10, 16, 10, 4, 10, 10, 10, 14, 10, 16, 10, 10, 4, 2,
 ]
 
-/** Shown before the audio metadata loads (the Figma timer). */
-const FALLBACK_DURATION = 30
+/** Loudness peak of each slice of the sound, scaled to the bar height range. */
+function waveform(buffer: AudioBuffer) {
+  const channels = Array.from({ length: buffer.numberOfChannels }, (_, i) =>
+    buffer.getChannelData(i),
+  )
+  const slice = Math.floor(buffer.length / BAR_COUNT)
+  const peaks = Array.from({ length: BAR_COUNT }, (_, bar) => {
+    let peak = 0
+    for (const data of channels) {
+      for (let i = bar * slice; i < (bar + 1) * slice; i++) peak = Math.max(peak, Math.abs(data[i]))
+    }
+    return peak
+  })
+  const loudest = Math.max(...peaks) || 1
+  return peaks.map((peak) => Math.round(BAR_MIN + (peak / loudest) * (BAR_MAX - BAR_MIN)))
+}
 
 function formatTime(seconds: number) {
   const total = Math.max(0, Math.ceil(seconds))
@@ -19,14 +42,32 @@ function formatTime(seconds: number) {
 }
 
 /**
- * Figma "Voice note": a message player. Play / pause the club audio; the waveform fills with the
- * progress and the timer counts down the time left.
+ * Figma "Voice": a voice message player for the club audio. The waveform is computed from the
+ * decoded sound itself and the timer from its real length: it counts down while playing, and the
+ * played part of the waveform turns primary.
  */
 export function VoiceNote() {
   const audioRef = useRef<HTMLAudioElement>(null)
-  const [playing, setPlaying] = useState(false)
-  const [duration, setDuration] = useState(FALLBACK_DURATION)
+  const [bars, setBars] = useState(FIGMA_BARS)
+  const [duration, setDuration] = useState<number | null>(null)
   const [current, setCurrent] = useState(0)
+  const [playing, setPlaying] = useState(false)
+
+  // Decode the file once to draw its real waveform.
+  useEffect(() => {
+    const controller = new AbortController()
+    const context = new AudioContext()
+    fetch(AUDIO_SRC, { signal: controller.signal })
+      .then((response) => response.arrayBuffer())
+      .then((data) => context.decodeAudioData(data))
+      .then((buffer) => {
+        setBars(waveform(buffer))
+        setDuration((known) => known ?? buffer.duration)
+      })
+      .catch(() => {}) // Keep the Figma bars.
+      .finally(() => void context.close())
+    return () => controller.abort()
+  }, [])
 
   // Smooth progress while playing (`timeupdate` only fires a few times per second).
   useEffect(() => {
@@ -48,43 +89,55 @@ export function VoiceNote() {
   }
 
   const progress = duration ? current / duration : 0
+  const active = playing || current > 0
 
   return (
-    <div className="flex flex-col items-start gap-2">
-      <div className="flex h-19.75 w-62.25 items-center gap-3 rounded-full bg-background px-4 shadow-[0_0.5rem_1.5rem_rgb(0_0_0/0.12)]">
+    <div className="flex w-[249px] flex-col items-start gap-1.5">
+      <div className="flex h-[49px] w-full items-center justify-center gap-2.5 overflow-clip rounded-lg border border-border bg-input p-2.5 shadow-xs">
         <button
           type="button"
           onClick={toggle}
           aria-label={playing ? "Pause the voice note" : "Play the voice note"}
-          className="grid size-11 shrink-0 cursor-pointer place-items-center rounded-full bg-primary text-primary-foreground transition-transform outline-none hover:scale-105 focus-visible:ring-4 focus-visible:ring-secondary"
+          className="size-[29px] shrink-0 cursor-pointer rounded-md outline-none focus-visible:ring-4 focus-visible:ring-secondary"
         >
-          {playing ? (
-            <PauseIcon aria-hidden className="size-5 fill-current" />
-          ) : (
-            <PlayIcon aria-hidden className="size-5 translate-x-px fill-current" />
-          )}
+          <Image
+            src={playing ? pauseIcon : playIcon}
+            alt=""
+            unoptimized
+            draggable={false}
+            className="size-[29px] max-w-none"
+          />
         </button>
 
-        <div aria-hidden className="flex h-8 flex-1 items-center gap-0.5">
-          {BARS.map((height, i) => (
-            <span
-              key={i}
-              style={{ height }}
-              className={cn(
-                "w-0.75 rounded-full transition-colors",
-                (i + 0.5) / BARS.length <= progress ? "bg-primary" : "bg-border",
-              )}
-            />
-          ))}
+        <div className="flex items-center gap-2">
+          <div aria-hidden className="flex items-center gap-1">
+            {bars.map((height, i) => (
+              <span
+                key={i}
+                style={{ height }}
+                className={cn(
+                  "w-0.5 rounded-[1px] transition-[height,background-color,opacity] duration-300",
+                  i < Math.round(progress * bars.length)
+                    ? "bg-primary opacity-80"
+                    : "bg-muted-foreground opacity-66",
+                )}
+              />
+            ))}
+          </div>
+          <span
+            aria-label="Time left"
+            className={cn(
+              "paragraph-sm whitespace-nowrap tabular-nums",
+              active ? "text-foreground" : "text-muted-foreground",
+            )}
+          >
+            {formatTime((duration ?? 0) - current)}
+          </span>
         </div>
-
-        <span className="w-9 shrink-0 paragraph-xs text-muted-foreground tabular-nums">
-          {formatTime(duration - current)}
-        </span>
 
         <audio
           ref={audioRef}
-          src="/hero/micro.mp3"
+          src={AUDIO_SRC}
           preload="metadata"
           onLoadedMetadata={(event) => setDuration(event.currentTarget.duration)}
           onPlay={() => setPlaying(true)}
@@ -95,7 +148,7 @@ export function VoiceNote() {
           }}
         />
       </div>
-      <p className="ps-4 paragraph-sm font-medium text-destructive">Warning its is loud!</p>
+      <p className="paragraph-md text-destructive">Warning its is loud!</p>
     </div>
   )
 }
