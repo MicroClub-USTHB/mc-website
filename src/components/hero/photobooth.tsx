@@ -3,7 +3,7 @@
 import { useState } from "react"
 import Image from "next/image"
 import { ArrowDownIcon } from "lucide-react"
-import * as motion from "motion/react-client"
+import { motion } from "motion/react"
 
 import { McButton } from "@/components/ui/mc-button"
 import { EASE_OUT_QUART } from "@/lib/easing"

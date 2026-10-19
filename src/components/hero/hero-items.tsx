@@ -1,3 +1,4 @@
+import { ArCard } from "@/components/hero/ar-card"
 import { Photobooth } from "@/components/hero/photobooth"
 import { VoiceNote } from "@/components/hero/voice-note"
 import { TodoList } from "@/components/hero/todo-list"
@@ -7,6 +8,7 @@ const ITEMS: Partial<Record<HeroCanvasItemId, React.ComponentType>> = {
   "todo-list": TodoList,
   photobooth: Photobooth,
   "voice-note": VoiceNote,
+  "ar-card": ArCard,
 }
 
 /** The canvas elements, each at its place from `HERO_ITEMS`. */
