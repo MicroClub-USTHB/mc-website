@@ -5,13 +5,14 @@ import { useLenis } from "lenis/react"
 import { AnimatePresence, motion, useReducedMotion } from "motion/react"
 
 import { XIcon } from "@/components/icons/x"
+import { AnswerText } from "@/components/microbot/answer-text"
 import { MessageInput } from "@/components/microbot/message-input"
 import { MicroBotLauncher } from "@/components/microbot/microbot-launcher"
 import { SuggestionChip } from "@/components/microbot/suggestion-chip"
 import { ThinkingStatus } from "@/components/microbot/thinking-status"
-import { MICROBOT_ERROR_ANSWER, MICROBOT_NAME, type MicroBotMessage } from "@/const/microbot"
+import { askMicroBot } from "@/actions/ask-microbot"
+import { MICROBOT_ERRORS, MICROBOT_NAME, type MicroBotMessage } from "@/const/microbot"
 import { EASE_OUT_EXPO } from "@/lib/easing"
-import { ask } from "@/lib/microbot"
 import { cn } from "@/lib/utils"
 
 /** Below `sm` the panel covers the whole screen, so it behaves as a modal dialog. */
@@ -37,7 +38,10 @@ type MicroBotWidgetProps = {
 }
 
 /**
- * Client island of the Ask MicroBot assistant: open state, conversation and answer loading. Fixed
+ * Client island of the Ask MicroBot assistant: open state, conversation and answer loading. Answers
+ * come from the Micro Bot API through the `askMicroBot` Server Action, streamed as they are
+ * written; the conversation id it returns is sent with the next question, so follow-ups keep
+ * their context (the API forgets a conversation after 30 idle minutes and starts a new one). Fixed
  * bottom right: launcher, and the panel above it, in a complementary
  * landmark outside `<main>`. The panel only renders while open, so the chat never adds content to
  * the page that search engines index.
@@ -62,6 +66,7 @@ export function MicroBotWidget({
   const scrollRef = useRef<HTMLDivElement>(null)
   const panelRef = useRef<HTMLElement>(null)
   const nextId = useRef(0)
+  const conversationId = useRef<string | undefined>(undefined)
   const wasOpen = useRef(false)
   const lenis = useLenis()
   const phone = useSyncExternalStore(subscribePhone, isPhone, () => false)
@@ -120,19 +125,43 @@ export function MicroBotWidget({
     el?.scrollTo({ top: el.scrollHeight, behavior: reduceMotion ? "auto" : "smooth" })
   }, [messages, loading, open, reduceMotion])
 
+  /** Updates the answer being written (the last message), or starts it. */
+  const writeAnswer = (id: number, update: (text: string) => string, streaming: boolean) =>
+    setMessages((m) =>
+      m.some((message) => message.id === id)
+        ? m.map((message) =>
+            message.id === id ? { ...message, text: update(message.text), streaming } : message,
+          )
+        : [...m, { id, role: "bot", text: update(""), streaming }],
+    )
+
   const send = async (question: string) => {
     const text = question.trim()
     if (!text || loading) return
     setMessages((m) => [...m, { id: nextId.current++, role: "user", text }])
     setLoading(true)
-    let answer: string
+    const answerId = nextId.current++
     try {
-      answer = await ask(text)
+      const reader = (await askMicroBot(text, conversationId.current)).getReader()
+      for (;;) {
+        const { done, value: event } = await reader.read()
+        if (done) break
+        if (event.type === "delta") {
+          // The thinking status gives way to the answer as soon as it starts.
+          setLoading(false)
+          writeAnswer(answerId, (answer) => answer + event.text, true)
+        } else if (event.type === "done") {
+          conversationId.current = event.conversationId || conversationId.current
+          writeAnswer(answerId, () => event.answer, false)
+        } else {
+          writeAnswer(answerId, () => event.message, false)
+        }
+      }
     } catch {
-      answer = MICROBOT_ERROR_ANSWER
+      writeAnswer(answerId, () => MICROBOT_ERRORS.failed, false)
+    } finally {
+      setLoading(false)
     }
-    setMessages((m) => [...m, { id: nextId.current++, role: "bot", text: answer }])
-    setLoading(false)
   }
 
   const asked = new Set(messages.filter((m) => m.role === "user").map((m) => m.text))
@@ -201,6 +230,7 @@ export function MicroBotWidget({
                   message.role === "user" ? (
                     <motion.p
                       key={message.id}
+                      dir="auto"
                       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
@@ -209,15 +239,17 @@ export function MicroBotWidget({
                       {message.text}
                     </motion.p>
                   ) : (
-                    <motion.p
+                    <motion.div
                       key={message.id}
+                      // Announced once complete, not word by word while it is written.
+                      aria-busy={message.streaming || undefined}
                       initial={reduceMotion ? false : { opacity: 0, y: 8 }}
                       animate={{ opacity: 1, y: 0 }}
                       transition={{ duration: 0.4, ease: EASE_OUT_EXPO }}
-                      className="px-3 paragraph-md [overflow-wrap:anywhere] text-muted-foreground"
+                      className="px-3"
                     >
-                      {message.text}
-                    </motion.p>
+                      <AnswerText text={message.text} streaming={message.streaming} />
+                    </motion.div>
                   ),
                 )}
 

@@ -15,25 +15,25 @@ export const MICROBOT_SUGGESTIONS = [
 /** Chips shown again under an answer, so the next question is one click away. */
 export const MICROBOT_MAX_FOLLOW_UPS = 3
 
-/** Canned answers of the mock `ask()`, keyed by suggested question. */
-export const MICROBOT_ANSWERS: Record<string, string> = {
-  [MICROBOT_SUGGESTIONS[0]]:
-    "Micro Club brings students together around technology: IT, robotics and game development projects, workshops, events and a community to learn and build with.",
-  [MICROBOT_SUGGESTIONS[1]]:
-    "Yes. You do not need to know IT to join, Micro Club is also a place to learn from other members while working on projects.",
-  [MICROBOT_SUGGESTIONS[2]]:
-    "Reach out to the team through the Contact Us section and they will tell you how it works.",
-  [MICROBOT_SUGGESTIONS[3]]:
-    "In registrations, you can join us by pressing the JOIN button on top and filling the form.",
-}
+/** Longest question the API accepts. */
+export const MICROBOT_MAX_LENGTH = 2000
 
-export const MICROBOT_FALLBACK_ANSWER =
-  "I can't answer that yet. Please reach out to the team through the Contact Us section."
+/** Shown in the chat when an answer cannot be given, by cause. */
+export const MICROBOT_ERRORS = {
+  busy: "MicroBot is answering a lot of questions right now. Please try again in a minute.",
+  failed: "Something went wrong. Please try again in a moment.",
+} as const
 
-export const MICROBOT_ERROR_ANSWER = "Something went wrong. Please try again in a moment."
+/** What the chat receives while MicroBot answers (see `askMicroBot`). */
+export type MicroBotEvent =
+  | { type: "delta"; text: string }
+  | { type: "done"; answer: string; conversationId: string }
+  | { type: "error"; message: string }
 
 export type MicroBotMessage = {
   id: number
   role: "user" | "bot"
   text: string
+  /** The answer is still being written. */
+  streaming?: boolean
 }

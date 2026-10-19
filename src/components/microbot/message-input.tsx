@@ -4,6 +4,7 @@ import { useState } from "react"
 
 import { ArrowUpIcon } from "@/components/icons/arrow-up"
 import { McButton } from "@/components/ui/mc-button"
+import { MICROBOT_MAX_LENGTH } from "@/const/microbot"
 
 type MessageInputProps = {
   ref?: React.Ref<HTMLInputElement>
@@ -37,7 +38,7 @@ export function MessageInput({ ref, placeholder, busy, onSend }: MessageInputPro
         placeholder={placeholder}
         aria-label={placeholder.replace(/\s*\.+$/, "")}
         autoComplete="off"
-        maxLength={500}
+        maxLength={MICROBOT_MAX_LENGTH}
         className="min-w-0 flex-1 bg-transparent paragraph-md text-foreground caret-primary outline-none placeholder:text-muted-foreground"
       />
       <McButton
