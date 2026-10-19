@@ -52,7 +52,7 @@ export function Photobooth() {
       <span
         className={cn(
           buttonVariants({ variant: "primary", size: "sm", icon: "trailing" }),
-          "border-primary shadow-xs group-hover/booth:bg-secondary-foreground group-hover/booth:text-secondary group-focus-visible/booth:ring-4 group-focus-visible/booth:ring-secondary",
+          "border-primary shadow-[0_1px_2px_0_rgb(10_13_18/0.05)] group-hover/booth:bg-secondary-foreground group-hover/booth:text-secondary group-focus-visible/booth:ring-4 group-focus-visible/booth:ring-secondary",
         )}
       >
         PHOTOS HERE

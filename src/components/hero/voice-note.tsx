@@ -93,7 +93,7 @@ export function VoiceNote() {
 
   return (
     <div className="flex w-[249px] flex-col items-start gap-1.5">
-      <div className="flex h-[49px] w-full items-center justify-center gap-2.5 overflow-clip rounded-lg border border-border bg-input p-2.5 shadow-xs">
+      <div className="flex h-[49px] w-full items-center justify-center gap-2.5 overflow-clip rounded-lg border border-border bg-input p-2.5 shadow-[0_1px_2px_0_rgb(10_13_18/0.05)]">
         <button
           type="button"
           onClick={toggle}
