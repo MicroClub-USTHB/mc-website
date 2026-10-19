@@ -125,7 +125,9 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
         className={cn(
           "absolute inset-0 overflow-hidden select-none",
           // Native touch panning (with momentum) only while exploring.
-          exploring ? "overflow-auto overscroll-contain" : "touch-pan-y",
+          exploring
+            ? "[scrollbar-width:none] overflow-auto overscroll-contain [&::-webkit-scrollbar]:hidden"
+            : "touch-pan-y",
           grabbing ? "cursor-grabbing" : "cursor-grab",
         )}
       >

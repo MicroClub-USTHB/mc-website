@@ -1,6 +1,7 @@
 "use client"
 
 import { useImperativeHandle, useRef } from "react"
+import { Maximize2Icon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
@@ -91,6 +92,13 @@ export function CanvasNavigator({
       )}
     >
       <span ref={indicatorRef} aria-hidden className="absolute rounded-full bg-secondary" />
+      {onExplore && (
+        // Touch screens: a hint that the map opens the explore mode.
+        <Maximize2Icon
+          aria-hidden
+          className="absolute top-2 right-2 hidden size-4 text-muted-foreground pointer-coarse:block"
+        />
+      )}
     </button>
   )
 }
