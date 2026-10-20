@@ -529,9 +529,11 @@
 }
 
 /*
- * MicroBot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice, `>_▬` three times,
- * then the `>_<` wink. Each glyph shows on its own frames (`step-end` holds every keyframe).
+ * Micro Bot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice (with a pause on
+ * `>`), `>_▬` three times between `>_`, then the `>_<` wink. Each part shows on its own frames
+ * (`step-end` holds every keyframe): frame n starts at n × 8.333%.
  */
+/* `>` before the underscore appears: frames 0-3. */
 @keyframes microbot-prompt {
   0% {
     visibility: visible;
@@ -541,27 +543,35 @@
     visibility: hidden;
   }
 }
-@keyframes microbot-underscore {
-  0% {
-    visibility: hidden;
-  }
-  33.333%,
-  100% {
-    visibility: visible;
-  }
-}
+/* The block next to `>`: frames 0 and 2. */
 @keyframes microbot-prompt-block {
   0%,
-  16.667%,
+  16.667% {
+    visibility: visible;
+  }
+  8.333%,
+  25%,
   33.333%,
   100% {
     visibility: hidden;
   }
-  8.333%,
-  25% {
+}
+/* `>_`: frames 4, 6, 8, 10 and 11. */
+@keyframes microbot-underscore {
+  0%,
+  41.667%,
+  58.333%,
+  75% {
+    visibility: hidden;
+  }
+  33.333%,
+  50%,
+  66.667%,
+  83.333% {
     visibility: visible;
   }
 }
+/* `>_▬`: frames 5, 7 and 9. */
 @keyframes microbot-underscore-block {
   0%,
   50%,
@@ -576,6 +586,7 @@
     visibility: visible;
   }
 }
+/* The `<` of the wink: frames 10 and 11. */
 @keyframes microbot-wink {
   0% {
     visibility: hidden;
