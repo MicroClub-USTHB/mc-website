@@ -10,11 +10,13 @@ import foosball from "@/assets/hero/activities/foosball.webp"
 import printedPaper from "@/assets/hero/activities/printed-paper.webp"
 
 type Print = {
-  /** Box of the tilted print on the note, in px (Figma frame, tilt included). */
+  /** Box that holds the tilted print, in px (its bounding box, tilt included). */
   box: { left: number; top: number; width: number; height: number }
   rotate: number
-  /** Padding around the photo, as in Figma. */
-  padding: string
+  /** Size of the print and padding around the photo, as in Figma (the border is drawn inside). */
+  print: { width: number; height: number; padding: string }
+  /** Drop shadow offset and blur (Figma, 5% black). */
+  shadow: string
   /** Photo size in px. */
   photo: { width: number; height: number }
   /** Crop of the photo inside its frame (Figma image fill), when it is not a plain cover. */
@@ -26,25 +28,28 @@ type Print = {
 /** Figma "Printed Photo" frames, painted in this order (the last one on top). */
 const PRINTS: Print[] = [
   {
-    box: { left: 243.6, top: 0, width: 265.327, height: 195.727 },
+    box: { left: 210.53, top: 0, width: 265.327, height: 195.727 },
     rotate: 13.17,
-    padding: "px-[4.969px] py-[11.043px]",
+    print: { width: 238.519, height: 145.209, padding: "px-[4.969px] py-[11.043px]" },
+    shadow: "drop-shadow-[0_2.816px_7.51px_rgb(0_0_0/0.05)]",
     photo: { width: 211.465, height: 120.916 },
     src: foosball,
     alt: "Members playing foosball at a Micro Club event",
   },
   {
-    box: { left: 134.33, top: 161.56, width: 185.507, height: 221.544 },
+    box: { left: 134.34, top: 129.55, width: 185.507, height: 221.544 },
     rotate: -12.61,
-    padding: "p-[10.555px]",
+    print: { width: 146.653, height: 194.219, padding: "p-[10.555px]" },
+    shadow: "drop-shadow-[0_2.692px_7.179px_rgb(0_0_0/0.05)]",
     photo: { width: 125.543, height: 167.391 },
     src: chess,
     alt: "Members playing chess at a Micro Club event",
   },
   {
-    box: { left: 63.57, top: 37.92, width: 202.144, height: 231.521 },
+    box: { left: 0, top: 37.92, width: 202.144, height: 231.521 },
     rotate: 19.11,
-    padding: "p-[10.555px]",
+    print: { width: 146.653, height: 194.219, padding: "p-[10.555px]" },
+    shadow: "drop-shadow-[0_2.692px_7.179px_rgb(0_0_0/0.05)]",
     photo: { width: 125.543, height: 167.391 },
     crop: { left: "-33.25%", top: "-1.61%", width: "199.98%" },
     src: craft,
@@ -53,20 +58,21 @@ const PRINTS: Print[] = [
 ]
 
 /** One tilted printed photo: off-white paper, a hairline border and the photo inside. */
-function PrintedPhoto({ box, rotate, padding, photo, crop, src, alt }: Print) {
+function PrintedPhoto({ box, rotate, print, shadow, photo, crop, src, alt }: Print) {
   return (
     <div
       className="absolute flex items-center justify-center"
       style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
     >
       <div
-        style={{ rotate: `${rotate}deg` }}
+        style={{ rotate: `${rotate}deg`, width: print.width, height: print.height }}
         className={cn(
-          "relative flex flex-col items-center justify-center border border-border drop-shadow-[0_2.7px_7.2px_rgb(0_0_0/0.05)]",
-          padding,
+          "relative flex shrink-0 flex-col items-center justify-center",
+          shadow,
+          print.padding,
         )}
       >
-        <span aria-hidden className="absolute inset-0 bg-background">
+        <span aria-hidden className="absolute inset-0 bg-background ring-1 ring-border ring-inset">
           <Image
             src={printedPaper}
             alt=""
