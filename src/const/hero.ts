@@ -10,7 +10,7 @@ export const HERO_CANVAS = {
 } as const
 
 export type HeroCanvasItemId =
-  "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card" | "activities"
+  "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card" | "activities" | "stickers"
 
 export type HeroCanvasItem = {
   id: HeroCanvasItemId
@@ -33,4 +33,6 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "voice-note", x: 2330, y: 960 },
   { id: "ar-card", x: 470, y: 1520 },
   { id: "activities", x: 1790, y: 1690 },
+  // Last: the stickers sit over the other elements and span the whole canvas.
+  { id: "stickers", x: 0, y: 0 },
 ]

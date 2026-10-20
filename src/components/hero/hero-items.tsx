@@ -3,6 +3,7 @@ import { ArCard } from "@/components/hero/ar-card"
 import { Photobooth } from "@/components/hero/photobooth"
 import { VoiceNote } from "@/components/hero/voice-note"
 import { StickyNote } from "@/components/hero/sticky-note"
+import { Stickers } from "@/components/hero/stickers"
 import { TodoList } from "@/components/hero/todo-list"
 import { HERO_ITEMS, type HeroCanvasItemId } from "@/const/hero"
 
@@ -13,6 +14,7 @@ const ITEMS: Partial<Record<HeroCanvasItemId, React.ComponentType>> = {
   "voice-note": VoiceNote,
   "ar-card": ArCard,
   activities: Activities,
+  stickers: Stickers,
 }
 
 /** The canvas elements, each at its place from `HERO_ITEMS`. */
