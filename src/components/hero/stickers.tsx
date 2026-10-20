@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useState, useSyncExternalStore } from "react"
 import Image from "next/image"
 import { useReducedMotion } from "motion/react"
 
@@ -32,6 +32,14 @@ const TEXT_STICKERS = [
     y: 1362,
   },
 ]
+
+const HOVER = "(any-hover: hover)"
+const getCanHover = () => window.matchMedia(HOVER).matches
+function subscribeToHover(onChange: () => void) {
+  const query = window.matchMedia(HOVER)
+  query.addEventListener("change", onChange)
+  return () => query.removeEventListener("change", onChange)
+}
 
 /** Offset of a canvas point from the centre of the canvas, where the sticker peel counts from. */
 const fromCenter = (x: number, y: number) => ({
@@ -73,6 +81,8 @@ export function Stickers() {
   const [images, setImages] = useState<(string | null)[]>([])
   const [back, setBack] = useState<string>()
   const [moved, setMoved] = useState(false)
+  // Stickers only peel toward a pointer that can hover.
+  const canHover = useSyncExternalStore(subscribeToHover, getCanHover, () => true)
 
   useEffect(() => {
     let cancelled = false
@@ -93,13 +103,16 @@ export function Stickers() {
   const common = {
     backColor: back,
     swing: reduceMotion ? 0 : 1,
+    followPointer: canHover,
     intro: !reduceMotion,
   }
 
   return (
     <div
       aria-hidden
-      className="pointer-events-none absolute -top-0 -left-0 select-none"
+      // On touch screens the sticker hit areas would trap a swipe meant for the page, so they only
+      // react while the canvas is explored.
+      className="pointer-events-none absolute top-0 left-0 select-none pointer-coarse:[&_[data-sticker]]:pointer-events-none pointer-coarse:in-data-exploring:[&_[data-sticker]]:pointer-events-auto"
       style={{ width: HERO_CANVAS.width, height: HERO_CANVAS.height }}
     >
       {TEXT_STICKERS.map((sticker, i) =>

@@ -122,7 +122,10 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
   }
 
   return (
-    <div className={cn("relative h-full", exploring && "fixed inset-0 z-60 h-auto bg-background")}>
+    <div
+      data-exploring={exploring || undefined}
+      className={cn("relative h-full", exploring && "fixed inset-0 z-60 h-auto bg-background")}
+    >
       <div
         ref={viewportRef}
         onPointerDown={onPointerDown}
