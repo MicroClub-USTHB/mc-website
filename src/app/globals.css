@@ -33,6 +33,10 @@
   --color-todo-to: #eed47d;
   --color-sticky-from: #ebb47c;
   --color-sticky-to: #be854c;
+  /* Tool logos of the hero playground (their brand backgrounds). */
+  --color-brand-black: #191919;
+  --color-brand-slate: #242938;
+  --color-brand-teal: #00979c;
 }
 
 @theme inline {

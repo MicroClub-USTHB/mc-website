@@ -11,7 +11,7 @@ import { cn } from "@/lib/utils"
 
 /** Elements whose pointer presses are theirs, not a canvas drag. */
 const INTERACTIVE =
-  "button, a, input, label, textarea, [contenteditable='true'], audio, [data-sticker]"
+  "button, a, input, label, textarea, [contenteditable='true'], audio, [data-sticker], [data-body]"
 
 const { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, gridSpacing } = HERO_CANVAS
 

@@ -10,7 +10,14 @@ export const HERO_CANVAS = {
 } as const
 
 export type HeroCanvasItemId =
-  "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card" | "activities" | "stickers"
+  | "sticky-note"
+  | "todo-list"
+  | "photobooth"
+  | "voice-note"
+  | "ar-card"
+  | "activities"
+  | "stickers"
+  | "playground"
 
 export type HeroCanvasItem = {
   id: HeroCanvasItemId
@@ -33,6 +40,9 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "voice-note", x: 2330, y: 960 },
   { id: "ar-card", x: 470, y: 1520 },
   { id: "activities", x: 1790, y: 1690 },
+  // The playground sits on the floor of the canvas, centred: its world is 1440px wide and ends at
+  // the canvas bottom (3000 - 1024 frame - 640 sky).
+  { id: "playground", x: 780, y: 1336 },
   // Last: the stickers sit over the other elements and span the whole canvas.
   { id: "stickers", x: 0, y: 0 },
 ]
