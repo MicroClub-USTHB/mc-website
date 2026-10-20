@@ -73,12 +73,29 @@ export function createWorld(width: number, height: number, gravity = GRAVITY): W
   return { width, height, gravity, tiles: [], drag: null, stillSteps: 0 }
 }
 
-/** Adds a pinned, upright tile centered on `center`. */
-export function addTile(world: World, center: Point, width: number, height: number): Tile {
+type TileOptions = {
+  /** Starts released (simulated) instead of hanging in place. */
+  released?: boolean
+  /** Starting angle (rad). */
+  angle?: number
+  /** Starting velocity (px/step). */
+  velocity?: Point
+}
+
+/** Adds a tile centered on `center`: upright and pinned, unless `options` say otherwise. */
+export function addTile(
+  world: World,
+  center: Point,
+  width: number,
+  height: number,
+  { released = false, angle = 0, velocity = { x: 0, y: 0 } }: TileOptions = {},
+): Tile {
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
   const corner = (dx: number, dy: number): Corner => {
-    const x = center.x + dx
-    const y = center.y + dy
-    return { x, y, px: x, py: y, contact: null }
+    const x = center.x + dx * cos - dy * sin
+    const y = center.y + dx * sin + dy * cos
+    return { x, y, px: x - velocity.x, py: y - velocity.y, contact: null }
   }
   const w = width / 2
   const h = height / 2
@@ -86,10 +103,16 @@ export function addTile(world: World, center: Point, width: number, height: numb
     corners: [corner(-w, -h), corner(w, -h), corner(w, h), corner(-w, h)],
     width,
     height,
-    pinned: true,
+    pinned: !released,
   }
   world.tiles.push(tile)
   return tile
+}
+
+/** Takes a tile out of the world (and out of a drag, if it was grabbed). */
+export function removeTile(world: World, tile: Tile) {
+  world.tiles = world.tiles.filter((other) => other !== tile)
+  if (world.drag?.tile === tile) world.drag = null
 }
 
 /** Center and angle (rad) of a tile, for rendering. */
