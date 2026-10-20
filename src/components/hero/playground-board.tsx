@@ -5,7 +5,8 @@ import { cancelFrame, frame, useReducedMotion } from "motion/react"
 import { ArrowRightIcon } from "lucide-react"
 
 import { McButton } from "@/components/ui/mc-button"
-import { PLAYGROUND, PLAYGROUND_INPUT } from "@/const/playground"
+import { HERO_CANVAS } from "@/const/hero"
+import { PLAYGROUND, PLAYGROUND_INPUT, PLAYGROUND_ORIGIN } from "@/const/playground"
 import {
   addTile,
   createWorld,
@@ -19,7 +20,6 @@ import {
   tileAt,
   wake,
   type Tile,
-  type World,
 } from "@/lib/box-physics"
 import { cn } from "@/lib/utils"
 
@@ -29,12 +29,14 @@ const STEP = 1000 / 60
 const SETTLE_STEPS = 900
 /** Time (ms) a box fades for before it leaves, once the playground holds too many. */
 const FADE = 400
+/** Pointer travel (px) past which a press on the form is a drag, not a click or typing. */
+const DRAG_THRESHOLD = 4
 
 type Box = { id: number; text: string }
 
 /** What the board lends to the boxes dropped on it. */
 type BoardApi = {
-  /** Drops `element` from the sky as a new body; returns it. */
+  /** Drops `element` from the sky as a new body. */
   drop: (element: HTMLElement) => void
   /** Takes `element`'s body out of the world. */
   remove: (element: HTMLElement) => void
@@ -78,11 +80,11 @@ function DroppedBox({
 }
 
 /**
- * Client island of the playground: a world the size of the Figma frame plus the sky above it. Its
- * `[data-body]` children hang at their Figma positions until the first touch, then fall and pile up
- * with physics (`src/lib/box-physics.ts`, heavier gravity than the footer). With a mouse they can
- * be dragged and thrown. The input drops a new box from above the visible area. The input itself
- * is a fixed body: boxes land on it.
+ * Client island of the playground: a world as big as the canvas. Its `[data-body]` children hang at
+ * their Figma positions until the first touch, then fall and pile up with physics
+ * (`src/lib/box-physics.ts`, heavier gravity than the footer). With a mouse every body, the input
+ * included, can be dragged and thrown anywhere on the canvas, which is also what stops them. The
+ * input drops a new box from above the visible area.
  *
  * Reduced motion: dropped boxes are shown at rest at once, and dragging still works.
  */
@@ -131,21 +133,20 @@ export function PlaygroundBoard({ children }: { children: React.ReactNode }) {
       className={cn(
         "pointer-events-none absolute top-0 left-0 select-none",
         // Cursors of the bodies, set by `startPlayground`: open hand, closed hand while dragging.
-        "data-dragging:[&_[data-body]]:cursor-grabbing! data-ready:[&_[data-body]:not([data-fixed])]:cursor-grab",
+        "data-dragging:[&_[data-body]]:cursor-grabbing! data-ready:[&_[data-body]]:cursor-grab data-dragging:[&_[data-body]_*]:cursor-grabbing!",
       )}
-      style={{ width: PLAYGROUND.width, height: PLAYGROUND.height + PLAYGROUND.sky }}
+      style={{ width: HERO_CANVAS.width, height: HERO_CANVAS.height }}
     >
       {children}
 
       <form
         ref={formRef}
         data-body
-        data-fixed
         onSubmit={drop}
         className="pointer-events-auto absolute flex items-center gap-2"
         style={{
-          left: PLAYGROUND_INPUT.x,
-          top: PLAYGROUND_INPUT.y + PLAYGROUND.sky,
+          left: PLAYGROUND_ORIGIN.x + PLAYGROUND_INPUT.x,
+          top: PLAYGROUND_ORIGIN.y + PLAYGROUND_INPUT.y,
           width: PLAYGROUND_INPUT.width,
           height: PLAYGROUND_INPUT.height,
         }}
@@ -157,7 +158,7 @@ export function PlaygroundBoard({ children }: { children: React.ReactNode }) {
           placeholder={PLAYGROUND_INPUT.placeholder}
           aria-label="Write a message to drop on the pile"
           autoComplete="off"
-          className="h-[44px] w-[320px] min-w-0 rounded-lg border border-border bg-input px-3.5 py-[9px] paragraph-md text-foreground shadow-xs outline-none placeholder:text-muted-foreground focus-visible:ring-4 focus-visible:ring-ring"
+          className="h-[44px] w-[320px] min-w-0 rounded-lg border border-border bg-input px-3.5 py-[9px] paragraph-md text-foreground shadow-xs outline-none select-text placeholder:text-muted-foreground focus-visible:ring-4 focus-visible:ring-ring"
         />
         <McButton
           type="submit"
@@ -177,8 +178,8 @@ export function PlaygroundBoard({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Runs the physics of `board`: its `[data-body]` elements, the dropped boxes and the fixed form.
- * Returns the cleanup, which puts everything back in its layout place.
+ * Runs the physics of `board`: its `[data-body]` elements (the pile, the form) and the dropped
+ * boxes. Returns the cleanup, which puts everything back in its layout place.
  */
 function startPlayground(
   board: HTMLElement,
@@ -186,11 +187,7 @@ function startPlayground(
   api: React.RefObject<BoardApi | null>,
   { animate }: { animate: boolean },
 ) {
-  const world: World = createWorld(
-    PLAYGROUND.width,
-    PLAYGROUND.height + PLAYGROUND.sky,
-    PLAYGROUND.gravity,
-  )
+  const world = createWorld(HERO_CANVAS.width, HERO_CANVAS.height, PLAYGROUND.gravity)
   // Body, its element and its layout center (the `transform` is the offset from it).
   const bodies = new Map<HTMLElement, { tile: Tile; origin: { x: number; y: number } }>()
   let released = false
@@ -209,13 +206,11 @@ function startPlayground(
     })
   }
 
-  /** The first touch sets the whole pile free (the fixed form stays). */
+  /** The first touch sets the whole pile free. */
   function release() {
     if (released) return
     released = true
-    for (const [element, { tile }] of bodies) {
-      if (element !== form) tile.pinned = false
-    }
+    for (const { tile } of bodies.values()) tile.pinned = false
     wake(world)
   }
 
@@ -234,14 +229,16 @@ function startPlayground(
   api.current = {
     drop(element) {
       release()
-      // From the sky: just above what is on screen (the top of the world when it is not).
+      // From the sky: just above what is on screen, around the middle of it (the top of the
+      // canvas when the playground is not in view).
       const rect = board.getBoundingClientRect()
-      const visibleTop = Math.max(0, -rect.top)
       const width = element.offsetWidth
       const height = element.offsetHeight
-      const x = PLAYGROUND_INPUT.x + PLAYGROUND_INPUT.width / 2 + (Math.random() - 0.5) * 240
+      const visibleTop = Math.max(0, -rect.top)
+      const visibleMiddle = Math.max(0, -rect.left) + Math.min(window.innerWidth, rect.right) / 2
+      const x = visibleMiddle + (Math.random() - 0.5) * 240
       const y = Math.max(height, visibleTop - height - 40)
-      element.style.left = `${Math.min(Math.max(x, width / 2), PLAYGROUND.width - width / 2) - width / 2}px`
+      element.style.left = `${Math.min(Math.max(x, width / 2), HERO_CANVAS.width - width / 2) - width / 2}px`
       element.style.top = `${y - height / 2}px`
       const origin = center(element)
       const tile = addTile(world, origin, width, height, {
@@ -268,31 +265,68 @@ function startPlayground(
     return { x: event.clientX - rect.left, y: event.clientY - rect.top }
   }
 
-  function onPointerDown(event: PointerEvent) {
-    if (event.pointerType === "touch" || event.button !== 0) return
-    const target = event.target as HTMLElement
-    // The form and its controls keep their own presses (typing, clicking).
-    if (form.contains(target)) return
-    const point = toBoard(event)
-    const index = tileAt(world, point)
-    const tile = world.tiles[index]
-    const element = [...bodies].find(([, body]) => body.tile === tile)?.[0]
-    if (!tile || !element || element === form) return
-    event.preventDefault() // No text selection or native image drag.
+  // A press on the form is typing or a click until it travels; then it drags the form.
+  let press: { start: { x: number; y: number }; pointerId: number } | null = null
+  let dragged = false
+
+  function grab(tile: Tile, element: HTMLElement, point: { x: number; y: number }, id: number) {
     release()
     startDrag(world, tile, point)
     board.dataset.dragging = ""
-    element.setPointerCapture(event.pointerId)
+    element.setPointerCapture(id)
+  }
+
+  function onPointerDown(event: PointerEvent) {
+    if (event.pointerType === "touch" || event.button !== 0) return
+    const point = toBoard(event)
+    if (form.contains(event.target as Node)) {
+      press = { start: point, pointerId: event.pointerId }
+      // The pointer may leave the form before the drag starts: follow it on the window.
+      window.addEventListener("pointermove", onPointerMove)
+      window.addEventListener("pointerup", drop)
+      window.addEventListener("pointercancel", drop)
+      return
+    }
+    const tile = world.tiles[tileAt(world, point)]
+    const element = [...bodies].find(([, body]) => body.tile === tile)?.[0]
+    if (!tile || !element) return
+    event.preventDefault() // No text selection or native image drag.
+    grab(tile, element, point, event.pointerId)
   }
 
   function onPointerMove(event: PointerEvent) {
-    if (world.drag) moveDrag(world, toBoard(event))
+    const point = toBoard(event)
+    if (press && !world.drag) {
+      if (Math.hypot(point.x - press.start.x, point.y - press.start.y) <= DRAG_THRESHOLD) return
+      const tile = bodies.get(form)?.tile
+      if (!tile) return
+      dragged = true
+      // Leaves the field (focus, text selection) for the drag.
+      window.getSelection()?.removeAllRanges()
+      if (document.activeElement instanceof HTMLElement && form.contains(document.activeElement)) {
+        document.activeElement.blur()
+      }
+      grab(tile, form, press.start, press.pointerId)
+      moveDrag(world, point)
+      return
+    }
+    if (world.drag) moveDrag(world, point)
   }
 
   function drop() {
+    press = null
+    window.removeEventListener("pointermove", onPointerMove)
+    window.removeEventListener("pointerup", drop)
+    window.removeEventListener("pointercancel", drop)
     if (!world.drag) return
     endDrag(world)
     delete board.dataset.dragging
+  }
+
+  // The click that ends a drag started on the form (its button) must not submit it.
+  function onClick(event: MouseEvent) {
+    if (dragged) event.preventDefault()
+    dragged = false
   }
 
   board.addEventListener("pointerdown", onPointerDown)
@@ -301,6 +335,7 @@ function startPlayground(
   board.addEventListener("pointercancel", drop)
   // Capture lost (window blur, tab switch...): no pointerup will come.
   board.addEventListener("lostpointercapture", drop)
+  board.addEventListener("click", onClick, true)
 
   let pending = 0
   function tick({ delta }: { delta: number }) {
@@ -321,6 +356,10 @@ function startPlayground(
     board.removeEventListener("pointerup", drop)
     board.removeEventListener("pointercancel", drop)
     board.removeEventListener("lostpointercapture", drop)
+    board.removeEventListener("click", onClick, true)
+    window.removeEventListener("pointermove", onPointerMove)
+    window.removeEventListener("pointerup", drop)
+    window.removeEventListener("pointercancel", drop)
     delete board.dataset.ready
     delete board.dataset.dragging
     api.current = null

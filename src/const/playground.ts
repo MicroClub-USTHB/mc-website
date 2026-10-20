@@ -1,19 +1,25 @@
+import { HERO_CANVAS } from "@/const/hero"
+
 /**
  * Hero playground (Figma "lwasmo"): tools and skills badges piled at the bottom of the canvas,
- * with an input that drops new boxes from the sky. Sizes in px, positions on the Figma 1440×1024
- * frame (the pile at rest).
+ * with an input that drops new boxes from the sky. Everything moves in the whole canvas. Sizes in
+ * px, positions on the Figma 1440×1024 frame (the pile at rest).
  */
 export const PLAYGROUND = {
-  width: 1440,
-  height: 1024,
-  /** Free space above the Figma frame, where dropped boxes fall from. */
-  sky: 640,
+  /** The pile's Figma frame (1440×1024), centred on the floor of the canvas. */
+  frame: { width: 1440, height: 1024 },
   /** Gravity (px/step²), heavier than the footer tiles so the pile feels solid. */
   gravity: 0.6,
   /** Most boxes dropped at once: the oldest fades out past it. */
   maxDropped: 24,
   /** Longest message a box can carry. */
   maxLength: 80,
+} as const
+
+/** Top left of the Figma frame on the canvas: centred, on its floor. */
+export const PLAYGROUND_ORIGIN = {
+  x: (HERO_CANVAS.width - PLAYGROUND.frame.width) / 2,
+  y: HERO_CANVAS.height - PLAYGROUND.frame.height,
 } as const
 
 export type PlaygroundBodyId =
@@ -65,7 +71,7 @@ export const PLAYGROUND_BODIES: PlaygroundBody[] = [
   { id: "code", x: 1185, y: 876, width: 191.067, height: 67.583 },
 ]
 
-/** The input (Figma "Input Field"): fixed in the pile, the boxes land on it. */
+/** The input (Figma "Input Field"): part of the pile, it can be dragged like the rest. */
 export const PLAYGROUND_INPUT = {
   x: 348,
   y: 910,
