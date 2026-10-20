@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"
 
 import { LoadingDots } from "@/components/microbot/loading-dots"
 
-/** "Thinking 49.0s" status shown while MicroBot answers: counts the elapsed seconds. */
+/** "Thinking 49.0s" status shown while Micro Bot answers: counts the elapsed seconds. */
 export function ThinkingStatus() {
   const [elapsed, setElapsed] = useState(0)
 

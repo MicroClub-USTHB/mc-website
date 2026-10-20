@@ -7,7 +7,7 @@ const loop =
   "[animation-duration:5.04s] [animation-iteration-count:infinite] [animation-timing-function:step-end] motion-reduce:animate-none"
 
 /**
- * Glassy terminal screen of MicroBot, the face of the launcher (Figma "Expressions" variants:
+ * Glassy terminal screen of Micro Bot, the face of the launcher (Figma "Expressions" variants:
  * `>`, `>▬`, `>_`, `>_▬` and the `>_<` wink), typing then blinking in a 5.04s loop (12 frames of
  * 420ms, see the `microbot-*` keyframes in globals.css). Pure CSS, so it
  * never re-renders React and pauses with the tab. With reduced motion it stays on `>_▬`, the

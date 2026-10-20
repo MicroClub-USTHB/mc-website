@@ -47,7 +47,7 @@ const fromCenter = (x: number, y: number) => ({
   y: y - HERO_CANVAS.height / 2,
 })
 
-/** Figma "tooltip" over the MicroBot sticker: it follows the sticker and fades once it is moved. */
+/** Figma "tooltip" over the Micro Bot sticker: it follows the sticker and fades once it is moved. */
 function MicroBotTooltip({ hidden }: { hidden: boolean }) {
   return (
     <div
@@ -56,7 +56,7 @@ function MicroBotTooltip({ hidden }: { hidden: boolean }) {
       className="absolute bottom-[calc(50%+94px)] left-1/2 flex w-[136px] -translate-x-1/2 flex-col gap-2 rounded-sm bg-card p-4 drop-shadow-[0_1px_2px_var(--color-blue-primary-200)] transition-opacity duration-300 ease-out-quart data-hidden:opacity-0 motion-reduce:transition-none"
     >
       <p className="text-xs leading-[18px] font-semibold text-muted-foreground">
-        Hi, I am MicroBot !
+        Hi, I am Micro Bot !
       </p>
       <span className="absolute bottom-[-18px] left-[calc(50%+1.11px)] h-[18px] w-[20.785px] -translate-x-1/2 rotate-180">
         <Image

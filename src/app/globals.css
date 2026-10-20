@@ -547,7 +547,7 @@
 }
 
 /*
- * MicroBot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice, `>_▬` three times,
+ * Micro Bot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice, `>_▬` three times,
  * then the `>_<` wink. Each glyph shows on its own frames (`step-end` holds every keyframe).
  */
 @keyframes microbot-prompt {

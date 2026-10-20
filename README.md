@@ -77,7 +77,7 @@ Rendered in this order by `src/app/(site)/page.tsx`. Each section has an anchor 
 | 7   | Featured Events  | `FeaturedEvents`   | `#featured-events`   | Scaffold                      |
 | 8   | Trusted By       | `TrustedBy`        | `#trusted-by`        | Waiting for sponsors list     |
 | 9   | MC Community     | `Community`        | `#community`         | Scaffold                      |
-| 10  | Ask MicroBot     | `MicroBot`         | `#microbot`          | Chatbot that replaces the FAQ |
+| 10  | Ask Micro Bot    | `MicroBot`         | `#microbot`          | Chatbot that replaces the FAQ |
 | 11  | Contact Us       | `Contact`          | `#contact`           | Small contact form            |
 
 To add or reorder a section, update both `homeSections` in `src/config/site.ts` and `src/app/(site)/page.tsx`.

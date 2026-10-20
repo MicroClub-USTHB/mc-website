@@ -5,7 +5,7 @@ import { siteConfig } from "@/config/site"
 
 /**
  * Hero (Figma "HERO SECTION"): one screen of an explorable whiteboard (see `HeroCanvas`), under the
- * menu and the MicroBot launcher. Its elements are placed from `HERO_ITEMS` in
+ * menu and the Micro Bot launcher. Its elements are placed from `HERO_ITEMS` in
  * `src/const/hero.ts`. The page title stays in the HTML for search engines and
  * screen readers.
  */
