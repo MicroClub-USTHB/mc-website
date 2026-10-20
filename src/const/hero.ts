@@ -9,7 +9,8 @@ export const HERO_CANVAS = {
   gridSpacing: 38,
 } as const
 
-export type HeroCanvasItemId = "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card"
+export type HeroCanvasItemId =
+  "sticky-note" | "todo-list" | "photobooth" | "voice-note" | "ar-card" | "activities"
 
 export type HeroCanvasItem = {
   id: HeroCanvasItemId
@@ -31,4 +32,5 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "photobooth", x: 1400, y: 1560 },
   { id: "voice-note", x: 2330, y: 960 },
   { id: "ar-card", x: 470, y: 1520 },
+  { id: "activities", x: 1790, y: 1690 },
 ]
