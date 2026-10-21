@@ -2,44 +2,60 @@
 
 import Link from "next/link"
 import { usePathname } from "next/navigation"
-import { ArrowRightIcon, RocketIcon } from "lucide-react"
 
+import { ArrowUpRightIcon } from "@/components/icons/arrow-up-right"
+import { useMenu } from "@/components/site-menu/menu-context"
 import { siteRoutes } from "@/config/site"
+import { cn } from "@/lib/utils"
 
 /**
- * "JOIN NOW" button at the right end of the header bar, like "GET STARTED" on wondermake.xyz: it is
- * as tall as the toggle, bordered like it, and scrolls away with the page (not sticky). On hover or
- * focus the box lifts with a hard shadow, an arrow slides in on the left, pushing the label, and
- * the rocket takes off. Hidden on the registrations page itself. Stays under the open menu panel.
+ * Same as the menu links: the fill grows from the edge the pointer crossed and shrinks toward the
+ * edge it leaves by.
+ */
+function setFillOrigin(event: React.PointerEvent<HTMLAnchorElement>) {
+  const { top, height } = event.currentTarget.getBoundingClientRect()
+  const fromTop = event.clientY - top < height / 2
+  event.currentTarget.style.setProperty("--fill-origin", fromTop ? "top" : "bottom")
+}
+
+/**
+ * "JOIN NOW" cell at the right end of the fixed menu bar, the main call to action of the site.
+ * It is built like the rest of the bar: a square-cornered cell as tall as the toggle with the same
+ * hairline ring, the primary color (the toggle is white, the logo navy), the heading font in caps.
+ * It stays on screen over every section, light or dark, since the bar does too. Hover and focus
+ * flood it with the page color from the edge the pointer entered, like the menu links, and the
+ * arrow plays its animation. Over the open menu in its dark theme it takes the dark tokens too.
+ * Hidden on the registrations page itself.
  */
 export function JoinButton() {
   const pathname = usePathname()
+  const { open, dark } = useMenu()
   if (pathname === siteRoutes.registrations) return null
 
   return (
-    <div className="pointer-events-none absolute inset-x-0 top-0 z-30 mx-auto max-w-site">
+    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
       <Link
         href={siteRoutes.registrations}
-        className={[
+        onPointerEnter={setFillOrigin}
+        onPointerLeave={setFillOrigin}
+        className={cn(
+          open && dark && "dark",
           "group pointer-events-auto absolute top-(--menu-top) right-(--menu-left)",
-          "flex h-(--menu-size) min-w-[calc(var(--menu-size)*2.25)] items-center justify-between gap-3 bg-background px-[calc(var(--menu-size)*0.27)] text-foreground ring-1 ring-border outline-none max-sm:justify-center",
-          "transition-[transform,box-shadow,background-color] duration-400 ease-out-expo",
-          "hover:translate-x-1 hover:-translate-y-1 hover:shadow-[-4px_4px_0_0_var(--foreground)]",
-          "focus-visible:translate-x-1 focus-visible:-translate-y-1 focus-visible:shadow-[-4px_4px_0_0_var(--foreground)] focus-visible:ring-foreground",
-          "motion-reduce:transition-none motion-reduce:hover:translate-0 motion-reduce:focus-visible:translate-0",
-        ].join(" ")}
+          "flex h-(--menu-size) items-center gap-[calc(var(--menu-size)*0.14)] overflow-hidden bg-primary px-[calc(var(--menu-size)*0.3)] text-primary-foreground ring-1 ring-border outline-none",
+          "transition-colors duration-500",
+          "focus-visible:ring-4 focus-visible:ring-ring",
+        )}
       >
-        <ArrowRightIcon
+        <span
           aria-hidden
-          strokeWidth={2.5}
-          className="absolute left-[calc(var(--menu-size)*0.27)] size-4 -translate-x-2 opacity-0 transition-[opacity,translate] duration-400 ease-out-expo group-hover:translate-x-0 group-hover:opacity-100 group-focus-visible:translate-x-0 group-focus-visible:opacity-100"
+          className="absolute inset-0 origin-(--fill-origin,bottom) scale-y-0 bg-background transition-transform duration-400 ease-out-expo group-hover:scale-y-100 group-focus-visible:scale-y-100"
         />
-        <span className="font-heading text-[length:clamp(0.6875rem,calc(var(--menu-size)*0.1875),1rem)] leading-6 font-bold tracking-[0.1em] whitespace-nowrap uppercase transition-transform duration-400 ease-out-expo group-hover:translate-x-6 group-focus-visible:translate-x-6">
+        <span className="relative font-heading text-[length:clamp(0.75rem,calc(var(--menu-size)*0.2),1.0625rem)] leading-none font-medium tracking-[-0.01em] whitespace-nowrap uppercase transition-colors duration-150 group-hover:text-primary group-focus-visible:text-primary">
           Join now
         </span>
-        <RocketIcon
-          aria-hidden
-          className="size-5 shrink-0 transition-transform duration-400 ease-out-expo group-hover:translate-x-0.5 group-hover:-translate-y-0.5 group-hover:rotate-12 group-focus-visible:translate-x-0.5 group-focus-visible:-translate-y-0.5 group-focus-visible:rotate-12 max-sm:hidden"
+        <ArrowUpRightIcon
+          size={20}
+          className="relative transition-colors duration-150 group-hover:text-primary group-focus-visible:text-primary max-sm:hidden"
         />
       </Link>
     </div>
