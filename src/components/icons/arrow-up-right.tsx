@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef } from "react"
+import { useLayoutEffect, useRef } from "react"
 import { motion, useAnimation, useReducedMotion, type Variants } from "motion/react"
 
 import { cn } from "@/lib/utils"
@@ -40,7 +40,9 @@ export function ArrowUpRightIcon({ className, size = 16, ...props }: ArrowUpRigh
   const reduceMotion = useReducedMotion()
   const root = useRef<HTMLSpanElement>(null)
 
-  useEffect(() => {
+  // A layout effect: its cleanup runs before React removes the DOM, so the blur / pointerleave
+  // events that removal fires (a link that navigates away) no longer reach `controls.start`.
+  useLayoutEffect(() => {
     const icon = root.current
     if (!icon || reduceMotion) return
     const host = icon.closest<HTMLElement>("a, button") ?? icon
