@@ -173,7 +173,7 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
 
       {/* Figma: 95px above the bottom of the 1024px frame, centred. */}
       {!exploring && (
-        <ScrollHint className="absolute bottom-[95px] left-1/2 -translate-x-1/2 max-lg:bottom-6" />
+        <ScrollHint className="absolute bottom-[95px] left-1/2 -translate-x-1/2 max-lg:bottom-6 low:bottom-6" />
       )}
 
       {exploring && (
