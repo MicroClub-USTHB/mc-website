@@ -77,9 +77,15 @@ function Photo({ src, alt, ...layer }: Layer & { src: StaticImageData; alt: stri
   )
 }
 
-/** Drone sticker size: Figma "Default" variant, and its "Hover" / "Clicked" scale. */
-const DRONE = { x: 141.641, y: 244.117, width: 201.324, height: 230.485, rotate: -11.25 }
+/**
+ * Drone sticker: Figma "Default" variant, placed in its bounding box (tilt included). The "Hover"
+ * and "Clicked" variants are 215.622px wide instead of 201.324px and, as laid out in the Figma
+ * component set, grow from the bottom-left corner of that box and rise by 7px.
+ */
+const DRONE_BOX = { left: 141.641, top: 204.78, width: 242.48, height: 265.38 }
+const DRONE = { x: 0, y: 39.337, width: 201.324, height: 230.485, rotate: -11.25 }
 const DRONE_ZOOM = 215.622 / 201.324
+const DRONE_RISE = -7
 
 /**
  * Figma "Robotic Working Space": three printed photos of the robotics workshop (electronics, a
@@ -185,36 +191,41 @@ export function Robotics() {
       </div>
 
       {/* The drone sticker. */}
-      <div className="absolute" style={layerStyle(DRONE)}>
-        <motion.button
-          type="button"
-          aria-label="Robotics workspace: see its status"
-          aria-expanded={open}
-          aria-controls={titleId}
-          onClick={() => setOpen((value) => !value)}
-          onHoverStart={() => setHovered(true)}
-          onHoverEnd={() => setHovered(false)}
-          animate={{ scale: lifted ? DRONE_ZOOM : 1 }}
-          transition={{ duration: 0.4, ease: EASE_OUT_QUART }}
-          className="group/drone relative block size-full cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-secondary"
-        >
-          <span
-            aria-hidden
-            className={cn(
-              "absolute top-[-4.821px] left-[-0.918px] h-[233.927px] w-[202.781px] mask-contain mask-no-repeat transition-colors duration-300",
-              open ? "bg-blue-primary-300" : lifted ? "bg-background" : "bg-sticker-edge",
-            )}
-            style={{ maskImage: `url(${droneOutline.src})` }}
-          />
-          <Image
-            src={drone}
-            alt="A white drone"
-            sizes="202px"
-            draggable={false}
-            className="absolute top-0 left-0 h-[230.593px] w-[201.324px] max-w-none"
-          />
-        </motion.button>
-      </div>
+      <motion.div
+        className="absolute"
+        style={{ ...DRONE_BOX, transformOrigin: "0% 100%" }}
+        animate={lifted ? { scale: DRONE_ZOOM, y: DRONE_RISE } : { scale: 1, y: 0 }}
+        transition={{ duration: 0.4, ease: EASE_OUT_QUART }}
+      >
+        <div className="absolute" style={layerStyle(DRONE)}>
+          <motion.button
+            type="button"
+            aria-label="Robotics workspace: see its status"
+            aria-expanded={open}
+            aria-controls={titleId}
+            onClick={() => setOpen((value) => !value)}
+            onHoverStart={() => setHovered(true)}
+            onHoverEnd={() => setHovered(false)}
+            className="group/drone relative block size-full cursor-pointer outline-none focus-visible:ring-4 focus-visible:ring-secondary"
+          >
+            <span
+              aria-hidden
+              className={cn(
+                "absolute top-[-4.821px] left-[-0.918px] h-[233.927px] w-[202.781px] mask-contain mask-no-repeat transition-colors duration-300",
+                open ? "bg-blue-primary-300" : lifted ? "bg-background" : "bg-sticker-edge",
+              )}
+              style={{ maskImage: `url(${droneOutline.src})` }}
+            />
+            <Image
+              src={drone}
+              alt="A white drone"
+              sizes="202px"
+              draggable={false}
+              className="absolute top-0 left-0 h-[230.593px] w-[201.324px] max-w-none"
+            />
+          </motion.button>
+        </div>
+      </motion.div>
 
       {/* Pop up, over the photos. */}
       <AnimatePresence>
