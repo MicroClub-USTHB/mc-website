@@ -1,12 +1,13 @@
 "use client"
 
-import { createContext, useContext, useState, useSyncExternalStore } from "react"
+import { createContext, useContext, useRef, useState, useSyncExternalStore } from "react"
 import { useLenis } from "lenis/react"
 
 import {
   fieldId,
   focusField,
   scrollToRegistrationTop,
+  stepTitleId,
   STUDENT_ID_FIELD,
 } from "@/components/registrations/state/registration-focus"
 import {
@@ -46,8 +47,13 @@ type RegistrationContextValue = {
   next: () => void
   back: () => void
   goToStep: (step: number) => void
-  /** Validates every step, then sends the registration. */
+  /** Whether the review dialog (answers summary before sending) is open. */
+  reviewing: boolean
+  closeReview: () => void
+  /** Validates every step, then opens the review dialog. */
   submit: (honeypot: string) => void
+  /** Sends the registration, from the review dialog. */
+  confirmSubmit: () => void
   startOver: () => void
 }
 
@@ -106,6 +112,8 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
   const [studentId, setStudentIdFile] = useState<File | null>(null)
   const [studentIdError, setStudentIdError] = useState<string | null>(null)
   const [announcement, setAnnouncement] = useState("")
+  const [reviewing, setReviewing] = useState(false)
+  const honeypot = useRef("")
 
   const dirtyValues = useSyncExternalStore(
     store.subscribe,
@@ -134,6 +142,7 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
       `Step ${step + 1} of ${REGISTRATION_STEPS.length}: ${REGISTRATION_STEPS[step].name}`,
     )
     scrollToForm()
+    focusField(stepTitleId(step), true)
   }
 
   function resetForm() {
@@ -193,11 +202,20 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
       if (target > step && !validateUpTo(target)) return
       openStep(target)
     },
-    submit(honeypot) {
+    reviewing,
+    closeReview: () => setReviewing(false),
+    submit(trap) {
       if (submitting) return
       // Every step must be valid (a draft can restore on the last step with an earlier one broken).
       if (!validateUpTo(LAST_STEP + 1)) return
-      sendRegistration(honeypot)
+      honeypot.current = trap
+      setReviewing(true)
+    },
+    confirmSubmit() {
+      if (submitting) return
+      // The page button shows the progress; the modals of the outcome open over the form.
+      setReviewing(false)
+      sendRegistration(honeypot.current)
     },
     startOver() {
       resetForm()

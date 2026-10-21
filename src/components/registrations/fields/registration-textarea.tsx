@@ -19,15 +19,25 @@ export function RegistrationTextarea({ field, className, ...props }: Registratio
   const { id, value, error, onValueChange, onBlur } = useRegistrationField(field)
 
   return (
-    <McTextarea
-      id={id}
-      value={value}
-      error={error}
-      maxLength={ANSWER_MAX_LENGTH}
-      onChange={(event) => onValueChange(event.target.value)}
-      onBlur={onBlur}
-      className={cn(TEXTAREA_FIELD_CLASS, className)}
-      {...props}
-    />
+    <div className="relative">
+      <McTextarea
+        id={id}
+        value={value}
+        error={error}
+        maxLength={ANSWER_MAX_LENGTH}
+        onChange={(event) => onValueChange(event.target.value)}
+        onBlur={onBlur}
+        className={cn(TEXTAREA_FIELD_CLASS, className)}
+        {...props}
+      />
+      {value.length > 0 && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute top-43 right-3.5 text-sm leading-5 text-muted-foreground"
+        >
+          {value.length}/{ANSWER_MAX_LENGTH}
+        </span>
+      )}
+    </div>
   )
 }

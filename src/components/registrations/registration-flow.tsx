@@ -9,10 +9,13 @@ import {
   useRegistration,
   useRegistrationSelector,
 } from "@/components/registrations/state/registration-context"
+import { ReviewDialog } from "@/components/registrations/review-dialog"
 import { StepAbout } from "@/components/registrations/steps/step-about"
 import { StepAdditional } from "@/components/registrations/steps/step-additional"
 import { StepIndicator } from "@/components/registrations/step-indicator"
 import { StepPersonal } from "@/components/registrations/steps/step-personal"
+import { stepTitleId } from "@/components/registrations/state/registration-focus"
+import { REGISTRATION_STEPS } from "@/const/registrations"
 import { REGISTRATION_HONEYPOT_FIELD } from "@/lib/registrations/schema"
 import { EASE_OUT_QUART } from "@/lib/easing"
 
@@ -85,12 +88,17 @@ function RegistrationSteps() {
             exit={{ opacity: 0, y: -16 }}
             transition={{ duration: 0.25, ease: EASE_OUT_QUART }}
           >
+            <h2 id={stepTitleId(step)} tabIndex={-1} className="sr-only">
+              {`Step ${step + 1} of ${STEPS.length}: ${REGISTRATION_STEPS[step].name}`}
+            </h2>
             <Step />
           </motion.div>
         </AnimatePresence>
 
         <FormActions />
       </form>
+
+      <ReviewDialog />
 
       <p aria-live="polite" className="sr-only">
         {announcement}
