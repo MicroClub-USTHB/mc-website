@@ -46,6 +46,9 @@
   /* Robotic working space: the drone sticker edge and the blueprint paper. */
   --color-sticker-edge: #f2f2f0;
   --color-blueprint-paper: #dad6d7;
+  /* Hero headline: "LET'S" and the light "CODE" chip of the E icon. */
+  --color-headline-soft: #2c2a57;
+  --color-chip-soft: #b6befc;
 }
 
 @theme inline {

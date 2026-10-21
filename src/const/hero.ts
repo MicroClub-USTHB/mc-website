@@ -22,6 +22,7 @@ export type HeroCanvasItemId =
   | "wins"
   | "level-up"
   | "robotics"
+  | "headline"
   | "stickers"
   | "playground"
 
@@ -39,6 +40,8 @@ export type HeroCanvasItem = {
  * layer, before its rotation). The headline sits in the first view, the other elements around it.
  */
 export const HERO_ITEMS: HeroCanvasItem[] = [
+  // Figma "Desktop - 21" frame (469, 464) + headline (392, 406): centre of the first view.
+  { id: "headline", x: 861, y: 870 },
   { id: "wins", x: 256, y: 29 },
   { id: "robotics", x: 1689, y: 44 },
   { id: "sticky-note", x: 1306.71, y: 247, rotate: 19.63 },
