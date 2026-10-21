@@ -1,5 +1,7 @@
 import {
   EMPTY_REGISTRATION,
+  STEP_FIELDS,
+  validateRegistration,
   type RegistrationErrors,
   type RegistrationField,
   type RegistrationValues,
@@ -72,6 +74,24 @@ function removeDraft() {
   }
 }
 
+/** Step that owns `field`. */
+function stepOf(field: RegistrationField) {
+  return STEP_FIELDS.findIndex((fields) => fields.includes(field))
+}
+
+/** `errors` with the message of `field` set, or removed when the field is valid. */
+function withFieldError(
+  values: RegistrationValues,
+  errors: RegistrationErrors,
+  field: RegistrationField,
+) {
+  const message = validateRegistration(values, stepOf(field))[field]
+  const next = { ...errors }
+  if (message) next[field] = message
+  else delete next[field]
+  return next
+}
+
 /**
  * Form state outside React, read with `useSyncExternalStore`: the server and the first client
  * render use the empty form, then the saved draft is read, with no state set in an effect.
@@ -99,6 +119,46 @@ export function createRegistrationStore() {
       state = update(this.getSnapshot())
       writeDraft(state)
       listeners.forEach((listener) => listener())
+    },
+    /**
+     * Sets one field. Fields already visited (or with an error) validate while typing, new ones
+     * stay quiet.
+     */
+    setValue<F extends RegistrationField>(field: F, value: RegistrationValues[F]) {
+      this.set((current) => {
+        const values = { ...current.values, [field]: value }
+        const shouldValidate = current.touched[field] || current.errors[field]
+        const errors = shouldValidate
+          ? withFieldError(values, current.errors, field)
+          : current.errors
+        return { ...current, values, errors, restored: false }
+      })
+    },
+    /** Marks the field as visited and shows its error, if any. */
+    blurField(field: RegistrationField) {
+      this.set((current) => ({
+        ...current,
+        errors: withFieldError(current.values, current.errors, field),
+        touched: { ...current.touched, [field]: true },
+      }))
+    },
+    /** Opens `step`, and remembers it as reached. */
+    openStep(step: number) {
+      this.set((current) => ({
+        ...current,
+        step,
+        furthestStep: Math.max(current.furthestStep, step),
+      }))
+    },
+    /** Opens `step` showing `errors` on its fields (they all count as visited). */
+    showErrors(step: number, errors: RegistrationErrors) {
+      const touched = Object.fromEntries(STEP_FIELDS[step].map((field) => [field, true as const]))
+      this.set((current) => ({
+        ...current,
+        step,
+        errors: { ...current.errors, ...errors },
+        touched: { ...current.touched, ...touched },
+      }))
     },
     /** Back to an empty form, and forgets the draft. */
     reset() {

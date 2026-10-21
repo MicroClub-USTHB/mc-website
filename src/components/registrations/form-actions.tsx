@@ -2,7 +2,10 @@
 
 import Link from "next/link"
 
-import { useRegistration } from "@/components/registrations/state/registration-context"
+import {
+  useRegistration,
+  useRegistrationSelector,
+} from "@/components/registrations/state/registration-context"
 import { McButton } from "@/components/ui/mc-button"
 import { REGISTRATION_STEPS } from "@/const/registrations"
 
@@ -11,7 +14,8 @@ import { REGISTRATION_STEPS } from "@/const/registrations"
  * on the last step is SUBMIT. Both are real buttons inside the form, so Enter in a field advances.
  */
 export function FormActions() {
-  const { step, back, submitting } = useRegistration()
+  const { back, submitting } = useRegistration()
+  const step = useRegistrationSelector((state) => state.step)
   const isLast = step === REGISTRATION_STEPS.length - 1
 
   return (

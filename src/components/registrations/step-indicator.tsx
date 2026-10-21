@@ -2,7 +2,10 @@
 
 import type { LucideIcon } from "lucide-react"
 
-import { useRegistration } from "@/components/registrations/state/registration-context"
+import {
+  useRegistration,
+  useRegistrationSelector,
+} from "@/components/registrations/state/registration-context"
 import { REGISTRATION_STEPS } from "@/const/registrations"
 import { cn } from "@/lib/utils"
 
@@ -64,7 +67,9 @@ function Indicator({ state, icon: Icon }: { state: StepState; icon: LucideIcon }
  * already reached is a button that jumps back to it. The current step is told with `aria-current`.
  */
 export function StepIndicator() {
-  const { step: current, furthestStep, goToStep } = useRegistration()
+  const { goToStep } = useRegistration()
+  const current = useRegistrationSelector((state) => state.step)
+  const furthestStep = useRegistrationSelector((state) => state.furthestStep)
 
   return (
     <nav aria-label="Registration progress" className="w-full">

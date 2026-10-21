@@ -7,6 +7,7 @@ import { FormActions } from "@/components/registrations/form-actions"
 import {
   RegistrationProvider,
   useRegistration,
+  useRegistrationSelector,
 } from "@/components/registrations/state/registration-context"
 import { StepAbout } from "@/components/registrations/steps/step-about"
 import { StepAdditional } from "@/components/registrations/steps/step-additional"
@@ -27,7 +28,9 @@ export function RegistrationFlow() {
 }
 
 function RegistrationSteps() {
-  const { step, restored, announcement, next, submit, startOver } = useRegistration()
+  const { announcement, next, submit, startOver } = useRegistration()
+  const step = useRegistrationSelector((state) => state.step)
+  const restored = useRegistrationSelector((state) => state.restored)
   const honeypotRef = useRef<HTMLInputElement>(null)
   const Step = STEPS[step]
   const isLast = step === STEPS.length - 1

@@ -1,10 +1,7 @@
 "use client"
 
 import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
-import {
-  useRegistration,
-  useRegistrationField,
-} from "@/components/registrations/state/registration-context"
+import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McBadge } from "@/components/ui/mc-badge"
 import {
   McSelect,
@@ -19,8 +16,7 @@ const PLACEHOLDER = "Select at least 1 skill"
 
 /** Multiple choice of skills (Figma "Skills" select), the picked ones show as chips. */
 export function SkillsField() {
-  const { setValue } = useRegistration()
-  const { id, value, error, onBlur } = useRegistrationField("skills")
+  const { id, value, error, onValueChange, onBlur } = useRegistrationField("skills")
   const errorId = `${id}-error`
 
   return (
@@ -32,7 +28,7 @@ export function SkillsField() {
       <McSelect
         multiple
         value={value}
-        onValueChange={(skills) => setValue("skills", skills as typeof value)}
+        onValueChange={(skills) => onValueChange(skills as typeof value)}
         onOpenChange={(open) => !open && onBlur()}
       >
         <McSelectTrigger

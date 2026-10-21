@@ -1,10 +1,7 @@
 "use client"
 
 import { INPUT_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
-import {
-  useRegistration,
-  useRegistrationField,
-} from "@/components/registrations/state/registration-context"
+import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McInput } from "@/components/ui/mc-input"
 import {
   McSelect,
@@ -17,11 +14,10 @@ import { PHONE_COUNTRIES } from "@/const/registrations"
 
 /** Phone number with the country prefix dropdown inside the input (Figma "ALG" + number). */
 export function PhoneField() {
-  const { values, setValue } = useRegistration()
+  const countryField = useRegistrationField("phoneCountry")
   const { id, value, error, onValueChange, onBlur } = useRegistrationField("phone")
   const country =
-    PHONE_COUNTRIES.find((candidate) => candidate.code === values.phoneCountry) ??
-    PHONE_COUNTRIES[0]
+    PHONE_COUNTRIES.find((candidate) => candidate.code === countryField.value) ?? PHONE_COUNTRIES[0]
 
   return (
     <McInput
@@ -39,7 +35,7 @@ export function PhoneField() {
       addonStart={
         <McSelect
           value={country.code}
-          onValueChange={(code) => code && setValue("phoneCountry", code)}
+          onValueChange={(code) => code && countryField.onValueChange(code)}
         >
           <McSelectTrigger
             aria-label="Country code"
