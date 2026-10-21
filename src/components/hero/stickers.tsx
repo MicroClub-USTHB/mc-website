@@ -7,6 +7,7 @@ import { useReducedMotion } from "motion/react"
 import StickerPeel from "@/components/shared/sticker-peel"
 import { HERO_CANVAS } from "@/const/hero"
 import { cssToken, renderTextSticker, TEXT_STICKER_FRAME } from "@/lib/text-sticker"
+import glassesCoffee from "@/assets/hero/stickers/glasses-coffee.webp"
 import learningOutline from "@/assets/hero/stickers/learning-outline.svg"
 import microbot from "@/assets/hero/stickers/microbot.png"
 import skillsOutline from "@/assets/hero/stickers/skills-outline.svg"
@@ -14,6 +15,8 @@ import tooltipArrow from "@/assets/hero/stickers/tooltip-arrow.svg"
 
 /** Sticker centres on the canvas, in px from its top-left corner. */
 const MICROBOT = { x: 2150, y: 1500 }
+/** Figma "STICKER 3" (glasses + coffee), rendered from its Figma vector export at 3x. */
+const GLASSES_COFFEE = { x: 2470, y: 1370, width: 306 }
 const TEXT_STICKERS = [
   {
     text: "# more_Than_Just_Learning",
@@ -73,7 +76,7 @@ function MicroBotTooltip({ hidden }: { hidden: boolean }) {
 /**
  * Figma "Stickers": die-cut stickers stuck on the board, with React Bits' sticker peel: they peel
  * at the edge under the pointer, can be dragged anywhere on the canvas and thrown, and swing back.
- * The two hashtag stickers are drawn from their Figma outline and text once the font is ready.
+ * The glasses + coffee sticker is a raster of its Figma vector export. The two hashtag stickers are drawn from their Figma outline and text once the font is ready.
  * Decorative: hidden from assistive tech, and calm with reduced motion.
  */
 export function Stickers() {
@@ -136,6 +139,14 @@ export function Stickers() {
         >
           <MicroBotTooltip hidden={moved} />
         </StickerPeel>
+      )}
+      {back && (
+        <StickerPeel
+          imageSrc={glassesCoffee.src}
+          width={GLASSES_COFFEE.width}
+          initialPosition={fromCenter(GLASSES_COFFEE.x, GLASSES_COFFEE.y)}
+          {...common}
+        />
       )}
     </div>
   )
