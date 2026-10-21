@@ -49,7 +49,9 @@ export async function uploadStudentId(file: File): Promise<UploadedStudentId> {
 }
 
 /** Removes an uploaded student ID, used when the registration could not be saved. */
-export async function deleteStudentId(upload: Pick<UploadedStudentId, "publicId" | "resourceType">) {
+export async function deleteStudentId(
+  upload: Pick<UploadedStudentId, "publicId" | "resourceType">,
+) {
   configure()
   await cloudinary.uploader.destroy(upload.publicId, {
     type: "authenticated",

@@ -1,0 +1,27 @@
+"use client"
+
+import { RegistrationInput } from "@/components/registrations/registration-input"
+import { SkillsField } from "@/components/registrations/skills-field"
+import { PROFILE_LINKS } from "@/const/registrations"
+
+/** Step 3: optional profile links, then the skills select (the only required field here). */
+export function StepAdditional() {
+  return (
+    <div className="flex flex-col gap-5">
+      {PROFILE_LINKS.map(({ field, label }) => (
+        <RegistrationInput
+          key={field}
+          field={field}
+          type="url"
+          inputMode="url"
+          label={label}
+          placeholder="Paste your link here ..."
+          autoComplete="off"
+          autoCapitalize="none"
+          spellCheck={false}
+        />
+      ))}
+      <SkillsField />
+    </div>
+  )
+}

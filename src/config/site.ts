@@ -5,6 +5,11 @@ export const siteConfig = {
   url: "https://www.microclub.info",
 } as const
 
+/** Pages other than the landing page. */
+export const siteRoutes = {
+  registrations: "/registrations",
+} as const
+
 /**
  * Landing page sections, in display order.
  * `id` is the DOM anchor of each section (`/#id`).

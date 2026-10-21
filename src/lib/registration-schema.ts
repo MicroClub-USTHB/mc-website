@@ -92,7 +92,11 @@ export const personalSchema = z.object({
     .superRefine((value, context) => {
       const date = parseBirthDate(value)
       if (!date) {
-        context.addIssue({ code: "custom", message: "Please use the format dd/mm/yyyy." })
+        const typed = /^\d{2}\/\d{2}\/\d{4}$/.test(value)
+        context.addIssue({
+          code: "custom",
+          message: typed ? "This date does not exist." : "Please use the format dd/mm/yyyy.",
+        })
         return
       }
       const age = yearsSince(date)
@@ -141,6 +145,10 @@ export const registrationSchema = z.object({
 
 export type RegistrationValues = z.infer<typeof registrationSchema>
 export type RegistrationField = keyof RegistrationValues
+/** Fields typed as free text (all but the skills list). */
+export type TextField = {
+  [F in RegistrationField]: RegistrationValues[F] extends string ? F : never
+}[RegistrationField]
 export type RegistrationErrors = Partial<Record<RegistrationField, string>>
 
 export const EMPTY_REGISTRATION: RegistrationValues = {
