@@ -1,14 +1,19 @@
 "use client"
 
 import { useState } from "react"
+import dynamic from "next/dynamic"
 import { CalendarIcon } from "lucide-react"
 
 import { INPUT_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
 import { useRegistrationField } from "@/components/registrations/state/registration-context"
-import { McCalendar } from "@/components/ui/mc-calendar"
 import { McInput } from "@/components/ui/mc-input"
 import { McPopover, McPopoverContent, McPopoverTrigger } from "@/components/ui/mc-popover"
 import { parseBirthDate } from "@/lib/registrations/schema"
+
+/** Loaded when the calendar first opens: react-day-picker and date-fns stay out of the form's bundle. */
+const McCalendar = dynamic(() => import("@/components/ui/mc-calendar").then((m) => m.McCalendar), {
+  loading: () => <div className="h-72 w-70" aria-hidden />,
+})
 
 const pad = (value: number) => String(value).padStart(2, "0")
 
