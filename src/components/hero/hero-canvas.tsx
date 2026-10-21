@@ -6,6 +6,7 @@ import { useLenis } from "lenis/react"
 import { XIcon } from "@/components/icons/x"
 import { McButton } from "@/components/ui/mc-button"
 import { CanvasNavigator, type NavigatorHandle } from "@/components/hero/canvas-navigator"
+import { ScrollHint } from "@/components/hero/scroll-hint"
 import { HERO_CANVAS } from "@/const/hero"
 import { cn } from "@/lib/utils"
 
@@ -169,6 +170,11 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           className="pointer-events-auto"
         />
       </div>
+
+      {/* Figma: 95px above the bottom of the 1024px frame, centred. */}
+      {!exploring && (
+        <ScrollHint className="absolute bottom-[95px] left-1/2 -translate-x-1/2 max-lg:bottom-6" />
+      )}
 
       {exploring && (
         <McButton
