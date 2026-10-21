@@ -97,7 +97,8 @@ export function Headline() {
       }
 
   return (
-    <div className="flex w-[656.648px] flex-col items-center gap-7">
+    // Phones see the canvas at full size: the headline shrinks to fit their width.
+    <div className="flex w-[656.648px] origin-center flex-col items-center gap-7 max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90">
       <p
         aria-label="Let's experience it"
         className="flex w-full flex-col items-center font-heading"
