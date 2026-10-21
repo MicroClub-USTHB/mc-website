@@ -1,7 +1,7 @@
 "use client"
 
-import { RegistrationInput } from "@/components/registrations/registration-input"
-import { SkillsField } from "@/components/registrations/skills-field"
+import { RegistrationInput } from "@/components/registrations/fields/registration-input"
+import { SkillsField } from "@/components/registrations/fields/skills-field"
 import { PROFILE_LINKS } from "@/const/registrations"
 
 /** Step 3: optional profile links, then the skills select (the only required field here). */

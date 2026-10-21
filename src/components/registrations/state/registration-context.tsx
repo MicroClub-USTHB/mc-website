@@ -7,7 +7,7 @@ import { useLenis } from "lenis/react"
 import {
   createRegistrationStore,
   type RegistrationState,
-} from "@/components/registrations/registration-store"
+} from "@/components/registrations/state/registration-store"
 import { REGISTRATION_STEPS } from "@/const/registrations"
 import { submitRegistration } from "@/actions/submit-registration"
 import {
@@ -19,8 +19,8 @@ import {
   type RegistrationErrors,
   type RegistrationField,
   type RegistrationValues,
-} from "@/lib/registration-schema"
-import { useUnsavedChangesGuard } from "@/components/registrations/use-unsaved-changes-guard"
+} from "@/lib/registrations/schema"
+import { useUnsavedChangesGuard } from "@/components/registrations/state/use-unsaved-changes-guard"
 import { useFeedbackModal } from "@/providers/feedback-modal-provider"
 
 const LAST_STEP = REGISTRATION_STEPS.length - 1

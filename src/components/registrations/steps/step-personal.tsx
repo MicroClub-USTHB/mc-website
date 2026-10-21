@@ -1,9 +1,9 @@
 "use client"
 
-import { BirthDateField } from "@/components/registrations/birth-date-field"
-import { PhoneField } from "@/components/registrations/phone-field"
-import { RegistrationInput } from "@/components/registrations/registration-input"
-import { StudentIdUpload } from "@/components/registrations/student-id-upload"
+import { BirthDateField } from "@/components/registrations/fields/birth-date-field"
+import { PhoneField } from "@/components/registrations/fields/phone-field"
+import { RegistrationInput } from "@/components/registrations/fields/registration-input"
+import { StudentIdUpload } from "@/components/registrations/fields/student-id-upload"
 
 /** Step 1 (Figma "Personal Information Fields"): two columns, the ID upload fills the second one. */
 export function StepPersonal() {

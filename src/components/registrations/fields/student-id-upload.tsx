@@ -3,12 +3,12 @@
 import { useEffect, useState } from "react"
 import { FileTextIcon, UploadIcon, XIcon } from "lucide-react"
 
-import { FIELD_LABEL_CLASS } from "@/components/registrations/field-styles"
+import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
 import {
   fieldId,
   STUDENT_ID_FIELD,
   useRegistration,
-} from "@/components/registrations/registration-context"
+} from "@/components/registrations/state/registration-context"
 import { STUDENT_ID_RULES } from "@/const/registrations"
 import { cn } from "@/lib/utils"
 

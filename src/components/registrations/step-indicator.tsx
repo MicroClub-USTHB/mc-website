@@ -2,7 +2,7 @@
 
 import type { LucideIcon } from "lucide-react"
 
-import { useRegistration } from "@/components/registrations/registration-context"
+import { useRegistration } from "@/components/registrations/state/registration-context"
 import { REGISTRATION_STEPS } from "@/const/registrations"
 import { cn } from "@/lib/utils"
 

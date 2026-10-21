@@ -3,10 +3,10 @@
 import { headers } from "next/headers"
 
 import { deleteStudentId, uploadStudentId, type UploadedStudentId } from "@/lib/cloudinary"
-import { matchesFileSignature } from "@/lib/file-signature"
+import { matchesFileSignature } from "@/lib/registrations/file-signature"
 import { connectToDatabase } from "@/lib/mongodb"
 import { isRateLimited } from "@/lib/rate-limit"
-import { RegistrationModel } from "@/lib/registration-model"
+import { RegistrationModel } from "@/lib/registrations/model"
 import {
   REGISTRATION_HONEYPOT_FIELD,
   normalizePhone,
@@ -14,7 +14,7 @@ import {
   registrationSchema,
   validateStudentId,
   type RegistrationErrors,
-} from "@/lib/registration-schema"
+} from "@/lib/registrations/schema"
 import { PHONE_COUNTRIES } from "@/const/registrations"
 
 /**

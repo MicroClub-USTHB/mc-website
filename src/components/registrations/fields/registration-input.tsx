@@ -1,9 +1,9 @@
 "use client"
 
-import { INPUT_FIELD_CLASS } from "@/components/registrations/field-styles"
-import { useRegistrationField } from "@/components/registrations/registration-context"
+import { INPUT_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
+import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McInput, type McInputProps } from "@/components/ui/mc-input"
-import type { TextField } from "@/lib/registration-schema"
+import type { TextField } from "@/lib/registrations/schema"
 import { cn } from "@/lib/utils"
 
 type RegistrationInputProps = Omit<McInputProps, "value" | "onChange" | "onBlur" | "error"> & {

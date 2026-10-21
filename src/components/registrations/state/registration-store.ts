@@ -3,7 +3,7 @@ import {
   type RegistrationErrors,
   type RegistrationField,
   type RegistrationValues,
-} from "@/lib/registration-schema"
+} from "@/lib/registrations/schema"
 
 export type RegistrationState = {
   step: number

@@ -7,12 +7,12 @@ import { FormActions } from "@/components/registrations/form-actions"
 import {
   RegistrationProvider,
   useRegistration,
-} from "@/components/registrations/registration-context"
-import { StepAbout } from "@/components/registrations/step-about"
-import { StepAdditional } from "@/components/registrations/step-additional"
+} from "@/components/registrations/state/registration-context"
+import { StepAbout } from "@/components/registrations/steps/step-about"
+import { StepAdditional } from "@/components/registrations/steps/step-additional"
 import { StepIndicator } from "@/components/registrations/step-indicator"
-import { StepPersonal } from "@/components/registrations/step-personal"
-import { REGISTRATION_HONEYPOT_FIELD } from "@/lib/registration-schema"
+import { StepPersonal } from "@/components/registrations/steps/step-personal"
+import { REGISTRATION_HONEYPOT_FIELD } from "@/lib/registrations/schema"
 import { EASE_OUT_QUART } from "@/lib/easing"
 
 const STEPS = [StepPersonal, StepAbout, StepAdditional]

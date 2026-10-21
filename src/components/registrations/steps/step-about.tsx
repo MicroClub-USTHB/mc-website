@@ -1,6 +1,6 @@
 "use client"
 
-import { RegistrationTextarea } from "@/components/registrations/registration-textarea"
+import { RegistrationTextarea } from "@/components/registrations/fields/registration-textarea"
 import { ABOUT_QUESTIONS } from "@/const/registrations"
 
 /** Step 2 (Figma "Textarea input field" x6): one long answer per question. */

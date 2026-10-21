@@ -1,10 +1,10 @@
 "use client"
 
-import { TEXTAREA_FIELD_CLASS } from "@/components/registrations/field-styles"
-import { useRegistrationField } from "@/components/registrations/registration-context"
+import { TEXTAREA_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
+import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McTextarea, type McTextareaProps } from "@/components/ui/mc-textarea"
 import { ANSWER_MAX_LENGTH } from "@/const/registrations"
-import type { TextField } from "@/lib/registration-schema"
+import type { TextField } from "@/lib/registrations/schema"
 import { cn } from "@/lib/utils"
 
 type RegistrationTextareaProps = Omit<

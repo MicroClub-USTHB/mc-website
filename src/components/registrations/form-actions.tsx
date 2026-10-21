@@ -2,7 +2,7 @@
 
 import Link from "next/link"
 
-import { useRegistration } from "@/components/registrations/registration-context"
+import { useRegistration } from "@/components/registrations/state/registration-context"
 import { McButton } from "@/components/ui/mc-button"
 import { REGISTRATION_STEPS } from "@/const/registrations"
 

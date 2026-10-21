@@ -3,12 +3,12 @@
 import { useState } from "react"
 import { CalendarIcon } from "lucide-react"
 
-import { INPUT_FIELD_CLASS } from "@/components/registrations/field-styles"
-import { useRegistrationField } from "@/components/registrations/registration-context"
+import { INPUT_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
+import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McCalendar } from "@/components/ui/mc-calendar"
 import { McInput } from "@/components/ui/mc-input"
 import { McPopover, McPopoverContent, McPopoverTrigger } from "@/components/ui/mc-popover"
-import { parseBirthDate } from "@/lib/registration-schema"
+import { parseBirthDate } from "@/lib/registrations/schema"
 
 const pad = (value: number) => String(value).padStart(2, "0")
 

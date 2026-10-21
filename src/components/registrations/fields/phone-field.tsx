@@ -1,10 +1,10 @@
 "use client"
 
-import { INPUT_FIELD_CLASS } from "@/components/registrations/field-styles"
+import { INPUT_FIELD_CLASS } from "@/components/registrations/fields/field-styles"
 import {
   useRegistration,
   useRegistrationField,
-} from "@/components/registrations/registration-context"
+} from "@/components/registrations/state/registration-context"
 import { McInput } from "@/components/ui/mc-input"
 import {
   McSelect,

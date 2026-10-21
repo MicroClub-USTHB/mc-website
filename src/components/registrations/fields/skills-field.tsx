@@ -1,10 +1,10 @@
 "use client"
 
-import { FIELD_LABEL_CLASS } from "@/components/registrations/field-styles"
+import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
 import {
   useRegistration,
   useRegistrationField,
-} from "@/components/registrations/registration-context"
+} from "@/components/registrations/state/registration-context"
 import { McBadge } from "@/components/ui/mc-badge"
 import {
   McSelect,
