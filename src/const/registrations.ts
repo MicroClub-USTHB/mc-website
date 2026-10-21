@@ -71,6 +71,8 @@ export const STUDENT_ID_RULES = {
   maxBytes: 5 * 1024 * 1024,
   mimeTypes: ["image/jpeg", "image/png", "image/webp", "application/pdf"],
   accept: "image/jpeg,image/png,image/webp,application/pdf",
+  /** Same list as `mimeTypes`, as Cloudinary names the formats. */
+  formats: ["jpg", "png", "webp", "pdf"],
   label: "JPG, PNG, WebP or PDF, 5 MB max",
 } as const
 
