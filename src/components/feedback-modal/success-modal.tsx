@@ -18,6 +18,8 @@ export function SuccessModal({
   description,
   actionLabel = "Continue",
   onAction,
+  secondaryLabel,
+  onSecondary,
 }: FeedbackModalProps) {
   return (
     <McDialog open={open} onOpenChange={onOpenChange}>
@@ -29,16 +31,29 @@ export function SuccessModal({
           <McDialogTitle>{title}</McDialogTitle>
           {description && <McDialogDescription>{description}</McDialogDescription>}
         </McDialogHeader>
-        <McButton
-          size="xl"
-          className="mx-auto"
-          onClick={() => {
-            onAction?.()
-            onOpenChange(false)
-          }}
-        >
-          {actionLabel}
-        </McButton>
+        <div className="flex flex-wrap justify-center gap-2">
+          {secondaryLabel && (
+            <McButton
+              variant="secondary"
+              size="xl"
+              onClick={() => {
+                onSecondary?.()
+                onOpenChange(false)
+              }}
+            >
+              {secondaryLabel}
+            </McButton>
+          )}
+          <McButton
+            size="xl"
+            onClick={() => {
+              onAction?.()
+              onOpenChange(false)
+            }}
+          >
+            {actionLabel}
+          </McButton>
+        </div>
       </McDialogContent>
     </McDialog>
   )

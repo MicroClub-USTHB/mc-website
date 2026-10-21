@@ -11,6 +11,7 @@ import {
 import { REGISTRATION_STEPS } from "@/const/registrations"
 import { submitRegistration } from "@/actions/submit-registration"
 import {
+  EMPTY_REGISTRATION,
   REGISTRATION_HONEYPOT_FIELD,
   STEP_FIELDS,
   validateRegistration,
@@ -19,6 +20,7 @@ import {
   type RegistrationField,
   type RegistrationValues,
 } from "@/lib/registration-schema"
+import { useUnsavedChangesGuard } from "@/components/registrations/use-unsaved-changes-guard"
 import { useFeedbackModal } from "@/providers/feedback-modal-provider"
 
 const LAST_STEP = REGISTRATION_STEPS.length - 1
@@ -94,6 +96,10 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
   const [studentIdError, setStudentIdError] = useState<string | null>(null)
   const [submitting, setSubmitting] = useState(false)
   const [announcement, setAnnouncement] = useState("")
+
+  // Typed answers or a chosen ID: leaving the page would lose them. A restored draft counts too.
+  const dirty = !!studentId || JSON.stringify(state.values) !== JSON.stringify(EMPTY_REGISTRATION)
+  useUnsavedChangesGuard(dirty && !submitting)
 
   function announceStep(step: number) {
     const { name } = REGISTRATION_STEPS[step]

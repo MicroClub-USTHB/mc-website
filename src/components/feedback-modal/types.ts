@@ -7,6 +7,10 @@ export type FeedbackModalOptions = {
   actionLabel?: string
   /** Runs when the main button is pressed, before the modal closes. */
   onAction?: () => void
+  /** Label of an optional second button, shown before the main one (e.g. "Leave anyway"). */
+  secondaryLabel?: string
+  /** Runs when the second button is pressed, before the modal closes. */
+  onSecondary?: () => void
   /** Runs once the modal is closed, by any of its buttons, Escape or a click outside. */
   onClose?: () => void
 }
