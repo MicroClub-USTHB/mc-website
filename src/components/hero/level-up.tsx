@@ -97,7 +97,11 @@ function Star({ size, className }: { size: number; className?: string }) {
  */
 export function LevelUp() {
   const fill = useMotionValue(0)
-  const width = useTransform(fill, (value) => `${value * 99.86}%`)
+  // While filling, the bar sits 1px inside the button (Figma "while holding"); once full it covers
+  // the whole button (Figma completed frame), hiding the dark edge.
+  const width = useTransform(fill, (value) => (value >= 1 ? "100.29%" : `${value * 99.86}%`))
+  const inset = useTransform(fill, (value) => (value >= 1 ? "0%" : "2.22%"))
+  const left = useTransform(fill, (value) => (value >= 1 ? "0%" : "0.43%"))
   const animation = useRef<ReturnType<typeof animate> | null>(null)
   const [holding, setHolding] = useState(false)
   const [leveledUp, setLeveledUp] = useState(false)
@@ -206,8 +210,8 @@ export function LevelUp() {
         {/* Fill: Figma highlight and fill layers (rendered there as a solid teal, measured). */}
         <motion.span
           aria-hidden
-          style={{ width }}
-          className="pointer-events-none absolute top-[2.22%] bottom-[2.22%] left-[0.43%] overflow-hidden rounded-[7px]"
+          style={{ width, top: inset, bottom: inset, left }}
+          className="pointer-events-none absolute overflow-hidden rounded-[7px]"
         >
           <span className="absolute inset-0 bg-level shadow-[inset_0_0_10px_0_white]" />
           <span className="absolute inset-0 bg-level shadow-[inset_0_0_10px_0_rgb(255_255_255/0.25)]" />
