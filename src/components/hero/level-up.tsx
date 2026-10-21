@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useState } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import { Pixelify_Sans } from "next/font/google"
 import { animate, AnimatePresence, motion, useMotionValue, useTransform } from "motion/react"
@@ -12,8 +12,9 @@ import arrow from "@/assets/hero/level-up/arrow.svg"
 /** Figma "+1 LVL" font. */
 const pixelify = Pixelify_Sans({ weight: "500", subsets: ["latin"] })
 
-/** Seconds to charge the button, to show "+1 LVL", and to fade it out. */
-const CHARGE = 0.9
+/** Seconds to hold for a level up, to drain back on release, and to show "+1 LVL". */
+const HOLD = 1.6
+const RELEASE = 0.45
 const CELEBRATE = 1.2
 const FADE_OUT = 0.6
 
@@ -90,36 +91,46 @@ function Star({ size, className }: { size: number; className?: string }) {
 }
 
 /**
- * Figma "LEVEL UP BUTTON" (final hero: "CLICK TO LEVEL UP"): a teal button. A click (or Enter /
- * Space) empties it and a teal bar charges it back up; once full, "+1 LVL" pops above it with pixel
- * sparkles, then fades out, ready for another go.
+ * Figma "LEVEL UP BUTTON": press and hold the button and a teal bar fills it (releasing early
+ * drains it back). Once full, "+1 LVL" pops above it with pixel sparkles, then fades out and the
+ * button empties for another go. Works with a mouse, a finger, or Space / Enter.
  */
 export function LevelUp() {
-  // Full by default (Figma final state); a click empties it and charges it back up.
-  const fill = useMotionValue(1)
+  const fill = useMotionValue(0)
   const width = useTransform(fill, (value) => `${value * 99.86}%`)
-  const [charging, setCharging] = useState(false)
+  const animation = useRef<ReturnType<typeof animate> | null>(null)
+  const [holding, setHolding] = useState(false)
   const [leveledUp, setLeveledUp] = useState(false)
 
-  // After the celebration, "+1 LVL" fades out and the button is ready again.
+  // After the celebration, "+1 LVL" fades out and the button drains back to its default state.
   useEffect(() => {
     if (!leveledUp) return
-    const timer = setTimeout(() => setLeveledUp(false), CELEBRATE * 1000)
+    const timer = setTimeout(() => {
+      setLeveledUp(false)
+      animation.current = animate(fill, 0, { duration: FADE_OUT, ease: EASE_IN_OUT_QUART })
+    }, CELEBRATE * 1000)
     return () => clearTimeout(timer)
-  }, [leveledUp])
+  }, [leveledUp, fill])
 
-  function levelUp() {
-    if (charging || leveledUp) return
-    setCharging(true)
-    fill.set(0)
-    animate(fill, 1, {
-      duration: CHARGE,
-      ease: EASE_IN_OUT_QUART,
+  function start() {
+    if (leveledUp || holding) return
+    setHolding(true)
+    animation.current?.stop()
+    animation.current = animate(fill, 1, {
+      duration: HOLD * (1 - fill.get()),
+      ease: "linear",
       onComplete: () => {
-        setCharging(false)
+        setHolding(false)
         setLeveledUp(true)
       },
     })
+  }
+
+  function release() {
+    if (!holding) return
+    setHolding(false)
+    animation.current?.stop()
+    animation.current = animate(fill, 0, { duration: RELEASE, ease: EASE_OUT_QUART })
   }
 
   return (
@@ -163,27 +174,46 @@ export function LevelUp() {
 
       <motion.button
         type="button"
-        onClick={levelUp}
-        aria-disabled={charging || leveledUp}
-        animate={{ scale: charging ? 0.97 : 1 }}
+        aria-label="Hold to level up"
+        onPointerDown={(event) => {
+          if (event.button !== 0) return
+          event.currentTarget.setPointerCapture(event.pointerId)
+          start()
+        }}
+        onPointerUp={release}
+        onPointerCancel={release}
+        onLostPointerCapture={release}
+        onKeyDown={(event) => {
+          if ((event.key === " " || event.key === "Enter") && !event.repeat) {
+            event.preventDefault()
+            start()
+          }
+        }}
+        onKeyUp={(event) => {
+          if (event.key === " " || event.key === "Enter") release()
+        }}
+        onBlur={release}
+        onContextMenu={(event) => event.preventDefault()}
+        animate={{ scale: holding ? 0.97 : 1 }}
         transition={{ duration: 0.2, ease: EASE_OUT_QUART }}
-        className="relative h-[45px] w-[233.337px] cursor-pointer rounded-lg bg-level-button shadow-[0_1.212px_2.425px_0_rgb(10_13_18/0.05)] outline-none focus-visible:ring-4 focus-visible:ring-secondary aria-disabled:cursor-default"
+        className="relative h-[45px] w-[231.337px] cursor-pointer touch-none rounded-lg bg-level-button shadow-[0_1.212px_2.425px_0_rgb(10_13_18/0.05)] outline-none [-webkit-touch-callout:none] focus-visible:ring-4 focus-visible:ring-secondary"
       >
         {/* Inner glow. */}
         <span
           aria-hidden
           className="pointer-events-none absolute inset-0 rounded-lg shadow-[inset_0_0_4.6px_0_var(--color-level-glow)]"
         />
-        {/* Fill: the Figma teal with its inner white glow; it sweeps back in while charging. */}
+        {/* Fill: Figma highlight and fill layers (rendered there as a solid teal, measured). */}
         <motion.span
           aria-hidden
           style={{ width }}
           className="pointer-events-none absolute top-[2.22%] bottom-[2.22%] left-[0.43%] overflow-hidden rounded-[7px]"
         >
           <span className="absolute inset-0 bg-level shadow-[inset_0_0_10px_0_white]" />
+          <span className="absolute inset-0 bg-level shadow-[inset_0_0_10px_0_rgb(255_255_255/0.25)]" />
         </motion.span>
         <span className="relative flex items-center justify-center gap-2.5 px-7 text-[16.974px] leading-[24.248px] font-medium whitespace-nowrap text-muted uppercase">
-          Click to level up
+          Hold to level up
           <span className="grid size-[13.337px] place-items-center">
             <Image
               src={arrow}
