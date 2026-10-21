@@ -1,6 +1,7 @@
 "use client"
 
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { useLenis } from "lenis/react"
 import {
   animate,
@@ -20,7 +21,10 @@ const CLOSE_TRANSITION = { duration: 0.5, ease: EASE_OUT_QUART }
 type MenuContextValue = {
   open: boolean
   toggle: () => void
-  /** Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling). */
+  /**
+   * Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling).
+   * Away from the landing page it goes there first (`/#section`, or `/` for the top).
+   */
   navigateTo: (target: string | number, options?: { immediate?: boolean }) => void
   /** Whether the panel (and the bar over it) uses the dark tokens: the inverse of the section behind the toggle. */
   dark: boolean
@@ -46,6 +50,8 @@ export function useMenu() {
  */
 export function MenuProvider({ children }: { children: React.ReactNode }) {
   const lenis = useLenis()
+  const router = useRouter()
+  const pathname = usePathname()
   const headerRef = useRef<HTMLElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const wordmarkRef = useRef<HTMLAnchorElement>(null)
@@ -103,6 +109,10 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     navigateTo: (target, { immediate = false } = {}) => {
       setOpen(false)
       lenis?.start()
+      if (pathname !== "/") {
+        router.push(typeof target === "number" ? "/" : `/${target}`)
+        return
+      }
       lenis?.scrollTo(target, { immediate })
     },
     dark,
