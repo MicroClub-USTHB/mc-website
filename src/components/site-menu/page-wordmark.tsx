@@ -2,10 +2,12 @@
 
 import { useRef } from "react"
 import Link from "next/link"
+import { usePathname } from "next/navigation"
 import { motion } from "motion/react"
 
 import { useMenu } from "@/components/site-menu/menu-context"
 import { useWipeClip } from "@/components/site-menu/use-wipe-clip"
+import { isBarePage } from "@/config/site"
 import { cn } from "@/lib/utils"
 
 /**
@@ -16,6 +18,8 @@ export function PageWordmark({ label }: { label: string }) {
   const { wordmarkRef, dark } = useMenu()
   const darkRef = useRef<HTMLSpanElement>(null)
   const darkClip = useWipeClip(darkRef)
+  const pathname = usePathname()
+  if (isBarePage(pathname)) return null
 
   return (
     <div className="absolute inset-x-0 top-0 z-50 mx-auto max-w-site">

@@ -11,6 +11,7 @@ import {
   type MotionValue,
 } from "motion/react"
 
+import { isBarePage } from "@/config/site"
 import { isDominantSectionDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
@@ -116,7 +117,8 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       lenis?.scrollTo(target, { immediate })
     },
     dark,
-    attached,
+    // Bare pages have no in-page wordmark, so the compact logo is always out.
+    attached: attached && !isBarePage(pathname),
     reveal,
     toggleRef,
     wordmarkRef,

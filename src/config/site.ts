@@ -11,6 +11,14 @@ export const siteRoutes = {
 } as const
 
 /**
+ * Pages drawn without the in-page "MICRO CLUB" wordmark and without the footer (Figma: only the
+ * toggle and the compact logo). The wordmark still shows while the menu is open.
+ */
+export function isBarePage(pathname: string) {
+  return pathname === siteRoutes.registrations
+}
+
+/**
  * Landing page sections, in display order.
  * `id` is the DOM anchor of each section (`/#id`).
  */
