@@ -43,6 +43,9 @@
   --color-level-dark: #027b7f;
   --color-level-button: #175a5c;
   --color-level-glow: #03c2c7;
+  /* Robotic working space: the drone sticker edge and the blueprint paper. */
+  --color-sticker-edge: #f2f2f0;
+  --color-blueprint-paper: #dad6d7;
 }
 
 @theme inline {

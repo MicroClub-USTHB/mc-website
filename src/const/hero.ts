@@ -18,6 +18,7 @@ export type HeroCanvasItemId =
   | "activities"
   | "wins"
   | "level-up"
+  | "robotics"
   | "stickers"
   | "playground"
 
@@ -44,6 +45,7 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "activities", x: 1790, y: 1690 },
   { id: "wins", x: 1480, y: 700 },
   { id: "level-up", x: 2340, y: 1110 },
+  { id: "robotics", x: 280, y: 980 },
   // The playground spans the whole canvas: its pile sits centred on the canvas floor.
   { id: "playground", x: 0, y: 0 },
   // Last: the stickers sit over the other elements and span the whole canvas.

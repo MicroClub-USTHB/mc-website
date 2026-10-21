@@ -6,6 +6,7 @@ import { VoiceNote } from "@/components/hero/voice-note"
 import { Wins } from "@/components/hero/wins"
 import { StickyNote } from "@/components/hero/sticky-note"
 import { Playground } from "@/components/hero/playground"
+import { Robotics } from "@/components/hero/robotics"
 import { Stickers } from "@/components/hero/stickers"
 import { TodoList } from "@/components/hero/todo-list"
 import { HERO_ITEMS, type HeroCanvasItemId } from "@/const/hero"
@@ -19,6 +20,7 @@ const ITEMS: Partial<Record<HeroCanvasItemId, React.ComponentType>> = {
   activities: Activities,
   wins: Wins,
   "level-up": LevelUp,
+  robotics: Robotics,
   playground: Playground,
   stickers: Stickers,
 }
