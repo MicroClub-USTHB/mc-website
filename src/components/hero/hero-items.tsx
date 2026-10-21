@@ -1,5 +1,6 @@
 import { Activities } from "@/components/hero/activities"
 import { ArCard } from "@/components/hero/ar-card"
+import { LevelUp } from "@/components/hero/level-up"
 import { Photobooth } from "@/components/hero/photobooth"
 import { VoiceNote } from "@/components/hero/voice-note"
 import { Wins } from "@/components/hero/wins"
@@ -17,6 +18,7 @@ const ITEMS: Partial<Record<HeroCanvasItemId, React.ComponentType>> = {
   "ar-card": ArCard,
   activities: Activities,
   wins: Wins,
+  "level-up": LevelUp,
   playground: Playground,
   stickers: Stickers,
 }

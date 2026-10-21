@@ -37,6 +37,12 @@
   --color-brand-black: #191919;
   --color-brand-slate: #242938;
   --color-brand-teal: #00979c;
+  /* Level up button: its teal button and the pixel sparkles of "+1 LVL". */
+  --color-level: #00c1c6;
+  --color-level-light: #65fbff;
+  --color-level-dark: #027b7f;
+  --color-level-button: #175a5c;
+  --color-level-glow: #03c2c7;
 }
 
 @theme inline {
