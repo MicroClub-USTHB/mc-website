@@ -22,6 +22,7 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - Next.js 16 (App Router, React Compiler), React 19, TypeScript
 - Tailwind CSS v4, **mcoli-ui** (Micro Club component library and design system, shadcn registry on Base UI), lucide-react
 - Lenis (smooth scroll) and Motion (animations)
+- MongoDB (Mongoose) and Cloudinary for the registrations, Zod for validation shared by browser and server
 - pnpm
 
 ## Project structure
@@ -34,15 +35,24 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - `src/components/shared/`: reusable building blocks (`SectionContainer`, `JsonLd` for schema.org structured data).
 - `src/components/<section>/`: sub-components of one section (cards, pills, counters), one folder per section, e.g. `src/components/statistics/metric-card.tsx`. Create the folder with the first sub-component.
 - `src/sections/`: one file per landing page section, flat (e.g. `src/sections/hero.tsx` exports `Hero`). The site is a one-page landing page; add a subfolder only if another page appears.
-- `src/providers/`: global client providers (`SmoothScrollProvider`).
-- `src/actions/`: Server Actions (`"use server"`), kept thin: validate input, rate limit, then call a `server-only` module in `src/lib/` (e.g. `src/lib/microbot-api.ts`), the only place that reads its secrets from `process.env`. Never expose a secret with `NEXT_PUBLIC_`; document every variable in `.env.example`.
+- `src/providers/`: global client providers (`SmoothScrollProvider`, `FeedbackModalProvider`).
+- `src/components/feedback-modal/`: the success, error and warning modals, one file each so each can be redesigned alone. Open them from any client component with `useFeedbackModal()` (`showSuccess`, `showError`, `showWarning`).
+- `src/components/registrations/`: the multi-step registration form (`/registrations`, route in `src/app/(site)/registrations/`). `state/` holds the store (form state outside React, saved as a draft in `sessionStorage`), the context, the submit hook and the unsaved-changes guard; `steps/` and `fields/` the step bodies and the field components; the stepper, actions, review dialog and `registration-flow.tsx` sit at the root. Fields subscribe to their own part of the state with `useRegistrationField`, so typing in one field does not render the others.
+- `src/lib/registrations/`: registration code shared or server-side: `schema.ts` (Zod, shared with the browser: the Server Action stays the source of truth), `model.ts` (Mongoose, `server-only`), `upload-student-id.ts` (browser upload to Cloudinary). Infrastructure used by more than one feature stays flat in `src/lib/` (`mongodb.ts`, `cloudinary.ts`, `rate-limit.ts`).
+- `src/actions/`: Server Actions (`"use server"`), kept thin: validate input, rate limit, then call a `server-only` module in `src/lib/` (e.g. `src/lib/microbot-api.ts`, `src/lib/cloudinary.ts`), the only place that reads its secrets from `process.env`. Never expose a secret with `NEXT_PUBLIC_`; document every variable in `.env.example`.
 - `src/config/`: site metadata, section anchors, menu links.
 - `src/const/`: static content constants, one file per section named like the section file (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
 - Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
+## Local services
+
+- `pnpm db:up` starts MongoDB from the root `docker-compose.yml` (`pnpm db:down` stops it); `MONGODB_URI=mongodb://localhost:27017/microclub` in `.env.local`.
+- Student IDs are uploaded by the browser straight to Cloudinary with a signature from `src/actions/sign-student-id-upload.ts` (`authenticated` assets, no public URL), then `src/actions/submit-registration.ts` reads the upload back and saves the registration. Needs the `CLOUDINARY_*` variables.
+
 ## Conventions
 
 - Section components are named after their content, **without** a `Section` suffix (`Hero`, `FeaturedEvents`, `Contact`). Files are kebab-case.
+- Pages drawn without the in-page wordmark, the footer and the chatbot (Figma shows only the toggle and the compact logo) are listed in `isBarePage()` in `src/config/site.ts`.
 - Wrap every landing page section in `SectionContainer` with an id from `homeSections` in `src/config/site.ts`.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
