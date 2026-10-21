@@ -13,11 +13,17 @@ import { cn } from "@/lib/utils"
 const INTERACTIVE =
   "button, a, input, label, textarea, [contenteditable='true'], audio, [data-sticker], [data-body]"
 
-const { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, gridSpacing } = HERO_CANVAS
+const { width: CANVAS_WIDTH, height: CANVAS_HEIGHT, gridSpacing, initialView } = HERO_CANVAS
+
+/** Centre of the first view (Figma "Desktop - 21"), in fractions of the canvas. */
+const START = {
+  x: (initialView.x + initialView.width / 2) / CANVAS_WIDTH,
+  y: (initialView.y + initialView.height / 2) / CANVAS_HEIGHT,
+}
 
 /**
  * Hero whiteboard, explored like significa.co/careers: the canvas is larger than the screen and
- * starts centred.
+ * starts on the Figma first view (`HERO_CANVAS.initialView`).
  *
  * - Mouse: drag anywhere to pan, 1:1 with the pointer (grab / grabbing cursor), clamped to the
  *   canvas. The page wheel keeps scrolling the page.
@@ -57,11 +63,11 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
     sync()
   }
 
-  // Start centred, and keep the same centre when the view is resized (or enters explore mode).
+  // Start on the Figma first view, and keep the same centre when the view is resized (or enters explore mode).
   useEffect(() => {
     const viewport = viewportRef.current
     if (!viewport) return
-    let center = { x: 0.5, y: 0.5 }
+    let center = START
     centerOn(center.x, center.y)
     const remember = () => {
       center = {

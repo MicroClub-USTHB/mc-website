@@ -148,7 +148,7 @@ export function VoiceNote() {
           }}
         />
       </div>
-      <p className="paragraph-md text-destructive">Warning its is loud!</p>
+      <p className="paragraph-md text-destructive">Warning it is loud!</p>
     </div>
   )
 }

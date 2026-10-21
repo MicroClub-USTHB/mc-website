@@ -16,9 +16,9 @@ export const PLAYGROUND = {
   maxLength: 80,
 } as const
 
-/** Top left of the Figma frame on the canvas: centred, on its floor. */
+/** Top left of the Figma frame on the canvas: on its floor, the pile where the final Figma puts it. */
 export const PLAYGROUND_ORIGIN = {
-  x: (HERO_CANVAS.width - PLAYGROUND.frame.width) / 2,
+  x: 481,
   y: HERO_CANVAS.height - PLAYGROUND.frame.height,
 } as const
 

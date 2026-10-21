@@ -13,26 +13,28 @@ import microbot from "@/assets/hero/stickers/microbot.png"
 import skillsOutline from "@/assets/hero/stickers/skills-outline.svg"
 import tooltipArrow from "@/assets/hero/stickers/tooltip-arrow.svg"
 
-/** Sticker centres on the canvas, in px from its top-left corner. */
-const MICROBOT = { x: 2150, y: 1500 }
+/** Sticker centres on the canvas (px from its top-left corner) and tilts, from the final Figma. */
+const MICROBOT = { x: 180, y: 1605 }
 /** Figma "STICKER 3" (glasses + coffee), rendered from its Figma vector export at 3x. */
-const GLASSES_COFFEE = { x: 2470, y: 1370, width: 306 }
+const GLASSES_COFFEE = { x: 1358.49, y: 155.89, width: 306, rotate: -1.88 }
 const TEXT_STICKERS = [
   {
     text: "# more_Than_Just_Learning",
     outline: learningOutline.src,
     outlineTop: 26,
     color: "--foreground",
-    x: 1475,
-    y: 1255,
+    x: 2232.82,
+    y: 715.18,
+    rotate: 0,
   },
   {
     text: "#real_Projects_Real_Skills",
     outline: skillsOutline.src,
     outlineTop: 26.4,
     color: "--primary-foreground",
-    x: 1473,
-    y: 1362,
+    x: 249.71,
+    y: 586.61,
+    rotate: -4.08,
   },
 ]
 
@@ -125,6 +127,7 @@ export function Stickers() {
             imageSrc={images[i]}
             width={TEXT_STICKER_FRAME.width}
             initialPosition={fromCenter(sticker.x, sticker.y)}
+            rotate={sticker.rotate}
             {...common}
           />
         ) : null,
@@ -145,6 +148,7 @@ export function Stickers() {
           imageSrc={glassesCoffee.src}
           width={GLASSES_COFFEE.width}
           initialPosition={fromCenter(GLASSES_COFFEE.x, GLASSES_COFFEE.y)}
+          rotate={GLASSES_COFFEE.rotate}
           {...common}
         />
       )}

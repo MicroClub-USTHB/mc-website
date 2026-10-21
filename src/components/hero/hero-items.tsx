@@ -34,7 +34,12 @@ export function HeroItems() {
       <div
         key={id}
         className="absolute"
-        style={{ left: x, top: y, transform: rotate ? `rotate(${rotate}deg)` : undefined }}
+        style={{
+          left: x,
+          top: y,
+          rotate: rotate ? `${rotate}deg` : undefined,
+          transformOrigin: "0 0",
+        }}
       >
         <Item />
       </div>
