@@ -197,7 +197,7 @@ export function RegistrationProvider({ children }: { children: React.ReactNode }
       if (submitting) return
       // Every step must be valid (a draft can restore on the last step with an earlier one broken).
       if (!validateUpTo(LAST_STEP + 1)) return
-      void sendRegistration(honeypot)
+      sendRegistration(honeypot)
     },
     startOver() {
       resetForm()

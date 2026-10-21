@@ -1,4 +1,4 @@
-import { useState } from "react"
+import { useTransition } from "react"
 import { useRouter } from "next/navigation"
 
 import { submitRegistration } from "@/actions/submit-registration"
@@ -34,10 +34,10 @@ export function useRegistrationSubmit({
 }: SubmitOptions) {
   const router = useRouter()
   const { showSuccess, showError, showWarning } = useFeedbackModal()
-  const [submitting, setSubmitting] = useState(false)
+  // The transition keeps `submitting` true until the whole request (and its handling) is done.
+  const [submitting, startSubmit] = useTransition()
 
-  async function submit(honeypot: string) {
-    setSubmitting(true)
+  async function send(honeypot: string) {
     try {
       const formData = new FormData()
       formData.set("values", JSON.stringify(store.getSnapshot().values))
@@ -105,10 +105,8 @@ export function useRegistrationSubmit({
         title: "We could not reach the server",
         description: "Check your connection and try again. Your answers are kept.",
       })
-    } finally {
-      setSubmitting(false)
     }
   }
 
-  return { submitting, submit }
+  return { submitting, submit: (honeypot: string) => startSubmit(() => send(honeypot)) }
 }
