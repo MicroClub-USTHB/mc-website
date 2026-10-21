@@ -1,17 +1,57 @@
 import { cn } from "@/lib/utils"
 
-const glyph =
-  "absolute -top-[0.39437rem] font-heading text-[1.633rem] leading-[2.17731rem] font-medium text-primary-foreground"
-/** One loop of the face: 12 frames of 420ms (see the `microbot-*` keyframes in globals.css). */
-const loop =
-  "[animation-duration:5.04s] [animation-iteration-count:infinite] [animation-timing-function:step-end] motion-reduce:animate-none"
+/** One shape of a face frame, in Figma px on the 54×26.828 screen. */
+type Shape =
+  | { kind: "prompt"; left: number }
+  | { kind: "wink"; left: number }
+  | { kind: "bar"; left: number; top: number; height: number }
+
+const PROMPT_AT = (left: number): Shape => ({ kind: "prompt", left })
+const BLOCK: Shape = { kind: "bar", left: 19.92, top: 12.98, height: 7.414 }
+const UNDERSCORE = (left: number): Shape => ({ kind: "bar", left, top: 18.54, height: 1.854 })
+
+const CURSOR = [PROMPT_AT(6.02), BLOCK]
+const PROMPT = [PROMPT_AT(6.02)]
+const TYPED = [PROMPT_AT(6.49), UNDERSCORE(20.39)]
+const TYPED_CURSOR = [
+  PROMPT_AT(4.63),
+  UNDERSCORE(18.53),
+  { kind: "bar", left: 34.76, top: 10.44, height: 9.268 } as Shape,
+]
+const WINK = [PROMPT_AT(6.49), UNDERSCORE(20.39), { kind: "wink", left: 32.05 } as Shape]
 
 /**
- * Glassy terminal screen of Micro Bot, the face of the launcher (Figma "Expressions" variants:
- * `>`, `>▬`, `>_`, `>_▬` and the `>_<` wink), typing then blinking in a 5.04s loop (12 frames of
- * 420ms, see the `microbot-*` keyframes in globals.css). Pure CSS, so it
- * never re-renders React and pauses with the tab. With reduced motion it stays on `>_▬`, the
- * base visibility of each glyph.
+ * Figma "Expressions", in order: `>▬`, `>`, `>▬`, `>`, `>_`, `>_▬`, `>_`, `>_▬`, `>_`, `>_▬`,
+ * then the `>_<` wink. One frame every 420ms, looping.
+ */
+const FRAMES = [
+  CURSOR,
+  PROMPT,
+  CURSOR,
+  PROMPT,
+  TYPED,
+  TYPED_CURSOR,
+  TYPED,
+  TYPED_CURSOR,
+  TYPED,
+  TYPED_CURSOR,
+  WINK,
+]
+const FRAME_MS = 420
+const LOOP_MS = FRAMES.length * FRAME_MS
+/** Frame shown with reduced motion: `>_▬`. */
+const STILL = 5
+
+/** The face is drawn on the Figma screen (54px wide) then scaled to the launcher screen. */
+const SCALE = 58.268 / 54
+
+const glyph = "absolute top-[-5.85px] font-heading text-[24.214px] leading-[32.285px] font-medium"
+
+/**
+ * Glassy terminal screen of Micro Bot, the face of the launcher: the 11 Figma "Expressions" frames
+ * played in a loop (each frame shows during its own 420ms slot of the `microbot-frame` keyframes,
+ * offset with a negative delay). Pure CSS, so it never re-renders React and pauses with the tab.
+ * With reduced motion it stays on `>_▬`.
  */
 export function MicroBotFace({ className }: { className?: string }) {
   return (
@@ -23,52 +63,44 @@ export function MicroBotFace({ className }: { className?: string }) {
       )}
     >
       <div className="absolute inset-0 bg-[radial-gradient(40px_20px_at_50%_50%,var(--foreground),var(--secondary))] opacity-56" />
-      {/* `>` before the underscore appears, then shifted left once it does. */}
-      <span
-        className={cn(
-          glyph,
-          loop,
-          "invisible left-[0.40563rem] animate-[microbot-prompt_5.04s_step-end_infinite]",
-        )}
+      <div
+        className="absolute top-0 left-0 h-[26.828px] w-[54px] origin-top-left text-primary-foreground"
+        style={{ scale: SCALE }}
       >
-        {">"}
-      </span>
-      <span
-        className={cn(
-          glyph,
-          loop,
-          "left-1.25 animate-[microbot-underscore_5.04s_step-end_infinite]",
-        )}
-      >
-        {">"}
-      </span>
-      <span
-        className={cn(
-          loop,
-          "absolute top-5.5 left-5 h-0.5 w-[0.92781rem] animate-[microbot-underscore_5.04s_step-end_infinite] bg-primary-foreground",
-        )}
-      />
-      <span
-        className={cn(
-          loop,
-          "invisible absolute top-[1.01625rem] left-[1.34312rem] h-2.5 w-[0.92781rem] animate-[microbot-prompt-block_5.04s_step-end_infinite] bg-primary-foreground",
-        )}
-      />
-      <span
-        className={cn(
-          loop,
-          "absolute top-[1.01625rem] left-[2.34375rem] h-2.5 w-[0.92781rem] animate-[microbot-underscore-block_5.04s_step-end_infinite] bg-primary-foreground",
-        )}
-      />
-      <span
-        className={cn(
-          glyph,
-          loop,
-          "invisible left-[2.34375rem] animate-[microbot-wink_5.04s_step-end_infinite]",
-        )}
-      >
-        {"<"}
-      </span>
+        {FRAMES.map((shapes, i) => (
+          <div
+            key={i}
+            className={cn(
+              "invisible absolute inset-0 animate-[microbot-frame_var(--loop)_step-end_infinite] motion-reduce:animate-none",
+              i === STILL && "motion-reduce:visible",
+            )}
+            style={
+              {
+                "--loop": `${LOOP_MS}ms`,
+                animationDelay: `${i * FRAME_MS - LOOP_MS}ms`,
+              } as React.CSSProperties
+            }
+          >
+            {shapes.map((shape, j) =>
+              shape.kind === "bar" ? (
+                <span
+                  key={j}
+                  className="absolute w-[13.758px] bg-current"
+                  style={{ left: shape.left, top: shape.top, height: shape.height }}
+                />
+              ) : (
+                <span
+                  key={j}
+                  className={cn(glyph, shape.kind === "wink" && "-scale-x-100")}
+                  style={{ left: shape.left }}
+                >
+                  {">"}
+                </span>
+              ),
+            )}
+          </div>
+        ))}
+      </div>
     </div>
   )
 }
