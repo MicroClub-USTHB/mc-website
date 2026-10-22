@@ -67,13 +67,16 @@ function PrintedPhoto({ box, rotate, print, photo, src, alt }: Print) {
             src={printedPaper}
             alt=""
             sizes="300px"
+            loading="eager"
             className="size-full max-w-none object-cover"
           />
         </span>
+        {/* On screen at load, the largest paint on some screens: not lazy. */}
         <Image
           src={src}
           alt={alt}
           sizes="270px"
+          loading="eager"
           draggable={false}
           className="relative max-w-none shrink-0 object-cover"
           style={{ width: photo.width, height: photo.height }}
