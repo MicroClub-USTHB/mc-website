@@ -48,6 +48,7 @@ Guidelines for AI coding agents working on the official Micro Club website.
 
 - `pnpm db:up` starts MongoDB from the root `docker-compose.yml` (`pnpm db:down` stops it); `MONGODB_URI=mongodb://localhost:27017/microclub` in `.env.local`.
 - Student IDs are uploaded by the browser straight to Cloudinary with a signature from `src/actions/sign-student-id-upload.ts` (`authenticated` assets, no public URL), then `src/actions/submit-registration.ts` reads the upload back and saves the registration. Needs the `CLOUDINARY_*` variables.
+- Registrations open and close with `REGISTRATIONS_WINDOW` in `src/config/registrations.ts` (`opensAt` / `closesAt`, ISO dates or `null`), read through `registrationsPhase()` in `src/lib/registrations/window.ts`. Outside the window `/registrations` is a 404 and the actions refuse submissions; the hero shows "Opening soon" or "Register now" with a countdown (`RegistrationsButton`), docked in the menu bar once scrolled past (`RegistrationsDock`), or nothing when closed.
 
 ## Conventions
 
