@@ -148,7 +148,9 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
         )}
       >
         <div
-          className="relative"
+          // Opaque (bg-background under the dots): the browser can then scroll it on the compositor,
+          // panning without repainting the board.
+          className="relative bg-background"
           style={{
             width: CANVAS_WIDTH,
             height: CANVAS_HEIGHT,
