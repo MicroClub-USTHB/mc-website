@@ -109,6 +109,7 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
   /** One tile per link, hanging at its place in the layout. */
   function build() {
     world = createWorld(box.clientWidth, box.clientHeight)
+    world.onWake = () => run()
     // `offset*` ignore transforms: the layout place, wherever the tile is drawn now.
     origins = elements.map((element) => ({
       x: element.offsetLeft + element.offsetWidth / 2,
@@ -223,11 +224,17 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
   box.addEventListener("lostpointercapture", drop)
   box.addEventListener("click", onClick, true)
 
+  // The loop only runs while the pile moves and the footer is on screen: at rest (or scrolled
+  // away) no frame is requested; grabbing a tile wakes the world, which starts it again.
   let pending = 0
+  let running = false
+  let onScreen = true
   function tick({ delta }: { delta: number }) {
-    // Idle once the pile is at rest, until a tile is grabbed again.
-    // (Not while rows are still waiting to be released.)
-    if (isAsleep(world) && tiles.every((tile) => !tile.pinned)) return
+    // Idle once the pile is at rest (not while rows are still waiting to be released).
+    if (!onScreen || (isAsleep(world) && tiles.every((tile) => !tile.pinned))) {
+      stop()
+      return
+    }
     pending = Math.min(pending + delta, STEP * 4)
     while (pending >= STEP) {
       advance()
@@ -235,14 +242,31 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
     }
     render()
   }
-  frame.update(tick, true)
+  function run() {
+    if (running || !onScreen) return
+    running = true
+    pending = 0
+    frame.update(tick, true)
+  }
+  function stop() {
+    if (!running) return
+    running = false
+    cancelFrame(tick)
+  }
+  const visibility = new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting
+    if (onScreen) run()
+  })
+  visibility.observe(box)
+  run()
 
   function reset() {
     for (const element of elements) element.style.transform = ""
   }
 
   return () => {
-    cancelFrame(tick)
+    stop()
+    visibility.disconnect()
     resizeObserver.disconnect()
     box.removeEventListener("pointerdown", onPointerDown)
     box.removeEventListener("pointermove", onPointerMove)
