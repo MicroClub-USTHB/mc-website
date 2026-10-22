@@ -49,6 +49,9 @@ function CardShape() {
     <Image
       src={cardShape}
       alt=""
+      // Exact size: the import rounds it to whole pixels.
+      width={295.65}
+      height={362.14}
       unoptimized
       draggable={false}
       className="absolute top-[-3.45px] left-[-10.31px] max-w-none"

@@ -35,6 +35,8 @@ type IconLetter = {
   box: { left: number; top: number; width: number; height: number }
   /** Offset of the SVG (glow included) from the letter box. */
   offset: { left: number; top: number }
+  /** The SVG's exact size: the imported one is rounded to whole pixels. */
+  size: { width: number; height: number }
 }
 
 const ICONS: IconLetter[] = [
@@ -43,18 +45,21 @@ const ICONS: IconLetter[] = [
     alt: "R",
     box: { left: 236, top: 23, width: 55.682, height: 76.484 },
     offset: { left: -9.9, top: -5.9 },
+    size: { width: 75.482, height: 96.284 },
   },
   {
     src: network,
     alt: "N",
     box: { left: 378.82, top: 22.95, width: 59.838, height: 72.659 },
     offset: { left: -9.9, top: -5.9 },
+    size: { width: 79.638, height: 92.459 },
   },
   {
     src: signal,
     alt: "C",
     box: { left: 447.43, top: 17.85, width: 57.415, height: 81.582 },
     offset: { left: -9.9, top: -3.88 },
+    size: { width: 77.215, height: 97.351 },
   },
 ]
 
@@ -138,7 +143,7 @@ export function Headline() {
             </motion.span>
           ))}
 
-          {ICONS.map(({ src, box, offset }, i) => (
+          {ICONS.map(({ src, box, offset, size }, i) => (
             <motion.span
               key={src.src}
               {...pop(1 + i)}
@@ -148,6 +153,7 @@ export function Headline() {
               <Image
                 src={src}
                 alt=""
+                {...size}
                 unoptimized
                 draggable={false}
                 className="absolute max-w-none"

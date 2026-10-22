@@ -115,6 +115,9 @@ export function Activities() {
         <Image
           src={chessOutline}
           alt=""
+          // Exact size (the import rounds it): sized by CSS, it is never mistaken for a squash.
+          width={118.506}
+          height={119.08}
           unoptimized
           draggable={false}
           className="absolute inset-[-3.25%_-3.49%_-3.48%_-3.18%] block h-[calc(100%*1.0673)] w-[calc(100%*1.0667)] max-w-none"
