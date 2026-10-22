@@ -25,14 +25,15 @@ export function isBackdropDark(x: number, y: number, ignore: Element | null) {
   const ctx = document.createElement("canvas").getContext("2d", { willReadFrequently: true })
   if (!ctx) return false
 
-  const layers = [...document.body.querySelectorAll("*")].filter((el) => {
-    if (ignore?.contains(el)) return false
-    const rect = el.getBoundingClientRect()
-    return rect.left <= x && x <= rect.right && rect.top <= y && y <= rect.bottom
-  })
+  // The browser's own hit test, top-most first: no walk over the whole document.
+  const layers = document
+    .elementsFromPoint(x, y)
+    .filter(
+      (el) => el !== document.documentElement && el !== document.body && !ignore?.contains(el),
+    )
 
   let [r, g, b, transmittance] = [0, 0, 0, 1]
-  for (const el of layers.reverse()) {
+  for (const el of layers) {
     const bg = toRgba(ctx, getComputedStyle(el).backgroundColor)
     const alpha = bg.a * effectiveOpacity(el)
     if (alpha === 0) continue
