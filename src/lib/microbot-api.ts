@@ -33,7 +33,7 @@ export async function* streamAnswer(
 ): AsyncGenerator<MicroBotApiEvent> {
   const apiKey = process.env.MICROBOT_API_KEY
   if (!apiKey) {
-    console.error("MicroBot: MICROBOT_API_KEY is missing")
+    console.error("Micro Bot: MICROBOT_API_KEY is missing")
     yield { type: "error", status: 500, code: "not_configured" }
     return
   }
@@ -57,7 +57,7 @@ export async function* streamAnswer(
       signal: AbortSignal.timeout(TIMEOUT_MS),
     })
   } catch (error) {
-    console.error("MicroBot: the API could not be reached", error)
+    console.error("Micro Bot: the API could not be reached", error)
     yield { type: "error", status: 503, code: "unreachable" }
     return
   }
@@ -95,7 +95,7 @@ export async function* streamAnswer(
     // The stream ended without `done`: cut by the network or a timeout.
     yield { type: "error", status: 504, code: "incomplete" }
   } catch (error) {
-    console.error("MicroBot: reading the answer stream failed", error)
+    console.error("Micro Bot: reading the answer stream failed", error)
     yield { type: "error", status: 504, code: "incomplete" }
   }
 }

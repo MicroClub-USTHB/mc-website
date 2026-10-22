@@ -1,8 +1,8 @@
 "use client"
 
-import { useEffect, useRef } from "react"
-import { motion, useAnimation, useReducedMotion } from "motion/react"
+import { motion } from "motion/react"
 
+import { useIconAnimation } from "@/components/icons/use-icon-animation"
 import { cn } from "@/lib/utils"
 
 type SendIconProps = Omit<React.ComponentProps<"span">, "children"> & {
@@ -17,30 +17,7 @@ type SendIconProps = Omit<React.ComponentProps<"span">, "children"> & {
  * reduced motion.
  */
 export function SendIcon({ className, size = 16, ...props }: SendIconProps) {
-  const controls = useAnimation()
-  const reduceMotion = useReducedMotion()
-  const root = useRef<HTMLSpanElement>(null)
-
-  useEffect(() => {
-    const icon = root.current
-    if (!icon || reduceMotion) return
-    const host = icon.closest<HTMLElement>("a, button") ?? icon
-    const play = (event: Event) => {
-      if (!(event instanceof PointerEvent) || event.pointerType === "mouse")
-        void controls.start("animate")
-    }
-    const stop = () => void controls.start("normal")
-    host.addEventListener("pointerenter", play)
-    host.addEventListener("pointerleave", stop)
-    host.addEventListener("focusin", play)
-    host.addEventListener("focusout", stop)
-    return () => {
-      host.removeEventListener("pointerenter", play)
-      host.removeEventListener("pointerleave", stop)
-      host.removeEventListener("focusin", play)
-      host.removeEventListener("focusout", stop)
-    }
-  }, [controls, reduceMotion])
+  const { controls, ref: root } = useIconAnimation()
 
   return (
     <span ref={root} aria-hidden className={cn("inline-flex", className)} {...props}>

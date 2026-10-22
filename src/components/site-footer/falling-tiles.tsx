@@ -15,7 +15,7 @@ import {
   step,
   tileAt,
   type Tile,
-} from "@/components/site-footer/tile-physics"
+} from "@/lib/box-physics"
 import { cn } from "@/lib/utils"
 
 /** Physics step (ms): fixed 60 Hz, whatever the display rate. */
@@ -35,7 +35,7 @@ const IMPACT_SPEED = 50
  * the scroll keeps its speed into the bottom, see `SmoothScrollProvider`), then fall with physics
  * (Matter.js), row by row from the bottom, and pile up at the bottom of the box. A slow arrival
  * leaves them hanging. With a mouse, tiles can be dragged and thrown; a press without moving
- * stays a click on the link. The physics is our own (`tile-physics.ts`), run on Motion's frame
+ * stays a click on the link. The physics is our own (`src/lib/box-physics.ts`), run on Motion's frame
  * loop: tiles can never leave the box, however hard they are thrown or dragged.
  *
  * Tiles keep their place in the layout and are moved with `transform` only (the box does not

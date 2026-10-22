@@ -1,11 +1,23 @@
+import { HeroCanvas } from "@/components/hero/hero-canvas"
+import { HeroItems } from "@/components/hero/hero-items"
 import { SectionContainer } from "@/components/shared/section-container"
 import { siteConfig } from "@/config/site"
 
+/**
+ * Hero (Figma "HERO SECTION"): one screen of an explorable whiteboard (see `HeroCanvas`), under the
+ * menu and the Micro Bot launcher. Its elements are placed from `HERO_ITEMS` in
+ * `src/const/hero.ts`. The page title stays in the HTML for search engines and
+ * screen readers.
+ */
 export function Hero() {
   return (
-    <SectionContainer id="hero" className="flex min-h-svh items-center">
-      {/* TODO: hero visual, tagline and primary call to action. */}
-      <h1 className="header-lg font-bold sm:header-xl">{siteConfig.name}</h1>
+    <SectionContainer id="hero" aria-labelledby="hero-title" bleed className="h-svh scroll-mt-0">
+      <h1 id="hero-title" className="sr-only">
+        {siteConfig.name}: {siteConfig.description}
+      </h1>
+      <HeroCanvas>
+        <HeroItems />
+      </HeroCanvas>
     </SectionContainer>
   )
 }

@@ -9,7 +9,7 @@ import { MICROBOT_MAX_LENGTH } from "@/const/microbot"
 type MessageInputProps = {
   ref?: React.Ref<HTMLInputElement>
   placeholder: string
-  /** True while MicroBot answers: the next question waits for the answer. */
+  /** True while Micro Bot answers: the next question waits for the answer. */
   busy: boolean
   onSend: (question: string) => void
 }

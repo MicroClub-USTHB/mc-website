@@ -48,7 +48,7 @@ const SCALE = 58.268 / 54
 const glyph = "absolute top-[-5.85px] font-heading text-[24.214px] leading-[32.285px] font-medium"
 
 /**
- * Glassy terminal screen of MicroBot, the face of the launcher: the 11 Figma "Expressions" frames
+ * Glassy terminal screen of Micro Bot, the face of the launcher: the 11 Figma "Expressions" frames
  * played in a loop (each frame shows during its own 420ms slot of the `microbot-frame` keyframes,
  * offset with a negative delay). Pure CSS, so it never re-renders React and pauses with the tab.
  * With reduced motion it stays on `>_▬`.

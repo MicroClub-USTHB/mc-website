@@ -4,7 +4,7 @@ import { cn } from "@/lib/utils"
 type MicroBotLauncherProps = React.ComponentProps<"button">
 
 /**
- * 72×72 button showing MicroBot's face: opens and closes the chat panel. No backdrop blur (unlike
+ * 72×72 button showing Micro Bot's face: opens and closes the chat panel. No backdrop blur (unlike
  * Figma): the background is opaque, so it would never show, yet it would repaint on every scroll
  * frame of the page behind this fixed button.
  */

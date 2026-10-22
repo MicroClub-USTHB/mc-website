@@ -38,7 +38,7 @@ type MicroBotWidgetProps = {
 }
 
 /**
- * Client island of the Ask MicroBot assistant: open state, conversation and answer loading. Answers
+ * Client island of the Ask Micro Bot assistant: open state, conversation and answer loading. Answers
  * come from the Micro Bot API through the `askMicroBot` Server Action, streamed as they are
  * written; the conversation id it returns is sent with the next question, so follow-ups keep
  * their context (the API forgets a conversation after 30 idle minutes and starts a new one). Fixed
