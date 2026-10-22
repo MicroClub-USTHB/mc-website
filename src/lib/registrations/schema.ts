@@ -4,7 +4,8 @@ import {
   ANSWER_MAX_LENGTH,
   ANSWER_MIN_LENGTH,
   PHONE_COUNTRIES,
-  REGISTRATION_SKILLS,
+  SKILLS_MAX,
+  SKILL_MAX_LENGTH,
   STUDENT_ID_RULES,
 } from "@/const/registrations"
 
@@ -136,9 +137,9 @@ export const additionalSchema = z.object({
   linkedinUrl: optionalLink,
   githubUrl: optionalLink,
   skills: z
-    .array(z.enum(REGISTRATION_SKILLS))
-    .min(1, "Select at least 1 skill.")
-    .max(REGISTRATION_SKILLS.length, "Too many skills selected."),
+    .array(z.string().trim().min(1).max(SKILL_MAX_LENGTH, "Keep each skill short."))
+    .min(1, "Please add at least one skill.")
+    .max(SKILLS_MAX, "Too many skills."),
 })
 
 /** One schema per step, in step order: a step is valid when its schema accepts the values. */

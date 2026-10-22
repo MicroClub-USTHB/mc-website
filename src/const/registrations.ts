@@ -25,29 +25,9 @@ export const PHONE_COUNTRIES: PhoneCountry[] = [{ code: "ALG", name: "Algeria", 
 
 export const DEFAULT_PHONE_COUNTRY = PHONE_COUNTRIES[0].code
 
-/** Skills the applicant can pick from (step 3). */
-export const REGISTRATION_SKILLS = [
-  "Web development",
-  "Mobile development",
-  "AI & machine learning",
-  "Data science",
-  "Cybersecurity",
-  "DevOps & cloud",
-  "UI / UX design",
-  "Graphic design",
-  "Video editing & motion",
-  "Photography",
-  "Game development",
-  "3D modeling",
-  "Electronics & embedded",
-  "Robotics",
-  "Content writing",
-  "Social media & marketing",
-  "Public speaking",
-  "Event organization",
-  "Project management",
-  "Teamwork & leadership",
-] as const
+/** Skills typed in step 3: how many, and how long each can be. */
+export const SKILLS_MAX = 20
+export const SKILL_MAX_LENGTH = 40
 
 /** Student ID upload rules (Figma "CLICK TO UPLOAD STUDENT ID"). */
 export const STUDENT_ID_RULES = {

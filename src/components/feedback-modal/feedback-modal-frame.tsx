@@ -1,6 +1,7 @@
 import { XIcon, type LucideIcon } from "lucide-react"
 
 import type { FeedbackModalProps } from "@/components/feedback-modal/types"
+import { McButton } from "@/components/ui/mc-button"
 import {
   McDialog,
   McDialogClose,
@@ -10,9 +11,9 @@ import {
 } from "@/components/ui/mc-dialog"
 import { cn } from "@/lib/utils"
 
-/** Figma "Buttons" of the modals: 165px wide, 14px medium label, 40px high. */
+/** Figma "Buttons" of the modals (McButton): 165px wide, 40px high, 14px medium label. */
 const BUTTON =
-  "h-10 min-w-0 flex-1 basis-0 cursor-pointer rounded-lg px-4 text-sm leading-5 font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-4 focus-visible:ring-ring sm:max-w-[165px]"
+  "h-10 min-w-0 flex-1 basis-0 px-4 py-2.5 text-sm leading-5 shadow-none sm:max-w-[165px]"
 
 /**
  * The card all feedback modals share (Figma "Modals", 387px wide): tinted icon, bold uppercase
@@ -62,34 +63,26 @@ export function FeedbackModalFrame({
         </div>
         <div className="flex justify-center gap-2">
           {secondaryLabel && (
-            <button
-              type="button"
+            <McButton
+              variant="secondary"
               onClick={() => {
                 onSecondary?.()
                 onOpenChange(false)
               }}
-              className={cn(
-                BUTTON,
-                "border border-border bg-secondary text-primary hover:bg-accent",
-              )}
+              className={cn(BUTTON, "border-border text-primary")}
             >
               {secondaryLabel}
-            </button>
+            </McButton>
           )}
-          <button
-            type="button"
+          <McButton
             onClick={() => {
               onAction?.()
               onOpenChange(false)
             }}
-            className={cn(
-              BUTTON,
-              "bg-primary text-secondary hover:bg-secondary-foreground",
-              !secondaryLabel && "max-w-[165px]",
-            )}
+            className={cn(BUTTON, "text-secondary", !secondaryLabel && "max-w-[165px]")}
           >
             {actionLabel}
-          </button>
+          </McButton>
         </div>
       </McDialogContent>
     </McDialog>

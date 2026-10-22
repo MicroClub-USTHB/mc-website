@@ -8,7 +8,7 @@ const HISTORY_MARKER = "mcUnsavedGuard"
 /**
  * While `dirty`, stops every way out of the page from losing the visitor's answers by accident:
  * - a click on any link to another page (menu, logo, BACK, footer...) opens the warning modal,
- *   and "Leave anyway" replays the same click, so the link behaves as if nothing stood in between;
+ *   and its "Home Page" button replays the same click, so the link behaves as if nothing stood in between;
  * - the browser back button shows the same modal (the guard keeps one extra history entry);
  * - reload, closing the tab or typing another address shows the browser's own confirmation,
  *   which pages cannot restyle.
@@ -18,12 +18,8 @@ export function useUnsavedChangesGuard(dirty: boolean) {
   const leaving = useRef(false)
 
   const askToLeave = useEffectEvent((leave: () => void) => {
+    // Figma copy: "Home Page" leaves (follows the link that was clicked), "Try Again" stays.
     showWarning({
-      title: "Leave without submitting?",
-      description:
-        "You have unsaved changes. If you leave this page now your registration will not be sent, and your student ID upload will be lost.",
-      actionLabel: "Keep editing",
-      secondaryLabel: "Leave anyway",
       onSecondary: () => {
         leaving.current = true
         leave()

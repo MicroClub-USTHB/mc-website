@@ -1,13 +1,14 @@
 export type FeedbackVariant = "success" | "error" | "warning"
 
 export type FeedbackModalOptions = {
-  title: string
+  /** Each variant has its Figma copy: title, message and button labels, overridable. */
+  title?: string
   description?: string
   /** Label of the main button. Each variant has a default one. */
   actionLabel?: string
   /** Runs when the main button is pressed, before the modal closes. */
   onAction?: () => void
-  /** Label of an optional second button, shown before the main one (e.g. "Leave anyway"). */
+  /** Label of an optional second button, shown before the main one (e.g. "Home Page"). */
   secondaryLabel?: string
   /** Runs when the second button is pressed, before the modal closes. */
   onSecondary?: () => void

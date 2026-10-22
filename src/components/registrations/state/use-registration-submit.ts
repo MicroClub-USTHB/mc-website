@@ -37,7 +37,10 @@ export function useRegistrationSubmit({
   scrollToForm,
 }: SubmitOptions) {
   const router = useRouter()
-  const { showSuccess, showError, showWarning } = useFeedbackModal()
+  const { showSuccess, showError } = useFeedbackModal()
+  /** Error modal (Figma): "Home Page" leaves, "Try Again" closes it on the form. */
+  const failed = (options: Parameters<typeof showError>[0] = {}) =>
+    showError({ onSecondary: () => router.push("/"), ...options })
   // The transition keeps `submitting` true until the whole request (and its handling) is done.
   const [submitting, startSubmit] = useTransition()
   const uploaded = useRef<{ file: File; upload: StudentIdUpload } | null>(null)
@@ -48,11 +51,7 @@ export function useRegistrationSubmit({
 
     const signed = await createStudentIdUploadSignature()
     if (signed.status === "rate-limited") {
-      showWarning({
-        title: "Too many attempts",
-        description:
-          "You tried to upload your ID several times in a row. Please wait a while, then try again.",
-      })
+      failed()
       return null
     }
     if (signed.status === "error") throw new Error("Signing the upload failed")
@@ -63,11 +62,7 @@ export function useRegistrationSubmit({
       return upload
     } catch (error) {
       console.error("Registration: the student ID upload failed", error)
-      showError({
-        title: "We could not upload your student ID",
-        description:
-          "Check the file (JPG, PNG, WebP or PDF, 5 MB max) and your connection, then try again.",
-      })
+      failed()
       return null
     }
   }
@@ -90,10 +85,6 @@ export function useRegistrationSubmit({
           uploaded.current = null
           onSaved()
           showSuccess({
-            title: "You are registered!",
-            description:
-              "Thank you for applying to Micro Club. We received your registration and will get back to you soon.",
-            actionLabel: "Back to home",
             onAction: () => router.push("/"),
             onClose: scrollToForm,
           })
@@ -108,19 +99,12 @@ export function useRegistrationSubmit({
               (index === 0 && result.studentIdError),
           )
           showStepErrors(Math.max(step, 0), result.errors, result.studentIdError ?? null)
-          showError({
-            title: "Some answers need a fix",
-            description: "Please check the highlighted fields, then submit again.",
-          })
+          failed()
           break
         }
         case "duplicate":
           uploaded.current = null
-          showWarning({
-            title: "You are already registered",
-            description:
-              "A registration with this email already exists. If you think this is a mistake, contact us through the Contact section.",
-            actionLabel: "Change my email",
+          failed({
             onAction: () => {
               store.openStep(0)
               focusField(fieldId("email"))
@@ -128,26 +112,15 @@ export function useRegistrationSubmit({
           })
           break
         case "rate-limited":
-          showWarning({
-            title: "Too many attempts",
-            description:
-              "You tried to register several times in a row. Please wait a while, then try again.",
-          })
+          failed()
           break
         case "error":
-          showError({
-            title: "We could not save your registration",
-            description:
-              "Something went wrong on our side. Your answers are kept, please try again.",
-          })
+          failed()
           break
       }
     } catch (error) {
       console.error("Registration: the request failed", error)
-      showError({
-        title: "We could not reach the server",
-        description: "Check your connection and try again. Your answers are kept.",
-      })
+      failed()
     }
   }
 

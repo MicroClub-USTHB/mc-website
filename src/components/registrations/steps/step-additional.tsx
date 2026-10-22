@@ -4,7 +4,7 @@ import { RegistrationInput } from "@/components/registrations/fields/registratio
 import { SkillsField } from "@/components/registrations/fields/skills-field"
 import { PROFILE_LINKS } from "@/const/registrations"
 
-/** Step 3: optional profile links, then the skills select (the only required field here). */
+/** Step 3: optional profile links, then the skills typed in (the only required field here). */
 export function StepAdditional() {
   return (
     <div className="flex flex-col gap-5">
