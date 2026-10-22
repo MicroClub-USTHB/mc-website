@@ -1,60 +1,16 @@
 import { CircleXIcon } from "lucide-react"
 
+import { FeedbackModalFrame } from "@/components/feedback-modal/feedback-modal-frame"
 import type { FeedbackModalProps } from "@/components/feedback-modal/types"
-import { McButton } from "@/components/ui/mc-button"
-import {
-  McDialog,
-  McDialogContent,
-  McDialogDescription,
-  McDialogHeader,
-  McDialogTitle,
-} from "@/components/ui/mc-dialog"
 
-/** Error modal. Its own file with its own markup, so it can be redesigned without the others. */
-export function ErrorModal({
-  open,
-  onOpenChange,
-  title,
-  description,
-  actionLabel = "Try again",
-  onAction,
-  secondaryLabel,
-  onSecondary,
-}: FeedbackModalProps) {
+/** Error (Figma "Destructive") modal. Its own file, so it can be redesigned without the others. */
+export function ErrorModal({ actionLabel = "Try again", ...props }: FeedbackModalProps) {
   return (
-    <McDialog open={open} onOpenChange={onOpenChange}>
-      <McDialogContent className="items-center text-center" showCloseButton={false}>
-        <span className="mx-auto grid size-14 place-items-center rounded-full bg-destructive-foreground text-destructive">
-          <CircleXIcon className="size-8" aria-hidden />
-        </span>
-        <McDialogHeader className="items-center">
-          <McDialogTitle>{title}</McDialogTitle>
-          {description && <McDialogDescription>{description}</McDialogDescription>}
-        </McDialogHeader>
-        <div className="flex flex-wrap justify-center gap-2">
-          {secondaryLabel && (
-            <McButton
-              variant="secondary"
-              size="xl"
-              onClick={() => {
-                onSecondary?.()
-                onOpenChange(false)
-              }}
-            >
-              {secondaryLabel}
-            </McButton>
-          )}
-          <McButton
-            size="xl"
-            onClick={() => {
-              onAction?.()
-              onOpenChange(false)
-            }}
-          >
-            {actionLabel}
-          </McButton>
-        </div>
-      </McDialogContent>
-    </McDialog>
+    <FeedbackModalFrame
+      {...props}
+      actionLabel={actionLabel}
+      icon={CircleXIcon}
+      tone="bg-destructive-foreground text-destructive"
+    />
   )
 }
