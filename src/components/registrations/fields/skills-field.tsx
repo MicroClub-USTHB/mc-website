@@ -1,18 +1,14 @@
 "use client"
 
+import { XIcon } from "lucide-react"
+
 import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
 import { useRegistrationField } from "@/components/registrations/state/registration-context"
 import { McBadge } from "@/components/ui/mc-badge"
-import {
-  McSelect,
-  McSelectContent,
-  McSelectItem,
-  McSelectTrigger,
-  McSelectValue,
-} from "@/components/ui/mc-select"
+import { McSelect, McSelectContent, McSelectItem, McSelectTrigger } from "@/components/ui/mc-select"
 import { REGISTRATION_SKILLS } from "@/const/registrations"
 
-const PLACEHOLDER = "Select at least 1 skill"
+const PLACEHOLDER = "Enter your skills here ..."
 
 /** Multiple choice of skills (Figma "Skills" select), the picked ones show as chips. */
 export function SkillsField() {
@@ -35,23 +31,33 @@ export function SkillsField() {
           id={id}
           aria-invalid={!!error || undefined}
           aria-describedby={error ? errorId : undefined}
-          className="h-auto min-h-11 w-full py-2 text-base leading-6 text-foreground shadow-xs data-[size=default]:h-auto"
+          className="h-auto min-h-11 w-full py-2.5 text-base leading-6 text-foreground shadow-xs data-[size=default]:h-auto [&>svg]:hidden"
         >
-          <McSelectValue>
-            {(selected: string[]) =>
-              selected.length === 0 ? (
-                PLACEHOLDER
-              ) : (
-                <span className="flex flex-wrap gap-1.5">
-                  {selected.map((skill) => (
-                    <McBadge key={skill} variant="secondary" size="md">
-                      {skill}
-                    </McBadge>
-                  ))}
-                </span>
-              )
-            }
-          </McSelectValue>
+          {/* Figma "Filled": the prompt stays, the picked skills line up under it. */}
+          <span className="flex min-w-0 flex-1 flex-col items-start gap-2">
+            <span className="text-muted-foreground">{PLACEHOLDER}</span>
+            {value.length > 0 && (
+              <span className="flex flex-wrap gap-2">
+                {value.map((skill) => (
+                  <McBadge key={skill} size="md" className="gap-1 pr-2 pl-2.5">
+                    {skill}
+                    {/* Unpicks the skill without opening the list (also in the list itself). */}
+                    <span
+                      aria-hidden
+                      onPointerDown={(event) => event.stopPropagation()}
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onValueChange(value.filter((item) => item !== skill))
+                      }}
+                      className="grid size-3 cursor-pointer place-items-center"
+                    >
+                      <XIcon className="size-3" strokeWidth={2} />
+                    </span>
+                  </McBadge>
+                ))}
+              </span>
+            )}
+          </span>
         </McSelectTrigger>
 
         <McSelectContent

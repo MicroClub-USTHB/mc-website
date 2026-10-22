@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileTextIcon, UploadIcon, XIcon } from "lucide-react"
+import { FileIcon, UploadIcon, XIcon } from "lucide-react"
 
 import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
 import { useRegistration } from "@/components/registrations/state/registration-context"
@@ -11,13 +11,14 @@ import { cn } from "@/lib/utils"
 
 function formatSize(bytes: number) {
   return bytes < 1024 * 1024
-    ? `${Math.max(1, Math.round(bytes / 1024))} KB`
+    ? `${(bytes / 1024).toFixed(1)} KB`
     : `${(bytes / (1024 * 1024)).toFixed(1)} MB`
 }
 
 /**
- * Student ID drop zone (Figma "CLICK TO UPLOAD STUDENT ID"): click or drop a file. The box stretches
- * to the height of the column next to it, and shows the chosen file with a preview and a remove button.
+ * Student ID drop zone (Figma "_Input field base"): click or drop a file in the 232px box. The
+ * chosen file shows below it (Figma "Uploaded"): a thumbnail when it is an image, its name and size,
+ * and a remove button.
  */
 export function StudentIdUpload() {
   const { studentId, studentIdError, setStudentId } = useRegistration()
@@ -42,7 +43,7 @@ export function StudentIdUpload() {
   const previewUrl = preview?.file === studentId ? preview.url : null
 
   return (
-    <div className="flex flex-1 flex-col gap-1.5">
+    <div className="flex flex-col gap-1.5">
       <span className={FIELD_LABEL_CLASS}>Certificate of enrollment or student ID</span>
 
       <label
@@ -60,7 +61,7 @@ export function StudentIdUpload() {
           setStudentId(event.dataTransfer.files[0] ?? null)
         }}
         className={cn(
-          "flex min-h-58 flex-1 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-border bg-input px-3.5 py-2.5 text-center shadow-xs transition-all",
+          "flex h-58 cursor-pointer flex-col items-center justify-center gap-2 rounded-lg border border-border bg-input px-3.5 py-2.5 text-center shadow-xs transition-all",
           "hover:border-ring has-focus-visible:ring-4 has-focus-visible:ring-ring",
           "data-dragging:border-ring data-dragging:bg-secondary data-error:border-destructive",
         )}
@@ -79,46 +80,47 @@ export function StudentIdUpload() {
           }}
         />
 
-        {studentId ? (
-          <>
-            {previewUrl ? (
-              // A local data URL: next/image cannot optimize it.
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={previewUrl}
-                alt={`Preview of ${studentId.name}`}
-                className="max-h-28 max-w-full rounded-md border border-border object-contain"
-              />
-            ) : (
-              <FileTextIcon className="size-10 text-muted-foreground" aria-hidden />
-            )}
-            <span className="max-w-full truncate text-base leading-6 font-medium text-foreground">
+        <UploadIcon className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden />
+        <span className="w-49.75 text-base leading-6 text-muted-foreground uppercase">
+          Click to upload student ID
+        </span>
+      </label>
+
+      {/* Figma "File Upload": the chosen file, with a thumbnail of it when it is an image. */}
+      {studentId && (
+        <div className="flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3">
+          {previewUrl ? (
+            // A local data URL: next/image cannot optimize it.
+            // eslint-disable-next-line @next/next/no-img-element
+            <img
+              src={previewUrl}
+              alt={`Preview of ${studentId.name}`}
+              className="size-12 shrink-0 rounded-md border border-border object-cover"
+            />
+          ) : (
+            <FileIcon
+              className="h-[25.333px] w-[16.667px] shrink-0 text-muted-foreground"
+              aria-hidden
+            />
+          )}
+          <div className="flex min-w-0 flex-1 flex-col justify-center">
+            <span className="truncate text-base leading-6 font-medium text-card-foreground">
               {studentId.name}
             </span>
-            <span className="text-sm leading-5 text-muted-foreground">
-              {formatSize(studentId.size)} · Click to replace
+            <span className="text-xs leading-6 font-medium text-muted-foreground">
+              {formatSize(studentId.size)}
             </span>
-            <button
-              type="button"
-              aria-label="Remove the file"
-              onClick={(event) => {
-                event.preventDefault()
-                setStudentId(null)
-              }}
-              className="mt-1 grid size-8 place-items-center rounded-md text-muted-foreground transition-colors outline-none hover:bg-accent hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
-            >
-              <XIcon className="size-4" aria-hidden />
-            </button>
-          </>
-        ) : (
-          <>
-            <UploadIcon className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden />
-            <span className="w-49.75 text-base leading-6 text-muted-foreground uppercase">
-              Click to upload student ID
-            </span>
-          </>
-        )}
-      </label>
+          </div>
+          <button
+            type="button"
+            aria-label={`Remove ${studentId.name}`}
+            onClick={() => setStudentId(null)}
+            className="grid size-5 shrink-0 cursor-pointer place-items-center rounded-sm text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
+          >
+            <XIcon className="size-4" aria-hidden />
+          </button>
+        </div>
+      )}
 
       <p id={hintId} className="sr-only">
         {STUDENT_ID_RULES.label}

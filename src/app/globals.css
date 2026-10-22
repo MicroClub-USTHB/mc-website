@@ -582,3 +582,40 @@
     translate: 0 3px;
   }
 }
+
+/* Registration step indicator (Figma "Luminous blue glaze"): primary core fading to white at the
+   rim, lit from inside by two white inner glows. */
+@utility glaze {
+  background:
+    radial-gradient(
+      circle 55.55px at center,
+      var(--color-primary) 0%,
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--color-primary) 55%, var(--color-primary-foreground)) 63%,
+          transparent
+        )
+        89.3%,
+      color-mix(in srgb, var(--color-primary-foreground) 20%, transparent) 100%
+    ),
+    radial-gradient(
+      circle 40.6px at center,
+      var(--color-primary) 23.1%,
+      var(--color-primary-foreground) 100%
+    );
+  box-shadow:
+    inset 0 0 11.33px color-mix(in srgb, var(--color-primary-foreground) 60%, transparent),
+    inset 0 0 8.09px color-mix(in srgb, var(--color-primary-foreground) 86%, transparent);
+}
+
+/* The glossy progress bar between reached steps (Figma "Rectangle 34625063"). */
+@utility glaze-bar {
+  background: radial-gradient(
+    ellipse 50% 1170% at center,
+    var(--color-primary) 23.1%,
+    var(--color-primary-foreground) 100%
+  );
+  box-shadow:
+    inset 0 0 5.72px color-mix(in srgb, var(--color-primary-foreground) 86%, transparent),
+    inset 0 0 29.75px color-mix(in srgb, var(--color-primary-foreground) 60%, transparent);
+}

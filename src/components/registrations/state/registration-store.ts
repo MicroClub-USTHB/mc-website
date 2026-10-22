@@ -45,7 +45,12 @@ function readDraft(): RegistrationState | null {
       step: draft.step,
       furthestStep: draft.furthestStep,
       // Fields added since the draft was saved fall back to their empty value.
-      values: { ...EMPTY_REGISTRATION, ...draft.values },
+      // (Only Algerian numbers now: an older draft's country is dropped.)
+      values: {
+        ...EMPTY_REGISTRATION,
+        ...draft.values,
+        phoneCountry: EMPTY_REGISTRATION.phoneCountry,
+      },
       restored: true,
     }
   } catch {

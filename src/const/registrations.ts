@@ -14,31 +14,14 @@ export const REGISTRATION_STEPS: RegistrationStep[] = [
 ]
 
 export type PhoneCountry = {
-  /** Short code shown in the dropdown (Figma shows "ALG"). */
+  /** Short code shown before the number (Figma shows "ALG"). */
   code: string
   name: string
   dialCode: string
 }
 
-/** Phone prefixes, Algeria first (default). */
-export const PHONE_COUNTRIES: PhoneCountry[] = [
-  { code: "ALG", name: "Algeria", dialCode: "+213" },
-  { code: "TUN", name: "Tunisia", dialCode: "+216" },
-  { code: "MAR", name: "Morocco", dialCode: "+212" },
-  { code: "LBY", name: "Libya", dialCode: "+218" },
-  { code: "EGY", name: "Egypt", dialCode: "+20" },
-  { code: "SAU", name: "Saudi Arabia", dialCode: "+966" },
-  { code: "ARE", name: "United Arab Emirates", dialCode: "+971" },
-  { code: "QAT", name: "Qatar", dialCode: "+974" },
-  { code: "TUR", name: "Turkey", dialCode: "+90" },
-  { code: "FRA", name: "France", dialCode: "+33" },
-  { code: "ESP", name: "Spain", dialCode: "+34" },
-  { code: "ITA", name: "Italy", dialCode: "+39" },
-  { code: "DEU", name: "Germany", dialCode: "+49" },
-  { code: "GBR", name: "United Kingdom", dialCode: "+44" },
-  { code: "CAN", name: "Canada", dialCode: "+1" },
-  { code: "USA", name: "United States", dialCode: "+1" },
-]
+/** Phone prefix: Algerian numbers only (Figma shows "ALG"). */
+export const PHONE_COUNTRIES: PhoneCountry[] = [{ code: "ALG", name: "Algeria", dialCode: "+213" }]
 
 export const DEFAULT_PHONE_COUNTRY = PHONE_COUNTRIES[0].code
 

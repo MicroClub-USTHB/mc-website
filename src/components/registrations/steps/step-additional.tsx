@@ -14,11 +14,7 @@ export function StepAdditional() {
           field={field}
           type="url"
           inputMode="url"
-          label={
-            <>
-              {label} <span className="font-normal">(optional)</span>
-            </>
-          }
+          label={label}
           placeholder="Paste your link here ..."
           autoComplete="off"
           autoCapitalize="none"

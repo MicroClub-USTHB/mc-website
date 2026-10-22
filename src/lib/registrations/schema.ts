@@ -34,9 +34,15 @@ const optionalLink = z
   .max(300, "This link is too long.")
   .refine((value) => value === "" || isHttpUrl(value), "Please enter a valid link (https://...).")
 
-/** Digits of a phone number typed with spaces, dashes or a leading 0 (0555... = 555...). */
+/**
+ * The 9 national digits of an Algerian number typed with spaces, dashes, a leading 0 or the
+ * country code (0555..., +213 555..., 00213 555... = 555...).
+ */
 export function normalizePhone(value: string) {
-  return value.replace(/\D/g, "").replace(/^0+/, "")
+  return value
+    .replace(/\D/g, "")
+    .replace(/^(00)?213/, "")
+    .replace(/^0+/, "")
 }
 
 /** Parses `dd/mm/yyyy` into a real date, or `null` when it is not an existing day. */
@@ -81,10 +87,11 @@ export const personalSchema = z.object({
     .trim()
     .min(1, "Please enter your phone number.")
     .refine((value) => /^[\d\s().+-]+$/.test(value), "Only digits, spaces and dashes are allowed.")
-    .refine((value) => {
-      const digits = normalizePhone(value).length
-      return digits >= 7 && digits <= 12
-    }, "Please enter a valid phone number."),
+    // Algerian numbers: 9 digits, mobiles start with 5, 6 or 7, landlines with 2, 3 or 4.
+    .refine(
+      (value) => /^[2-7]\d{8}$/.test(normalizePhone(value)),
+      "Please enter a valid Algerian phone number.",
+    ),
   birthDate: z
     .string()
     .trim()
