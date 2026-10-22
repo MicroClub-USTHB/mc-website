@@ -337,9 +337,16 @@ function startPlayground(
   board.addEventListener("lostpointercapture", drop)
   board.addEventListener("click", onClick, true)
 
+  // The loop only runs while something moves and the board is on screen: once the pile sleeps
+  // (or scrolls away) no frame is requested at all, and a wake (drag, drop) starts it again.
   let pending = 0
+  let running = false
+  let onScreen = true
   function tick({ delta }: { delta: number }) {
-    if (isAsleep(world)) return
+    if (isAsleep(world) || !onScreen) {
+      stop()
+      return
+    }
     pending = Math.min(pending + delta, STEP * 4)
     while (pending >= STEP) {
       step(world)
@@ -347,10 +354,29 @@ function startPlayground(
     }
     render()
   }
-  frame.update(tick, true)
+  function run() {
+    if (running || !onScreen) return
+    running = true
+    pending = 0
+    frame.update(tick, true)
+  }
+  function stop() {
+    if (!running) return
+    running = false
+    cancelFrame(tick)
+  }
+  world.onWake = run
+  const visibility = new IntersectionObserver(([entry]) => {
+    onScreen = entry.isIntersecting
+    if (onScreen && !isAsleep(world)) run()
+  })
+  visibility.observe(board)
+  run()
 
   return () => {
-    cancelFrame(tick)
+    stop()
+    visibility.disconnect()
+    world.onWake = undefined
     board.removeEventListener("pointerdown", onPointerDown)
     board.removeEventListener("pointermove", onPointerMove)
     board.removeEventListener("pointerup", drop)

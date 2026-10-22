@@ -67,6 +67,8 @@ export type World = {
   drag: Drag | null
   /** Steps in a row with (almost) no motion. */
   stillSteps: number
+  /** Called when the world wakes up, so a paused render loop can restart. */
+  onWake?: () => void
 }
 
 export function createWorld(width: number, height: number, gravity = GRAVITY): World {
@@ -132,6 +134,7 @@ export function isAsleep(world: World) {
 
 export function wake(world: World) {
   world.stillSteps = 0
+  world.onWake?.()
 }
 
 /** Grabs `tile` at the box point `point`; the point then follows `moveDrag`. */
