@@ -1,11 +1,1 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="47.0001" height="46.7578" viewBox="0 0 47.0001 46.7578" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="Group" style="mix-blend-mode:overlay" opacity="0.25">
-<path id="Vector" d="M33.3287 46.5579C34.0689 46.8463 34.913 46.8278 35.6601 46.4683L45.3366 41.8122C46.3534 41.3229 47.0001 40.2938 47.0001 39.1648V7.59315C47.0001 6.46417 46.3535 5.4351 45.3367 4.94583L35.6601 0.28954C34.6796 -0.182286 33.532 -0.0667183 32.6714 0.558937C32.5485 0.648317 32.4314 0.748107 32.3215 0.858078L13.797 17.7584L5.72805 11.6334C4.97694 11.0632 3.92628 11.11 3.22866 11.7445L0.6407 14.0987C-0.212624 14.8749 -0.213602 16.2174 0.638585 16.9948L7.6362 23.3789L0.638585 29.763C-0.213602 30.5405 -0.212624 31.8829 0.6407 32.6591L3.22866 35.0133C3.92628 35.6479 4.97694 35.6946 5.72805 35.1244L13.797 28.9994L32.3215 45.8998C32.6145 46.1929 32.9586 46.4138 33.3287 46.5579ZM35.2572 12.7094L21.2013 23.3789L35.2572 34.0485V12.7094Z" fill-rule="evenodd" clip-rule="evenodd" fill="url(#paint0_linear_0_59)"/>
-</g>
-<defs>
-<linearGradient id="paint0_linear_0_59" x1="23.5001" y1="7.48537e-05" x2="23.5001" y2="46.7578" gradientUnits="userSpaceOnUse">
-<stop stop-color="white"/>
-<stop offset="1" stop-color="white" stop-opacity="0"/>
-</linearGradient>
-</defs>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="47" height="46.758" fill="none" overflow="visible" preserveAspectRatio="none" style="display:block" viewBox="0 0 47 46.758"><path fill="url(#a)" fill-rule="evenodd" d="M33.329 46.558c.74.288 1.584.27 2.331-.09l9.677-4.656A2.94 2.94 0 0 0 47 39.165V7.593a2.94 2.94 0 0 0-1.663-2.647L35.66.29a2.93 2.93 0 0 0-3.338.568l-18.525 16.9-8.069-6.125a1.956 1.956 0 0 0-2.5.112L.642 14.099a1.96 1.96 0 0 0-.002 2.896l6.997 6.384L.64 29.763a1.96 1.96 0 0 0 .002 2.896l2.588 2.354a1.956 1.956 0 0 0 2.499.111L13.797 29l18.525 16.9c.292.294.637.515 1.007.659m1.928-33.849L21.201 23.38l14.056 10.67z" clip-rule="evenodd" opacity=".25" style="mix-blend-mode:overlay"/><defs><linearGradient id="a" x1="23.5" x2="23.5" y1="0" y2="46.758" gradientUnits="userSpaceOnUse"><stop stop-color="#fff"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient></defs></svg>

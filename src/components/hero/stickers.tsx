@@ -9,7 +9,7 @@ import { HERO_CANVAS } from "@/const/hero"
 import { cssToken, renderTextSticker, TEXT_STICKER_FRAME } from "@/lib/text-sticker"
 import glassesCoffee from "@/assets/hero/stickers/glasses-coffee.webp"
 import learningOutline from "@/assets/hero/stickers/learning-outline.svg"
-import microbot from "@/assets/hero/stickers/microbot.png"
+import microbot from "@/assets/hero/stickers/microbot.webp"
 import skillsOutline from "@/assets/hero/stickers/skills-outline.svg"
 import tooltipArrow from "@/assets/hero/stickers/tooltip-arrow.svg"
 

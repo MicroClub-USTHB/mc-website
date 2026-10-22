@@ -1,5 +1,1 @@
-<svg preserveAspectRatio="none" overflow="visible" style="display: block;" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
-<g id="italics">
-<path id="Vector" d="M9.04762 3.33333L11.9048 3.33333M11.9048 3.33333L14.7619 3.33333M11.9048 3.33333L8.09524 16.6667M10.9524 16.6667L8.09524 16.6667L5.2381 16.6667" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" stroke="#545454"/>
-</g>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="none" overflow="visible" preserveAspectRatio="none" style="display:block" viewBox="0 0 20 20"><path stroke="#545454" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5" d="M9.048 3.333h2.857m0 0h2.857m-2.857 0-3.81 13.334m2.857 0H5.238"/></svg>
