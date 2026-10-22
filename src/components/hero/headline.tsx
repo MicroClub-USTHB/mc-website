@@ -64,17 +64,29 @@ const ICONS: IconLetter[] = [
   },
 ]
 
-/** On-load timing (s): letters first, then the icons one after another. */
-const ICONS_START = 0.45
-const ICON_STAGGER = 0.22
+/**
+ * The plain letters the icons replace, where the font would set them next to the Figma letters
+ * (their advance widths, tracking included): "EXPERIENCE" reads in full first. `swap` is the icon
+ * that takes its place (0 = the E chips).
+ */
+const SWAPPED = [
+  { text: "e", left: 10.68, swap: 0 },
+  { text: "r", left: 229.48, swap: 1 },
+  { text: "n", left: 366.63, swap: 2 },
+  { text: "c", left: 436.23, swap: 3 },
+]
+
+/** On-load timing (s): "EXPERIENCE" first, then each letter springs into its icon, in turn. */
+const ICONS_START = 1
+const ICON_STAGGER = 0.3
 
 const TEXT = "text-[91.78px] leading-[114.725px] tracking-[-1.8356px] uppercase whitespace-nowrap"
 
 /**
  * Figma hero headline: "LET'S EXPERIENCE IT", where E, R, N and C are drawn as icons (a stack of
  * DEBUG / CODE / DEPLOY chips, a branch, a network and a signal), above the registration button
- * and its countdown. On page load the words fade in, then the icons drop into their letters one
- * after another and settle in place. It plays once, and not at all with reduced motion.
+ * and its countdown. On page load "EXPERIENCE" fades in as plain letters, then E, R, N and C
+ * spring into their icons one after another. It plays once, and not at all with reduced motion.
  */
 export function Headline() {
   const reduceMotion = useReducedMotion()
@@ -84,8 +96,8 @@ export function Headline() {
     reduceMotion
       ? { initial: false as const }
       : {
-          initial: { opacity: 0, y: -28, scale: 0.6, rotate: -14 },
-          animate: { opacity: 1, y: 0, scale: 1, rotate: 0 },
+          initial: { opacity: 0, scale: 0.3, rotate: -14 },
+          animate: { opacity: 1, scale: 1, rotate: 0 },
           transition: {
             delay: ICONS_START + i * ICON_STAGGER,
             type: "spring" as const,
@@ -94,6 +106,17 @@ export function Headline() {
             mass: 0.9,
           },
         }
+  // The letter an icon replaces shrinks away as the icon springs up in its place.
+  const swapOut = (i: number) => ({
+    initial: { opacity: 1, scale: 1 },
+    animate: { opacity: 0, scale: 0.4 },
+    transition: {
+      delay: ICONS_START + i * ICON_STAGGER,
+      type: "spring" as const,
+      stiffness: 380,
+      damping: 26,
+    },
+  })
   const fadeIn = reduceMotion
     ? { initial: false as const }
     : {
@@ -127,6 +150,21 @@ export function Headline() {
               {text}
             </motion.span>
           ))}
+
+          {/* With reduced motion the icons are simply there: no letters to swap. */}
+          {!reduceMotion &&
+            SWAPPED.map(({ text, left, swap }) => (
+              <motion.span
+                key={text}
+                {...fadeIn}
+                className={cn(TEXT, "absolute top-0 text-foreground")}
+                style={{ left }}
+              >
+                <motion.span {...swapOut(swap)} className="block">
+                  {text}
+                </motion.span>
+              </motion.span>
+            ))}
 
           {CHIPS.map(({ label, top, left, width, height, soft, step }) => (
             <motion.span
