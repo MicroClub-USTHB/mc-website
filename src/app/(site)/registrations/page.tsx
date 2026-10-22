@@ -1,7 +1,10 @@
 import type { Metadata } from "next"
+import { notFound } from "next/navigation"
+import { connection } from "next/server"
 
 import { RegistrationFlow } from "@/components/registrations/registration-flow"
 import { siteRoutes } from "@/config/site"
+import { areRegistrationsOpen } from "@/lib/registrations/window"
 
 export const metadata: Metadata = {
   title: "Registrations",
@@ -13,9 +16,13 @@ export const metadata: Metadata = {
 /**
  * Registrations page (Figma "Registation Form"): a three step form, personal information, about
  * you and the club, additional information. The title is server rendered, the form is a client
- * island (`RegistrationFlow`) that holds the state.
+ * island (`RegistrationFlow`) that holds the state. Outside the registrations window
+ * (`src/config/registrations.ts`) the page does not exist: a 404, checked on each request.
  */
-export default function RegistrationsPage() {
+export default async function RegistrationsPage() {
+  await connection()
+  if (!areRegistrationsOpen()) notFound()
+
   return (
     <div className="px-4 pt-[calc(var(--menu-top)+var(--menu-size)+2rem)] pb-24 sm:px-6 lg:pb-40">
       <div className="mx-auto flex w-full max-w-250 flex-col items-center gap-[54px]">

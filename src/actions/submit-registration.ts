@@ -7,6 +7,7 @@ import { deleteStudentId, getStudentIdUpload, type UploadedStudentId } from "@/l
 import { connectToDatabase } from "@/lib/mongodb"
 import { isRateLimited } from "@/lib/rate-limit"
 import { RegistrationModel } from "@/lib/registrations/model"
+import { areRegistrationsOpen } from "@/lib/registrations/window"
 import {
   REGISTRATION_HONEYPOT_FIELD,
   normalizePhone,
@@ -70,6 +71,8 @@ function uploadProblem(stored: UploadedStudentId) {
  */
 export async function submitRegistration(formData: FormData): Promise<RegistrationResult> {
   if (formData.get(REGISTRATION_HONEYPOT_FIELD)) return { status: "success" }
+  // The window may have closed while the form was open.
+  if (!areRegistrationsOpen()) return { status: "error" }
 
   let raw: unknown
   try {
