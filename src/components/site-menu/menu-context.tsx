@@ -31,6 +31,12 @@ type MenuContextValue = {
   wordmarkRef: RefObject<HTMLAnchorElement | null>
 }
 
+/**
+ * The top edge of the sections scrolling over the hero (the page's first `SectionStack`, a 1px
+ * marker: a section taller than the screen would never cross an observer threshold).
+ */
+const COVER_EDGE = "[data-stack-edge]"
+
 const MenuContext = createContext<MenuContextValue | null>(null)
 
 export function useMenu() {
@@ -55,22 +61,25 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [dark, setDark] = useState(false)
   const reveal = useMotionValue(0)
 
-  // The in-page wordmark stays attached until its bottom edge scrolls past the toggle's top edge.
-  // An IntersectionObserver whose root starts at the toggle's top edge reports exactly that
-  // crossing, so scrolling does no layout reads (rebuilt when the window resizes).
+  // The "MICRO CLUB" wordmark belongs to the hero, which stays put while About scrolls over it
+  // (`SectionStack`): it stays attached to the toggle until About's top edge reaches the bar's
+  // bottom, then folds into the compact logo. An IntersectionObserver whose root starts at the
+  // bar's bottom reports that crossing, so scrolling does no layout reads. Rebuilt on resize and
+  // on navigation (the hero, and the wordmark, are only on the landing page).
   useEffect(() => {
-    const wordmark = wordmarkRef.current
     const toggle = toggleRef.current
-    if (!wordmark || !toggle) return
+    const edge = document.querySelector(COVER_EDGE)
+    // No hero on this page: the compact logo from the start.
+    if (!toggle || !edge) return setAttached(false)
     let observer: IntersectionObserver | null = null
     const observe = () => {
       observer?.disconnect()
-      const top = toggle.getBoundingClientRect().top
+      const bottom = toggle.getBoundingClientRect().bottom
       observer = new IntersectionObserver(
-        ([entry]) => setAttached(entry.boundingClientRect.bottom > top),
-        { rootMargin: `${-Math.max(0, Math.floor(top))}px 0px 0px 0px`, threshold: [0, 1] },
+        ([entry]) => setAttached(entry.boundingClientRect.top > bottom),
+        { rootMargin: `${-Math.max(0, Math.floor(bottom))}px 0px 0px 0px`, threshold: [0, 1] },
       )
-      observer.observe(wordmark)
+      observer.observe(edge)
     }
     observe()
     window.addEventListener("resize", observe)
@@ -78,7 +87,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("resize", observe)
       observer?.disconnect()
     }
-  }, [])
+  }, [pathname])
 
   useEffect(() => {
     const controls = animate(reveal, open ? 1 : 0, open ? OPEN_TRANSITION : CLOSE_TRANSITION)
