@@ -37,7 +37,7 @@ const transition = "motion-safe:duration-700 motion-safe:ease-out-expo"
  */
 const art = {
   base: cn(
-    "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0] [&_[data-el]]:[transform-box:view-box]",
+    "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0]",
     "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
   ),
   open: "[&_[data-el=out]]:[transform:var(--open,none)]",
@@ -98,6 +98,41 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
     setOpen(index)
   }
 
+  /**
+   * The row's size (`--cw` × `--ch`, its container's from `lg`) and a panel's inner width (`--pw`,
+   * the accordion's container), measured: the CSS reads them in place of the container query
+   * units, its fallback until hydration. A style using those units is recomputed whenever its
+   * container lays out, on every frame of a panel's animation: for the dozens of art layers
+   * moving with it, that cost more than the animation itself.
+   */
+  useEffect(() => {
+    const viewport = viewportRef.current
+    const track = trackRef.current
+    const panel = track?.firstElementChild
+    if (!viewport || !track || !panel) return
+    const set = (name: string, value: number) => {
+      if (track.style.getPropertyValue(name) !== `${value}px`) {
+        track.style.setProperty(name, `${value}px`)
+      }
+    }
+    // Each size is only set where it is read, and fixed while a panel animates: the row from `lg`
+    // (the accordion's grows as it opens), a panel below (the row's widens as it opens).
+    const observer = new ResizeObserver((entries) => {
+      const desktop = window.matchMedia(DESKTOP).matches
+      for (const { target, contentBoxSize } of entries) {
+        const [{ inlineSize, blockSize }] = contentBoxSize
+        if (target === panel && !desktop) set("--pw", inlineSize)
+        if (target === viewport && desktop) {
+          set("--cw", inlineSize)
+          set("--ch", blockSize)
+        }
+      }
+    })
+    observer.observe(viewport)
+    observer.observe(panel)
+    return () => observer.disconnect()
+  }, [])
+
   // Keep the open card in view when the row is resized.
   useEffect(() => {
     const viewport = viewportRef.current
@@ -145,12 +180,12 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
           "flex flex-col gap-3",
           // From `lg` the row fills its size container (the section's leftover height, at most the
           // 828px design): `--k` is its height over the design's, the scale of cards, tabs and art.
-          "lg:h-full lg:[--k:tan(atan2(100cqh,51.75rem))]",
+          "lg:h-full lg:[--k:tan(atan2(var(--ch,100cqh),51.75rem))]",
           // Strips share the content width (`100cqw`) with the design's gaps, scaled; the open card
           // overflows it. The strip art lays itself out (see `scripts/department-art.mjs`): `--ax`
           // is the strip's width over the scaled 135px design strip, `--fit` its objects' scale.
           "lg:[--gap:calc(1.5rem*var(--k))]",
-          "lg:[--strip:calc((100cqw-(var(--count)-1)*var(--gap))/var(--count))]",
+          "lg:[--strip:calc((var(--cw,100cqw)-(var(--count)-1)*var(--gap))/var(--count))]",
           "lg:[--ax:tan(atan2(var(--strip),8.4375rem*var(--k)))] lg:[--fit:min(var(--ax),1.25)]",
           "lg:translate-x-(--shift) lg:flex-row lg:gap-(--gap) lg:motion-safe:transition-transform",
           transition,
@@ -173,8 +208,8 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 // of its objects. `--hh` is the header's height: the bar's, then the open card's.
                 "max-lg:[container-type:inline-size] max-lg:[--bh:6rem] max-lg:[--hh:var(--bh)]",
                 "max-lg:[--bw:8rem] sm:max-lg:[--bw:10rem]",
-                "max-lg:[--bl:tan(atan2(var(--bw)*135,var(--bh)))] max-lg:[--bu:tan(atan2(var(--bh)*610,100cqw*135))]",
-                "max-lg:[--bax:clamp(0.4,tan(atan2((100cqw-var(--bw))*135,var(--bh)*785)),1)] max-lg:[--bfit:clamp(0.55,var(--bax)*1.25,1)]",
+                "max-lg:[--bl:tan(atan2(var(--bw)*135,var(--bh)))] max-lg:[--bu:tan(atan2(var(--bh)*610,var(--pw,100cqw)*135))]",
+                "max-lg:[--bax:clamp(0.4,tan(atan2((var(--pw,100cqw)-var(--bw))*135,var(--bh)*785)),1)] max-lg:[--bfit:clamp(0.55,var(--bax)*1.25,1)]",
                 "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width]",
                 transition,
                 art.base,
