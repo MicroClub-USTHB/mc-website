@@ -47,26 +47,49 @@ function formatTime(seconds: number) {
  * played part of the waveform turns primary.
  */
 export function VoiceNote() {
+  const rootRef = useRef<HTMLDivElement>(null)
   const audioRef = useRef<HTMLAudioElement>(null)
   const [bars, setBars] = useState(FIGMA_BARS)
   const [duration, setDuration] = useState<number | null>(null)
   const [current, setCurrent] = useState(0)
   const [playing, setPlaying] = useState(false)
 
-  // Decode the file once to draw its real waveform.
+  // Decode the file once to draw its real waveform, only when the note comes near the screen and
+  // the browser is idle: an offline context needs no audio output nor a user gesture.
   useEffect(() => {
+    const root = rootRef.current
+    if (!root) return
     const controller = new AbortController()
-    const context = new AudioContext()
-    fetch(AUDIO_SRC, { signal: controller.signal })
-      .then((response) => response.arrayBuffer())
-      .then((data) => context.decodeAudioData(data))
-      .then((buffer) => {
-        setBars(waveform(buffer))
-        setDuration((known) => known ?? buffer.duration)
-      })
-      .catch(() => {}) // Keep the Figma bars.
-      .finally(() => void context.close())
-    return () => controller.abort()
+    let idle = 0
+    const decode = () => {
+      fetch(AUDIO_SRC, { signal: controller.signal })
+        .then((response) => response.arrayBuffer())
+        .then((data) => new OfflineAudioContext(1, 1, 44100).decodeAudioData(data))
+        .then((buffer) => {
+          setBars(waveform(buffer))
+          setDuration((known) => known ?? buffer.duration)
+        })
+        .catch(() => {}) // Keep the Figma bars.
+    }
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry.isIntersecting) return
+        observer.disconnect()
+        // Safari has no requestIdleCallback: a short timeout instead.
+        idle =
+          typeof requestIdleCallback === "function"
+            ? requestIdleCallback(decode, { timeout: 2000 })
+            : window.setTimeout(decode, 200)
+      },
+      { rootMargin: "400px" },
+    )
+    observer.observe(root)
+    return () => {
+      observer.disconnect()
+      if (typeof cancelIdleCallback === "function") cancelIdleCallback(idle)
+      else window.clearTimeout(idle)
+      controller.abort()
+    }
   }, [])
 
   // Smooth progress while playing (`timeupdate` only fires a few times per second).
@@ -92,7 +115,7 @@ export function VoiceNote() {
   const active = playing || current > 0
 
   return (
-    <div className="flex w-[249px] flex-col items-start gap-1.5">
+    <div ref={rootRef} className="flex w-[249px] flex-col items-start gap-1.5">
       <div className="flex h-[49px] w-full items-center justify-center gap-2.5 overflow-clip rounded-lg border border-border bg-input p-2.5 shadow-[0_1px_2px_0_rgb(10_13_18/0.05)]">
         <button
           type="button"

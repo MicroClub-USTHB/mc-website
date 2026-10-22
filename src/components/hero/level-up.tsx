@@ -10,7 +10,8 @@ import { cn } from "@/lib/utils"
 import arrow from "@/assets/hero/level-up/arrow.svg"
 
 /** Figma "+1 LVL" font. */
-const pixelify = Pixelify_Sans({ weight: "500", subsets: ["latin"] })
+// Only shown after a level up: not preloaded, so it never competes with the first paint.
+const pixelify = Pixelify_Sans({ weight: "500", subsets: ["latin"], preload: false })
 
 /** Seconds to hold for a level up, to drain back on release, and to show "+1 LVL". */
 const HOLD = 1.6
