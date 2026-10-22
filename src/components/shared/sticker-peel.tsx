@@ -1137,7 +1137,8 @@ const StickerPeel = ({
         wake()
       }
     })
-    intersection.observe(parent)
+    // Watch the sticker itself (not the whole layer): a sticker panned off screen stops rendering.
+    intersection.observe(root)
     window.addEventListener("pointermove", onPointerMove, { passive: true })
     document.documentElement.addEventListener("pointerleave", onLeaveWindow)
     document.addEventListener("visibilitychange", onVisibility)
