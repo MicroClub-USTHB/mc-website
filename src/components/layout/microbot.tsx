@@ -7,7 +7,7 @@ import {
 } from "@/const/microbot"
 
 /**
- * Ask MicroBot (Figma): chat assistant fixed at the bottom right of every page. Server Component:
+ * Ask Micro Bot (Figma): chat assistant fixed at the bottom right of every page. Server Component:
  * the content comes from `src/const/microbot.ts`, the client island only holds the chat state.
  */
 export function MicroBot() {

@@ -3,13 +3,7 @@
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
 import { usePathname, useRouter } from "next/navigation"
 import { useLenis } from "lenis/react"
-import {
-  animate,
-  useMotionValue,
-  useMotionValueEvent,
-  useScroll,
-  type MotionValue,
-} from "motion/react"
+import { animate, useMotionValue, type MotionValue } from "motion/react"
 
 import { isBarePage } from "@/config/site"
 import { isDominantSectionDark } from "@/lib/backdrop"
@@ -62,14 +56,29 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const reveal = useMotionValue(0)
 
   // The in-page wordmark stays attached until its bottom edge scrolls past the toggle's top edge.
-  const { scrollY } = useScroll()
-  useMotionValueEvent(scrollY, "change", () => {
+  // An IntersectionObserver whose root starts at the toggle's top edge reports exactly that
+  // crossing, so scrolling does no layout reads (rebuilt when the window resizes).
+  useEffect(() => {
     const wordmark = wordmarkRef.current
     const toggle = toggleRef.current
     if (!wordmark || !toggle) return
-    const next = wordmark.getBoundingClientRect().bottom > toggle.getBoundingClientRect().top
-    if (next !== attached) setAttached(next)
-  })
+    let observer: IntersectionObserver | null = null
+    const observe = () => {
+      observer?.disconnect()
+      const top = toggle.getBoundingClientRect().top
+      observer = new IntersectionObserver(
+        ([entry]) => setAttached(entry.boundingClientRect.bottom > top),
+        { rootMargin: `${-Math.max(0, Math.floor(top))}px 0px 0px 0px`, threshold: [0, 1] },
+      )
+      observer.observe(wordmark)
+    }
+    observe()
+    window.addEventListener("resize", observe)
+    return () => {
+      window.removeEventListener("resize", observe)
+      observer?.disconnect()
+    }
+  }, [])
 
   useEffect(() => {
     const controls = animate(reveal, open ? 1 : 0, open ? OPEN_TRANSITION : CLOSE_TRANSITION)

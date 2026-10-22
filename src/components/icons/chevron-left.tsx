@@ -1,8 +1,8 @@
 "use client"
 
-import { useLayoutEffect, useRef } from "react"
-import { motion, useAnimation, useReducedMotion, type Transition } from "motion/react"
+import { motion, type Transition } from "motion/react"
 
+import { useIconAnimation } from "@/components/icons/use-icon-animation"
 import { cn } from "@/lib/utils"
 
 const DEFAULT_TRANSITION: Transition = {
@@ -22,32 +22,7 @@ type ChevronLeftIconProps = Omit<React.ComponentProps<"span">, "children"> & {
  * reduced motion.
  */
 export function ChevronLeftIcon({ className, size = 16, ...props }: ChevronLeftIconProps) {
-  const controls = useAnimation()
-  const reduceMotion = useReducedMotion()
-  const root = useRef<HTMLSpanElement>(null)
-
-  // A layout effect: its cleanup runs before React removes the DOM, so the blur / pointerleave
-  // events that removal fires (a link that navigates away) no longer reach `controls.start`.
-  useLayoutEffect(() => {
-    const icon = root.current
-    if (!icon || reduceMotion) return
-    const host = icon.closest<HTMLElement>("a, button") ?? icon
-    const play = (event: Event) => {
-      if (!(event instanceof PointerEvent) || event.pointerType === "mouse")
-        void controls.start("animate")
-    }
-    const stop = () => void controls.start("normal")
-    host.addEventListener("pointerenter", play)
-    host.addEventListener("pointerleave", stop)
-    host.addEventListener("focusin", play)
-    host.addEventListener("focusout", stop)
-    return () => {
-      host.removeEventListener("pointerenter", play)
-      host.removeEventListener("pointerleave", stop)
-      host.removeEventListener("focusin", play)
-      host.removeEventListener("focusout", stop)
-    }
-  }, [controls, reduceMotion])
+  const { controls, ref: root } = useIconAnimation()
 
   return (
     <span ref={root} aria-hidden className={cn("inline-flex", className)} {...props}>

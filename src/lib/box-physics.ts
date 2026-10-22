@@ -1,6 +1,6 @@
 /**
- * Minimal 2D physics for the footer tiles (no physics library): each tile is a rigid rectangle
- * made of its 4 corners, simulated with Verlet integration and position-based constraints.
+ * Minimal 2D physics for rectangles in a box (the footer tiles, the hero playground; no physics
+ * library): each tile is a rigid rectangle made of its 4 corners, simulated with Verlet integration and position-based constraints.
  *
  * - Corners move on their own, then shape matching snaps them back to an exact rectangle (the
  *   best-fit position and angle), so a tile tips over and rotates naturally when a corner hits
@@ -13,7 +13,7 @@
  * Units: px and steps (one step = 1/60 s).
  */
 
-/** Gravity (px/step²). */
+/** Default gravity (px/step²). */
 const GRAVITY = 0.32
 /** Velocity kept per step, the rest is air drag. */
 const AIR = 0.995
@@ -61,22 +61,43 @@ type Drag = {
 export type World = {
   width: number
   height: number
+  /** Gravity (px/step²). */
+  gravity: number
   tiles: Tile[]
   drag: Drag | null
   /** Steps in a row with (almost) no motion. */
   stillSteps: number
+  /** Called when the world wakes up, so a paused render loop can restart. */
+  onWake?: () => void
 }
 
-export function createWorld(width: number, height: number): World {
-  return { width, height, tiles: [], drag: null, stillSteps: 0 }
+export function createWorld(width: number, height: number, gravity = GRAVITY): World {
+  return { width, height, gravity, tiles: [], drag: null, stillSteps: 0 }
 }
 
-/** Adds a pinned, upright tile centered on `center`. */
-export function addTile(world: World, center: Point, width: number, height: number): Tile {
+type TileOptions = {
+  /** Starts released (simulated) instead of hanging in place. */
+  released?: boolean
+  /** Starting angle (rad). */
+  angle?: number
+  /** Starting velocity (px/step). */
+  velocity?: Point
+}
+
+/** Adds a tile centered on `center`: upright and pinned, unless `options` say otherwise. */
+export function addTile(
+  world: World,
+  center: Point,
+  width: number,
+  height: number,
+  { released = false, angle = 0, velocity = { x: 0, y: 0 } }: TileOptions = {},
+): Tile {
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
   const corner = (dx: number, dy: number): Corner => {
-    const x = center.x + dx
-    const y = center.y + dy
-    return { x, y, px: x, py: y, contact: null }
+    const x = center.x + dx * cos - dy * sin
+    const y = center.y + dx * sin + dy * cos
+    return { x, y, px: x - velocity.x, py: y - velocity.y, contact: null }
   }
   const w = width / 2
   const h = height / 2
@@ -84,10 +105,16 @@ export function addTile(world: World, center: Point, width: number, height: numb
     corners: [corner(-w, -h), corner(w, -h), corner(w, h), corner(-w, h)],
     width,
     height,
-    pinned: true,
+    pinned: !released,
   }
   world.tiles.push(tile)
   return tile
+}
+
+/** Takes a tile out of the world (and out of a drag, if it was grabbed). */
+export function removeTile(world: World, tile: Tile) {
+  world.tiles = world.tiles.filter((other) => other !== tile)
+  if (world.drag?.tile === tile) world.drag = null
 }
 
 /** Center and angle (rad) of a tile, for rendering. */
@@ -107,6 +134,7 @@ export function isAsleep(world: World) {
 
 export function wake(world: World) {
   world.stillSteps = 0
+  world.onWake?.()
 }
 
 /** Grabs `tile` at the box point `point`; the point then follows `moveDrag`. */
@@ -142,7 +170,7 @@ export function step(world: World) {
   for (const tile of live) {
     for (const c of tile.corners) {
       let vx = (c.x - c.px) * AIR
-      let vy = (c.y - c.py) * AIR + GRAVITY
+      let vy = (c.y - c.py) * AIR + world.gravity
       const speed = Math.hypot(vx, vy)
       if (speed > MAX_SPEED) {
         vx *= MAX_SPEED / speed

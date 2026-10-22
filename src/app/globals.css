@@ -21,6 +21,36 @@
 /* Two-column event card: large screens, and phones held sideways (short landscape). */
 @custom-variant wide (@media (width >= 64rem) or ((orientation: landscape) and (height <= 40rem)));
 
+/* Hero canvas illustrations (Figma "Elements"): the paper notes and their cards. Not mcoli-ui
+   colors: they only paint those drawings. */
+@theme {
+  --color-note: #fff6e5;
+  --color-note-ink: #d3c69a;
+  --color-note-highlight: #ffe9d0;
+  --color-note-icon: #545454;
+  --color-canvas-dot: #f7f7f7;
+  --color-todo-from: #ffedb0;
+  --color-todo-to: #eed47d;
+  --color-sticky-from: #ebb47c;
+  --color-sticky-to: #be854c;
+  /* Tool logos of the hero playground (their brand backgrounds). */
+  --color-brand-black: #191919;
+  --color-brand-slate: #242938;
+  --color-brand-teal: #00979c;
+  /* Level up button: its teal button and the pixel sparkles of "+1 LVL". */
+  --color-level: #00c1c6;
+  --color-level-light: #65fbff;
+  --color-level-dark: #027b7f;
+  --color-level-button: #175a5c;
+  --color-level-glow: #03c2c7;
+  /* Robotic working space: the drone sticker edge and the blueprint paper. */
+  --color-sticker-edge: #f2f2f0;
+  --color-blueprint-paper: #dad6d7;
+  /* Hero headline: "LET'S" and the light "CODE" chip of the E icon. */
+  --color-headline-soft: #2c2a57;
+  --color-chip-soft: #b6befc;
+}
+
 @theme inline {
   --color-background: var(--background);
   --color-foreground: var(--foreground);
@@ -529,70 +559,26 @@
 }
 
 /*
- * Micro Bot face (Figma "Expressions"): 12 frames of 420ms, typing `>▬` twice (with a pause on
- * `>`), `>_▬` three times between `>_`, then the `>_<` wink. Each part shows on its own frames
- * (`step-end` holds every keyframe): frame n starts at n × 8.333%.
+ * Micro Bot face (Figma "Expressions"): each of the 11 frames is visible during its own 1/11 of the
+ * loop (`step-end` holds every keyframe), shifted with a negative animation delay.
  */
-/* `>` before the underscore appears: frames 0-3. */
-@keyframes microbot-prompt {
+@keyframes microbot-frame {
   0% {
     visibility: visible;
   }
-  33.333%,
+  9.0909%,
   100% {
     visibility: hidden;
   }
 }
-/* The block next to `>`: frames 0 and 2. */
-@keyframes microbot-prompt-block {
+
+/* Hero scroll hint: the mouse bobs 3px. */
+@keyframes scroll-hint-bob {
   0%,
-  16.667% {
-    visibility: visible;
-  }
-  8.333%,
-  25%,
-  33.333%,
   100% {
-    visibility: hidden;
+    translate: 0 0;
   }
-}
-/* `>_`: frames 4, 6, 8, 10 and 11. */
-@keyframes microbot-underscore {
-  0%,
-  41.667%,
-  58.333%,
-  75% {
-    visibility: hidden;
-  }
-  33.333%,
-  50%,
-  66.667%,
-  83.333% {
-    visibility: visible;
-  }
-}
-/* `>_▬`: frames 5, 7 and 9. */
-@keyframes microbot-underscore-block {
-  0%,
-  50%,
-  66.667%,
-  83.333%,
-  100% {
-    visibility: hidden;
-  }
-  41.667%,
-  58.333%,
-  75% {
-    visibility: visible;
-  }
-}
-/* The `<` of the wink: frames 10 and 11. */
-@keyframes microbot-wink {
-  0% {
-    visibility: hidden;
-  }
-  83.333%,
-  100% {
-    visibility: visible;
+  50% {
+    translate: 0 3px;
   }
 }

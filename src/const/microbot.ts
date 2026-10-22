@@ -1,8 +1,8 @@
-export const MICROBOT_NAME = "MicroBot"
+export const MICROBOT_NAME = "Micro Bot"
 
-export const MICROBOT_GREETING = "This is MicroBot, how can I help you?"
+export const MICROBOT_GREETING = "This is Micro Bot, how can I help you?"
 
-export const MICROBOT_PLACEHOLDER = "Ask MicroBot ..."
+export const MICROBOT_PLACEHOLDER = "Ask Micro Bot ..."
 
 /** Suggested questions shown as chips, in display order. */
 export const MICROBOT_SUGGESTIONS = [
@@ -20,11 +20,11 @@ export const MICROBOT_MAX_LENGTH = 2000
 
 /** Shown in the chat when an answer cannot be given, by cause. */
 export const MICROBOT_ERRORS = {
-  busy: "MicroBot is answering a lot of questions right now. Please try again in a minute.",
+  busy: "Micro Bot is answering a lot of questions right now. Please try again in a minute.",
   failed: "Something went wrong. Please try again in a moment.",
 } as const
 
-/** What the chat receives while MicroBot answers (see `askMicroBot`). */
+/** What the chat receives while Micro Bot answers (see `askMicroBot`). */
 export type MicroBotEvent =
   | { type: "delta"; text: string }
   | { type: "done"; answer: string; conversationId: string }
