@@ -2,7 +2,6 @@
 
 import Image from "next/image"
 import { useLenis } from "lenis/react"
-import { motion, useReducedMotion } from "motion/react"
 
 import { homeSections } from "@/config/site"
 import { cn } from "@/lib/utils"
@@ -17,7 +16,6 @@ const NEXT_SECTION = homeSections[1]
  */
 export function ScrollHint({ className }: { className?: string }) {
   const lenis = useLenis()
-  const reduceMotion = useReducedMotion()
 
   return (
     <a
@@ -33,14 +31,13 @@ export function ScrollHint({ className }: { className?: string }) {
         className,
       )}
     >
-      <motion.span
+      {/* CSS keyframes on `translate`: runs on the compositor, no JavaScript per frame. */}
+      <span
         aria-hidden
-        className="grid size-6 place-items-center"
-        animate={reduceMotion ? undefined : { y: [0, 3, 0] }}
-        transition={{ duration: 1.6, repeat: Infinity, ease: "easeInOut" }}
+        className="grid size-6 animate-[scroll-hint-bob_1.6s_ease-in-out_infinite] place-items-center motion-reduce:animate-none"
       >
         <Image src={mouse} alt="" unoptimized className="h-[21.89px] w-[14.23px] max-w-none" />
-      </motion.span>
+      </span>
       SCROLL DOWN
     </a>
   )

@@ -571,3 +571,14 @@
     visibility: hidden;
   }
 }
+
+/* Hero scroll hint: the mouse bobs 3px. */
+@keyframes scroll-hint-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 3px;
+  }
+}
