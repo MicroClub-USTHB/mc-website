@@ -5,6 +5,7 @@ import { motion, useReducedMotion } from "motion/react"
 
 import { Registration } from "@/components/hero/registration"
 import { EASE_OUT_QUART } from "@/lib/easing"
+import { hasRegistrationsWindow } from "@/lib/registrations/window"
 import { cn } from "@/lib/utils"
 import branch from "@/assets/hero/headline/branch.svg"
 import network from "@/assets/hero/headline/network.svg"
@@ -164,9 +165,13 @@ export function Headline() {
         </span>
       </p>
 
-      <motion.div {...fadeIn}>
-        <Registration />
-      </motion.div>
+      {/* Without a registrations window, the headline stands alone in the first view. */}
+      {hasRegistrationsWindow && (
+        // Empty (no gap left) once the registrations close.
+        <motion.div {...fadeIn} className="empty:hidden">
+          <Registration />
+        </motion.div>
+      )}
     </div>
   )
 }
