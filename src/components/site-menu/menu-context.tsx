@@ -2,11 +2,7 @@
 
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
 import { useLenis } from "lenis/react"
-import {
-  animate,
-  useMotionValue,
-  type MotionValue,
-} from "motion/react"
+import { animate, useMotionValue, type MotionValue } from "motion/react"
 
 import { isDominantSectionDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
