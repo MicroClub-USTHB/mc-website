@@ -5,8 +5,8 @@ import { useRegistrationsPhase } from "@/lib/registrations/use-registrations-pha
 
 /**
  * The hero's registrations call to action (see `RegistrationsButton`), under the headline. Its
- * box is the slot the menu bar docks it from once it scrolls up there (`RegistrationsDock`), and
- * hides while it is docked (`data-docked`). Its size is kept while the page hydrates (the phase
+ * box is the slot the menu bar docks it from once it scrolls up there (`RegistrationsDock`, which
+ * hides it meanwhile). Its size is kept while the page hydrates (the phase
  * needs the visitor's clock); it goes away for good once the registrations close.
  */
 export function Registration() {
@@ -14,7 +14,7 @@ export function Registration() {
   if (state?.phase.status === "closed") return null
 
   return (
-    <div data-registrations-slot className="data-docked:invisible">
+    <div data-registrations-slot>
       {state ? (
         <RegistrationsButton phase={state.phase} now={state.now} />
       ) : (

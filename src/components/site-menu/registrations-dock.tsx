@@ -2,44 +2,55 @@
 
 import { useEffect, useRef } from "react"
 import { usePathname } from "next/navigation"
-import { animate, useReducedMotion, type AnimationPlaybackControls } from "motion/react"
+import { useReducedMotion } from "motion/react"
 
 import { RegistrationsButton } from "@/components/shared/registrations-button"
 import { useMenu } from "@/components/site-menu/menu-context"
-import { EASE_IN_OUT_QUART, EASE_OUT_EXPO } from "@/lib/easing"
 import { useRegistrationsPhase } from "@/lib/registrations/use-registrations-phase"
 import { cn } from "@/lib/utils"
 
-/** Flight from the hero to the bar, and back (s). */
-const DOCK_DURATION = 0.7
-const UNDOCK_DURATION = 0.5
+/** Scroll distance (px) of the glide into the bar: a share of the way across, within bounds. */
+const GLIDE = { share: 0.6, min: 120, max: 360 }
+/** The glide's curve across: ease-in-out (cubic), the same in CSS and in the fallback. */
+const GLIDE_EASING = "cubic-bezier(0.65, 0, 0.35, 1)"
+const easeInOutCubic = (t: number) => (t < 0.5 ? 4 * t ** 3 : 1 - (-2 * t + 2) ** 3 / 2)
 
-/** A flight frame: offset (px) of the dock's top-right corner and its scale, from its place. */
-type Pose = { x: number; y: number; scale: number }
+/** Scroll-driven animations, missing from the DOM typings. */
+type ScrollTimelineOptions = { source: Element; axis: "block" }
+type ScrollAnimationOptions = KeyframeAnimationOptions & {
+  timeline: AnimationTimeline
+  rangeStart: string
+  rangeEnd: string
+}
+declare const ScrollTimeline: { new (options: ScrollTimelineOptions): AnimationTimeline }
 
-const REST: Pose = { x: 0, y: 0, scale: 1 }
-
-const toTransform = ({ x, y, scale }: Pose) => `translate(${x}px, ${y}px) scale(${scale})`
-
-/** The pose a running flight has reached (`matrix(a, b, c, d, e, f)` of translate + scale). */
-function currentPose(element: HTMLElement): Pose {
-  const match = getComputedStyle(element).transform.match(/matrix\(([^)]+)\)/)
-  if (!match) return REST
-  const [a, , , , e, f] = match[1].split(",").map(Number)
-  return { x: e, y: f, scale: a }
+/**
+ * Where the dock glides from and to, in page scroll offsets: from `start` the dock takes over from
+ * the hero button (drawn exactly over it), and it lands in the bar at `end`, when the hero button
+ * would reach the bar's line. Up there, it is `x` px across and `scale` times the hero button's
+ * size away from its place in the bar (its top-right corner, its transform origin).
+ */
+type Glide = {
+  start: number
+  end: number
+  x: number
+  scale: number
+  /** Viewport line the hero button's top crosses at `start`. */
+  line: number
 }
 
 /**
  * The hero's registrations button docked in the menu bar (Figma: at the right end of the bar,
- * centred on it). Once the hero button scrolls up to the dock's
- * line (or out of view), it flies from its place in the hero to the bar; scrolling back down, it
- * flies back into the hero, following the page as it scrolls. The hero keeps its slot (hidden by
- * `data-docked` meanwhile), so its layout never changes.
+ * centred on it). Its move is tied to the scroll, not to a timer: over the last stretch before
+ * the hero button would reach the bar, a copy fixed in the bar takes over from it, keeps rising
+ * with the page (1 px per px scrolled, so the hand-over is seamless) and glides across to land in
+ * the bar just as it gets there. Scrolling back plays it backwards, at the speed of the scroll.
  *
- * Cheap by design: an IntersectionObserver whose root starts at the dock's line reports the
- * crossing, so scrolling reads no layout. The flight to the bar is a CSS transform animation
- * (run by the compositor); only the flight back, which tracks the scrolling page, sets a
- * transform per frame, for half a second. Instant with reduced motion. Hidden while the menu is
+ * Cheap by design: scroll-driven Web Animations (a `ScrollTimeline` on the page), of `translate`,
+ * `transform` and `opacity` only, which the browser runs on the compositor, in step with the
+ * scroll, without any JavaScript while scrolling. Browsers without them get the same frames from
+ * a passive scroll listener. The geometry is measured once, and again on resize or when the hero
+ * canvas is dragged. With reduced motion, the button just swaps places. Hidden while the menu is
  * open (it would sit over the menu's wordmark) and on other pages than the landing page.
  */
 export function RegistrationsDock() {
@@ -47,121 +58,151 @@ export function RegistrationsDock() {
   const { open } = useMenu()
   const state = useRegistrationsPhase()
   const reduceMotion = useReducedMotion()
-  const dockRef = useRef<HTMLDivElement>(null)
+  const riseRef = useRef<HTMLDivElement>(null)
+  const glideRef = useRef<HTMLDivElement>(null)
   const phase = state?.phase.status === "closed" ? null : state?.phase
   const active = pathname === "/" && !!phase
 
   useEffect(() => {
-    const dock = dockRef.current
-    const container = dock?.parentElement
+    const riseElement = riseRef.current
+    const glideElement = glideRef.current
+    const container = riseElement?.parentElement
     const slot = document.querySelector<HTMLElement>("[data-registrations-slot]")
-    if (!active || !dock || !container || !slot) return
+    if (!active || !riseElement || !glideElement || !container || !slot) return
+    const rise: HTMLDivElement = riseElement
+    const glide: HTMLDivElement = glideElement
 
-    let docked = false
-    let flight: AnimationPlaybackControls | null = null
+    let animations: Animation[] = []
     let observer: IntersectionObserver | null = null
+    let removeFallback = () => {}
 
-    /** The dock's top-right corner at its place, and its scale (transforms aside). */
-    function place() {
+    function measure(): Glide {
+      // The dock's place: its top-right corner, transforms aside (offsets ignore them).
       const box = container!.getBoundingClientRect()
-      const scale = parseFloat(getComputedStyle(dock!.firstElementChild!).scale) || 1
-      return {
-        right: box.left + dock!.offsetLeft + dock!.offsetWidth,
-        top: box.top + dock!.offsetTop,
-        width: dock!.offsetWidth * scale,
+      const right = box.left + rise!.offsetLeft + rise!.offsetWidth
+      const top = box.top + rise!.offsetTop
+      const scale = parseFloat(getComputedStyle(glide!.firstElementChild!).scale) || 1
+      const width = rise!.offsetWidth * scale
+      const hero = slot!.getBoundingClientRect()
+      const end = Math.max(0, hero.top + window.scrollY - top)
+      const x = hero.right - right
+      const distance = reduceMotion
+        ? 0
+        : Math.min(GLIDE.max, Math.max(GLIDE.min, Math.abs(x) * GLIDE.share))
+      const start = Math.max(0, end - distance)
+      return { start, end, x, scale: hero.width / width, line: hero.top + window.scrollY - start }
+    }
+
+    /** One frame of the glide: `progress` 0 over the hero button, 1 in the bar. */
+    const frames = ({ start, end, x, scale }: Glide) => ({
+      rise: { translate: [`0px ${end - start}px`, "0px 0px"] },
+      glide: { transform: [`translateX(${x}px) scale(${scale})`, "translateX(0px) scale(1)"] },
+    })
+
+    let current: Glide | null = null
+
+    /** (Re)creates the glide, unless the geometry is unchanged. */
+    function build() {
+      const geometry = measure()
+      const same =
+        current &&
+        (Object.keys(geometry) as (keyof Glide)[]).every(
+          (key) => Math.abs(geometry[key] - current![key]) < 0.5,
+        )
+      if (same) return
+      teardown()
+      current = geometry
+      const { start, end } = geometry
+      const { rise: riseFrames, glide: glideFrames } = frames(geometry)
+
+      // Who is shown: the hero button before `start`, the dock from there (a 1px cross-fade).
+      if (typeof ScrollTimeline === "function") {
+        const timeline = new ScrollTimeline({ source: document.documentElement, axis: "block" })
+        const range = (from: number, to: number): ScrollAnimationOptions => ({
+          timeline,
+          rangeStart: `${from}px`,
+          rangeEnd: `${Math.max(to, from + 1)}px`,
+          fill: "both",
+        })
+        animations = [
+          rise.animate({ opacity: [0, 1] }, range(start, start + 1)),
+          slot!.animate({ opacity: [1, 0] }, range(start, start + 1)),
+        ]
+        if (end > start) {
+          animations.push(
+            rise.animate(riseFrames, range(start, end)),
+            glide.animate(glideFrames, { ...range(start, end), easing: GLIDE_EASING }),
+          )
+        }
+      } else {
+        removeFallback = followScroll(geometry)
       }
-    }
 
-    /** The pose that draws the dock over the hero button, at `slot` (its box on screen). */
-    function poseOver(slot: DOMRectReadOnly): Pose {
-      const { right, top, width } = place()
-      return { x: slot.right - right, y: slot.top - top, scale: slot.width / width }
-    }
-
-    /** Stops a flight where it is and returns the pose it reached (`null`: none running). */
-    function interrupt() {
-      if (!flight) return null
-      const pose = currentPose(dock!)
-      flight.stop()
-      flight = null
-      return pose
-    }
-
-    function dockIn(slotBox: DOMRectReadOnly, instant: boolean) {
-      docked = true
-      const from = interrupt() ?? poseOver(slotBox)
-      dock!.dataset.docked = ""
-      slot!.dataset.docked = ""
-      if (instant || reduceMotion) {
-        dock!.style.transform = ""
-        return
-      }
-      flight = animate(
-        dock!,
-        { transform: [toTransform(from), toTransform(REST)] },
-        { duration: DOCK_DURATION, ease: EASE_OUT_EXPO },
-      )
-      flight.finished.then(() => (flight = null))
-    }
-
-    function dockOut(slotBox: DOMRectReadOnly, instant: boolean) {
-      docked = false
-      const from = interrupt() ?? REST
-      const settle = () => {
-        flight = null
-        dock!.style.transform = ""
-        delete dock!.dataset.docked
-        delete slot!.dataset.docked
-      }
-      if (instant || reduceMotion) return settle()
-      // The hero button keeps moving with the page: aim at where the scroll has taken it.
-      const target = poseOver(slotBox)
-      const scrollStart = window.scrollY
-      flight = animate(0, 1, {
-        duration: UNDOCK_DURATION,
-        ease: EASE_IN_OUT_QUART,
-        onUpdate: (progress) => {
-          const y = target.y + scrollStart - window.scrollY
-          dock!.style.transform = toTransform({
-            x: from.x + (target.x - from.x) * progress,
-            y: from.y + (y - from.y) * progress,
-            scale: from.scale + (target.scale - from.scale) * progress,
-          })
-        },
-        onComplete: settle,
-      })
-    }
-
-    // The root starts at the dock's top: the hero button docks once its top passes that line (or
-    // once it is out of view, the canvas dragged away), and comes back when it is below again.
-    function observe() {
-      observer?.disconnect()
-      const { top } = place()
-      let first = true
+      // Clicks, focus and screen readers go to the copy that is shown (the hero button's top
+      // above the hand-over line, or the button out of view, the canvas dragged away).
       observer = new IntersectionObserver(
         ([entry]) => {
-          const shouldDock = !entry.isIntersecting || entry.boundingClientRect.top < top
-          // On load (or resize), the button simply is where it belongs.
-          if (shouldDock !== docked) {
-            if (shouldDock) dockIn(entry.boundingClientRect, first)
-            else dockOut(entry.boundingClientRect, first)
-          }
-          first = false
+          const docked = !entry.isIntersecting || entry.boundingClientRect.top < geometry.line
+          rise.inert = !docked
+          slot!.inert = docked
         },
-        { rootMargin: `${-Math.max(0, Math.floor(top))}px 0px 0px 0px`, threshold: [0, 1] },
+        {
+          rootMargin: `${-Math.max(0, Math.floor(geometry.line))}px 0px 0px 0px`,
+          threshold: [0, 1],
+        },
       )
       observer.observe(slot!)
     }
 
-    observe()
-    window.addEventListener("resize", observe)
-    return () => {
-      window.removeEventListener("resize", observe)
+    /** Without scroll timelines: the same frames, set from a passive scroll listener. */
+    function followScroll(geometry: Glide) {
+      const { start, end, x, scale } = geometry
+      let last = -1
+      const update = () => {
+        const span = end - start
+        const progress = span > 0 ? Math.min(1, Math.max(0, (window.scrollY - start) / span)) : 1
+        const shown = window.scrollY >= start
+        const key = shown ? progress : -1
+        if (key === last) return
+        last = key
+        rise!.style.opacity = shown ? "1" : "0"
+        slot!.style.opacity = shown ? "0" : "1"
+        const eased = easeInOutCubic(progress)
+        rise!.style.translate = `0px ${(end - start) * (1 - progress)}px`
+        glide!.style.transform = `translateX(${x * (1 - eased)}px) scale(${scale + (1 - scale) * eased})`
+      }
+      update()
+      window.addEventListener("scroll", update, { passive: true })
+      return () => {
+        window.removeEventListener("scroll", update)
+        for (const element of [rise!, glide!, slot!]) {
+          element.style.opacity = ""
+          element.style.translate = ""
+          element.style.transform = ""
+        }
+      }
+    }
+
+    function teardown() {
+      animations.forEach((animation) => animation.cancel())
+      animations = []
       observer?.disconnect()
-      flight?.stop()
-      dock.style.transform = ""
-      delete dock.dataset.docked
-      delete slot.dataset.docked
+      removeFallback()
+      removeFallback = () => {}
+    }
+
+    build()
+    // Measured again (only rebuilt if anything moved) once the headline's fade-in has settled the
+    // button, on resize, and whenever a scroll ends: the page's, or the hero canvas dragged.
+    const settled = window.setTimeout(build, 1000)
+    window.addEventListener("resize", build)
+    window.addEventListener("scrollend", build, { capture: true })
+    return () => {
+      window.clearTimeout(settled)
+      window.removeEventListener("resize", build)
+      window.removeEventListener("scrollend", build, { capture: true })
+      teardown()
+      slot.inert = false
     }
   }, [active, reduceMotion])
 
@@ -171,21 +212,24 @@ export function RegistrationsDock() {
     <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
       {/* Centred on the bar, scaled with it (the Figma 85px bar: 1, never under 0.75). */}
       <div
-        ref={dockRef}
+        ref={riseRef}
+        inert
         className={cn(
-          "invisible absolute right-(--menu-left) origin-top-right data-docked:visible",
+          "absolute right-(--menu-left) opacity-0",
           "[--dock-scale:clamp(0.75,tan(atan2(var(--menu-size),85px)),1)]",
           "top-[calc(var(--menu-top)+var(--menu-size)/2-32.1375px*var(--dock-scale))]",
         )}
       >
-        <RegistrationsButton
-          phase={phase}
-          now={state.now}
-          className={cn(
-            "pointer-events-auto origin-top-right scale-(--dock-scale) transition-opacity duration-300",
-            open && "pointer-events-none opacity-0",
-          )}
-        />
+        <div ref={glideRef} className="origin-top-right">
+          <RegistrationsButton
+            phase={phase}
+            now={state.now}
+            className={cn(
+              "pointer-events-auto origin-top-right scale-(--dock-scale) transition-opacity duration-300",
+              open && "pointer-events-none opacity-0",
+            )}
+          />
+        </div>
       </div>
     </div>
   )
