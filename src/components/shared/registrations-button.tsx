@@ -90,9 +90,25 @@ export function RegistrationsButton({ phase, now, className }: RegistrationsButt
         <p
           role="timer"
           aria-label={`Registrations ${upcoming ? "open" : "close"} in ${countdown}`}
-          className="pointer-events-none absolute top-0 left-[91.18px] text-[20.479px] leading-[31.855px] font-medium whitespace-nowrap text-primary-foreground [-webkit-text-stroke:13.66px_var(--color-primary)] [paint-order:stroke_fill]"
+          className="pointer-events-none absolute top-0 left-[91.18px] text-[20.479px] leading-[31.855px] font-medium whitespace-nowrap text-primary-foreground"
         >
-          {countdown}
+          {/*
+            The outline (Figma "Text": the glyphs stroked 13.65px, round joins). A text stroke
+            in CSS has mitred joins, which spike out of sharp corners (4, M), so it is SVG text
+            behind the label, on the label's baseline (half-leading + ascent: 2.93 + 20px).
+          */}
+          <svg aria-hidden className="absolute top-0 left-0 h-full w-full overflow-visible">
+            <text
+              y="22.93"
+              className="fill-primary stroke-primary"
+              strokeWidth="13.65"
+              strokeLinejoin="round"
+              strokeLinecap="round"
+            >
+              {countdown}
+            </text>
+          </svg>
+          <span className="relative">{countdown}</span>
         </p>
       )}
     </div>
