@@ -156,6 +156,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
         label: "Relive Micro Code Recap Reel",
         href: "https://www.instagram.com/reel/DWCJdwejDt5/",
       },
+      { label: "Micro Code Website", href: "https://microcode.microclub.info/" },
     ],
   },
   {
