@@ -127,7 +127,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     description:
       "MGV is Micro Club's ultimate design competition, uniting digital artists, motion designers, graphic designers, 3D artists, and UI/UX designers for an immersive creative experience.",
     link: [
-      { label: "Relive MGV Recap Post", href: "" },
+      { label: "Relive MGV Recap Post", href: "https://www.instagram.com/p/DJPnrNtuSa5/" },
       { label: "MGV Website", href: "https://mgv.microclub.info/" },
     ],
   },
