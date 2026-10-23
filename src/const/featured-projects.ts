@@ -29,7 +29,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2026,
         description:
           "The premier React component library that brings professional-grade UI components with a bold Micro Club DNA to developers everywhere. We’ve combined world-class design standards with an elite visual identity to help you build stunning web applications in record time.",
-        url: `${ORGANIZATION_URL}/mcoli-ui`,
+        url: "https://mcoli-ui.microclub.info/",
       },
       {
         name: "MCID",
@@ -37,7 +37,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2026,
         description:
           "Micro Club Identity: sign in once, be recognized across every Micro Club project. A NestJS API that centralizes Discord identity and access through Discord OAuth, with a Next.js admin panel to manage it, and a CLI to connect projects to it.",
-        url: `${ORGANIZATION_URL}/MCID`,
+        url: "https://mcid.microclub.info/",
       },
       {
         name: "mAIcro",
