@@ -619,3 +619,11 @@
     inset 0 0 5.72px color-mix(in srgb, var(--color-primary-foreground) 86%, transparent),
     inset 0 0 29.75px color-mix(in srgb, var(--color-primary-foreground) 60%, transparent);
 }
+
+/* Hero headline words (see `headline.tsx`). */
+@keyframes headline-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
+  }
+}

@@ -3,7 +3,6 @@
 import Image, { type StaticImageData } from "next/image"
 import { motion, useReducedMotion } from "motion/react"
 
-import { EASE_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 import branch from "@/assets/hero/headline/branch.svg"
 import network from "@/assets/hero/headline/network.svg"
@@ -78,6 +77,13 @@ const SWAPPED = [
 const ICONS_START = 1
 const ICON_STAGGER = 0.3
 
+/**
+ * The words fade up on load (0.6s, ease-out-quart). A CSS animation, not Motion: it runs from the
+ * server HTML on, so the headline paints without waiting for JavaScript (it is the page's largest
+ * text). None with reduced motion.
+ */
+const FADE_IN = "motion-safe:animate-[headline-in_0.6s_var(--ease-out-quart)_both]"
+
 const TEXT = "text-[91.78px] leading-[114.725px] tracking-[-1.8356px] uppercase whitespace-nowrap"
 
 /**
@@ -115,53 +121,42 @@ export function Headline() {
       damping: 26,
     },
   })
-  const fadeIn = reduceMotion
-    ? { initial: false as const }
-    : {
-        initial: { opacity: 0, y: 16 },
-        animate: { opacity: 1, y: 0 },
-        transition: { duration: 0.6, ease: EASE_OUT_QUART },
-      }
 
   return (
     // Phones see the canvas at full size: the headline shrinks to fit their width.
     <div className="flex w-[656.648px] origin-center flex-col items-center max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90">
-      <p
-        aria-label="Let's experience it"
-        className="flex w-full flex-col items-center font-heading"
-      >
-        <motion.span
+      <p className="flex w-full flex-col items-center font-heading">
+        {/* The words are drawn in pieces (and icons): screen readers get the sentence. */}
+        <span className="sr-only">Let’s experience it</span>
+        <span
           aria-hidden
-          {...fadeIn}
-          className={cn(TEXT, "mb-[-19px] text-center text-headline-soft")}
+          className={cn(TEXT, FADE_IN, "mb-[-19px] text-center text-headline-soft")}
         >
           let’s
-        </motion.span>
+        </span>
         <span aria-hidden className="relative block h-[114.725px] w-full">
           {LETTERS.map(({ text, left, top }) => (
-            <motion.span
+            <span
               key={text}
-              {...fadeIn}
-              className={cn(TEXT, "absolute text-foreground")}
+              className={cn(TEXT, FADE_IN, "absolute text-foreground")}
               style={{ left, top }}
             >
               {text}
-            </motion.span>
+            </span>
           ))}
 
           {/* With reduced motion the icons are simply there: no letters to swap. */}
           {!reduceMotion &&
             SWAPPED.map(({ text, left, swap }) => (
-              <motion.span
+              <span
                 key={text}
-                {...fadeIn}
-                className={cn(TEXT, "absolute top-0 text-foreground")}
+                className={cn(TEXT, FADE_IN, "absolute top-0 text-foreground")}
                 style={{ left }}
               >
                 <motion.span {...swapOut(swap)} className="block">
                   {text}
                 </motion.span>
-              </motion.span>
+              </span>
             ))}
 
           {CHIPS.map(({ label, top, left, width, height, soft, step }) => (
