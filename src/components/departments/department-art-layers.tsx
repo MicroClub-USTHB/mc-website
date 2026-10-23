@@ -52,7 +52,7 @@ function fitLayers(root: HTMLElement) {
 const MAX_RASTER_DPR = 2
 
 /**
- * Touch devices (phones, tablets): each layer is drawn once into a bitmap (a `<canvas>` in its
+ * Touch devices (phones, tablets): each layer is drawn once into a bitmap (an image in its
  * place), and the bitmaps are what move. Safari renders SVG filters (the blurs and glows) on the
  * CPU and outside its compositor, so an SVG layer moved or uncovered by the accordion is redrawn,
  * filters included, frame after frame; a bitmap is only moved by the GPU. Desktops keep the
@@ -62,7 +62,7 @@ const MAX_RASTER_DPR = 2
  * tokens written out), decoded off the main thread, drawn at its on-screen size, then swapped in
  * with the same attributes, styles and transforms. Runs once the art is in, before it is used.
  */
-async function rasterizeLayers(root: HTMLElement, signal: AbortSignal) {
+async function rasterizeLayers(root: HTMLElement, signal: AbortSignal, urls: string[]) {
   const defs = root.querySelector("svg:not([data-el]) defs")
   const tokens = getComputedStyle(root)
   const scale =
@@ -104,11 +104,26 @@ async function rasterizeLayers(root: HTMLElement, signal: AbortSignal) {
     canvas.width = Math.max(1, Math.ceil(width * scale))
     canvas.height = Math.max(1, Math.ceil(height * scale))
     canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height)
+    // Into an image: a canvas stays a GPU layer of its own for good, and 126 of them would be
+    // re-managed by the compositor every frame; an image only becomes one while it moves.
+    const blob = await new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, "image/png"))
+    if (!blob || signal.aborted) continue
+    const bitmap = new Image()
+    bitmap.alt = ""
+    bitmap.decoding = "async"
+    bitmap.src = URL.createObjectURL(blob)
+    urls.push(bitmap.src)
+    try {
+      await bitmap.decode()
+    } catch {
+      continue
+    }
+    if (signal.aborted) return
     for (const { name, value } of layer.attributes) {
       if (name === "data-el" || name === "style" || name === "aria-hidden")
-        canvas.setAttribute(name, value)
+        bitmap.setAttribute(name, value)
     }
-    layer.replaceWith(canvas)
+    layer.replaceWith(bitmap)
   }
 }
 
@@ -133,6 +148,7 @@ export function DepartmentArtLayers({
     const element = ref.current
     if (!element) return
     const controller = new AbortController()
+    const urls: string[] = []
     const observer = new IntersectionObserver(
       ([entry]) => {
         if (!entry.isIntersecting) return
@@ -143,7 +159,7 @@ export function DepartmentArtLayers({
             element.innerHTML = html
             fitLayers(element)
             if (window.matchMedia("(pointer: coarse)").matches) {
-              return rasterizeLayers(element, controller.signal)
+              return rasterizeLayers(element, controller.signal, urls)
             }
           })
           .catch(() => {})
@@ -154,6 +170,7 @@ export function DepartmentArtLayers({
     return () => {
       observer.disconnect()
       controller.abort()
+      urls.forEach((url) => URL.revokeObjectURL(url))
     }
   }, [id])
 
