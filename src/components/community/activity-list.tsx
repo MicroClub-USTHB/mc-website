@@ -1,14 +1,13 @@
 "use client"
 
-import { useLayoutEffect, useRef, useState } from "react"
-import { animate, useReducedMotion } from "motion/react"
+import { useEffect, useRef, useState } from "react"
 
 import { ActivityCursor } from "@/components/community/activity-cursor"
 import { ActivityItem } from "@/components/community/activity-item"
 import type { CommunityActivity } from "@/const/community"
-import { EASE_OUT_QUART } from "@/lib/easing"
 
-const RESIZE_TRANSITION = { duration: 0.4, ease: EASE_OUT_QUART }
+/** How long the rows take to resize (`duration-400` on the rows). */
+const RESIZE_MS = 400
 
 /**
  * Activities accordion: at most one row open, all closed by default. With a mouse the hovered row
@@ -16,60 +15,30 @@ const RESIZE_TRANSITION = { duration: 0.4, ease: EASE_OUT_QUART }
  * and with the keyboard, tapping / activating a title toggles its row. The hovered row's icon
  * follows the cursor.
  *
- * The open and closed heights come from CSS (responsive); on each change the rows animate from
- * the heights measured just before it to their new ones, then hand control back to CSS.
+ * The rows resize with a CSS height transition, between their closed height and their measured
+ * open one (see `ActivityItem`): the browser interpolates it without any script per frame, and a
+ * change mid-way (the pointer sweeping across rows) carries on from where the rows are.
  */
 export function ActivityList({ activities }: { activities: CommunityActivity[] }) {
   const [active, setActive] = useState<number | null>(null)
   const [hovered, setHovered] = useState<number | null>(null)
-  const listRef = useRef<HTMLOListElement>(null)
-  /** Row heights measured right before the last change, the animation start points. */
-  const fromHeights = useRef<number[]>([])
-  const animating = useRef(false)
-  const reduceMotion = useReducedMotion()
+  /** Rows are resizing: a still pointer they slide under does not count as a hover. */
+  const resizing = useRef(false)
+  const resizeTimer = useRef(0)
 
   function open(index: number | null) {
     if (index === active) return
-    const rows = listRef.current?.children
-    fromHeights.current = rows ? Array.from(rows, (row) => (row as HTMLElement).offsetHeight) : []
+    resizing.current = true
+    window.clearTimeout(resizeTimer.current)
+    resizeTimer.current = window.setTimeout(() => (resizing.current = false), RESIZE_MS)
     setActive(index)
   }
 
-  useLayoutEffect(() => {
-    const rows = listRef.current
-      ? Array.from(listRef.current.children as HTMLCollectionOf<HTMLElement>)
-      : []
-    const from = fromHeights.current
-    fromHeights.current = []
-
-    // Drop the heights left by an interrupted animation, so the targets come from CSS.
-    for (const row of rows) row.style.height = ""
-    if (reduceMotion || from.length !== rows.length) return
-
-    const to = rows.map((row) => row.offsetHeight)
-
-    let cancelled = false
-    animating.current = true
-    const controls = rows.map((row, i) =>
-      animate(row, { height: [`${from[i]}px`, `${to[i]}px`] }, RESIZE_TRANSITION),
-    )
-    Promise.all(controls).then(() => {
-      if (cancelled) return
-      for (const row of rows) row.style.height = ""
-      animating.current = false
-    })
-
-    return () => {
-      cancelled = true
-      animating.current = false
-      for (const control of controls) control.stop()
-    }
-  }, [active, reduceMotion])
+  useEffect(() => () => window.clearTimeout(resizeTimer.current), [])
 
   return (
     <>
       <ol
-        ref={listRef}
         onPointerLeave={(event) => {
           if (event.pointerType !== "mouse") return
           setHovered(null)
@@ -92,7 +61,7 @@ export function ActivityList({ activities }: { activities: CommunityActivity[] }
               if (event.pointerType !== "mouse") return
               setHovered(index)
               // Not while rows move under a still pointer.
-              if (!animating.current) open(index)
+              if (!resizing.current) open(index)
             }}
           />
         ))}
