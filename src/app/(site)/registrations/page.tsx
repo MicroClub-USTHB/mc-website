@@ -11,6 +11,11 @@ export const metadata: Metadata = {
   description:
     "Join Micro Club: fill in the registration form to become a member of the USTHB student scientific club.",
   alternates: { canonical: siteRoutes.registrations },
+  openGraph: {
+    title: "Micro Club registrations",
+    description: "Join Micro Club, the first student scientific club in Algeria, at USTHB.",
+    url: siteRoutes.registrations,
+  },
 }
 
 /**
