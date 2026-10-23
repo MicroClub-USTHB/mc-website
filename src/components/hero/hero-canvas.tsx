@@ -202,8 +202,13 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           iconDefinition={<XIcon size={20} />}
           aria-label="Close the canvas"
           onClick={() => setExploring(false)}
-          // Under the fixed menu bar (which stays over the canvas, with its registrations button).
-          className="absolute top-[calc(var(--menu-top)+var(--menu-size)+0.75rem)] right-(--menu-left) size-11"
+          // The fixed menu bar stays over the canvas. Lined up with its right end (where the bar's
+          // content stops, past 1440px too) and centred on it, unless the registrations button sits
+          // there: then just under the bar.
+          className={cn(
+            "absolute top-[calc(var(--menu-top)+(var(--menu-size)-2.75rem)/2)] right-[max(var(--menu-left),calc((100%-90rem)/2+var(--menu-left)))] size-11",
+            "[:root:has([data-registrations-corner])_&]:top-[calc(var(--menu-top)+var(--menu-size)+0.75rem)]",
+          )}
         />
       )}
     </div>

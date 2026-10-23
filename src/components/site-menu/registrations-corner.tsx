@@ -25,7 +25,11 @@ export function RegistrationsCorner({ renderedAt }: { renderedAt: number }) {
   }
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
+    // `data-registrations-corner`: other fixed controls make room for it (the canvas close button).
+    <div
+      data-registrations-corner
+      className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site"
+    >
       <div
         className={cn(
           // The bar's scale (never under 0.8, to stay readable on tablets), capped by the room left of the "MICRO CLUB" wordmark (toggle + 3
