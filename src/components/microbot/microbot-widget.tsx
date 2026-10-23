@@ -47,7 +47,8 @@ type MicroBotWidgetProps = {
  * the page that search engines index.
  *
  * On phones the open panel covers the whole screen and is a modal dialog: focus stays inside it
- * and Lenis is stopped, so the page behind does not scroll (like the Event Hub card). Larger
+ * and the page behind is pinned, so it does not scroll (like the Event Hub card). The panel
+ * follows the visual viewport, so the on-screen keyboard shrinks it instead of uncovering the page. Larger
  * screens keep it as a non-modal panel next to the page.
  */
 export function MicroBotWidget({
@@ -114,8 +115,36 @@ export function MicroBotWidget({
       }
     }
     document.addEventListener("keydown", onKeyDown)
+
+    // The page behind stays put, touch scrolling included (iOS scrolls past `overflow: hidden`
+    // on the root): the body is pinned at its scroll position, and put back when closed.
+    const scrollY = window.scrollY
+    const body = document.body.style
+    const saved = { position: body.position, top: body.top, left: body.left, right: body.right }
+    Object.assign(body, { position: "fixed", top: `-${scrollY}px`, left: "0", right: "0" })
+
+    // The panel covers what is visible: the visual viewport, which the on-screen keyboard
+    // shrinks (and iOS pans) while the layout viewport, that `fixed` follows, does not.
+    const viewport = window.visualViewport
+    const panel = panelRef.current
+    const fit = () => {
+      if (!viewport || !panel) return
+      panel.style.top = `${viewport.offsetTop}px`
+      panel.style.bottom = "auto"
+      panel.style.height = `${viewport.height}px`
+    }
+    fit()
+    viewport?.addEventListener("resize", fit)
+    viewport?.addEventListener("scroll", fit)
+
     return () => {
       document.removeEventListener("keydown", onKeyDown)
+      viewport?.removeEventListener("resize", fit)
+      viewport?.removeEventListener("scroll", fit)
+      // Back to the CSS sizes (the panel may stay open past `sm`, as a floating panel).
+      if (panel) Object.assign(panel.style, { top: "", bottom: "", height: "" })
+      Object.assign(body, saved)
+      window.scrollTo(0, scrollY)
       lenis?.start()
     }
   }, [modal, lenis])
