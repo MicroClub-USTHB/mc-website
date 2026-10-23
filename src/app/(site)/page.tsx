@@ -24,6 +24,7 @@ import { TrustedBy } from "@/sections/trusted-by"
 export const revalidate = 60
 
 export const metadata: Metadata = {
+  title: { absolute: siteConfig.title },
   alternates: { canonical: "/" },
 }
 

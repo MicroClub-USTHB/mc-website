@@ -1,9 +1,10 @@
 export const siteConfig = {
   name: "Micro Club",
-  /** Short line for shared previews. */
-  tagline: "The first student scientific club in Algeria, at USTHB since 1985.",
+  /** Title of the landing page in search results and shared previews (under 60 characters). */
+  title: "Micro Club | First Student Scientific Club in Algeria",
+  /** Search results and shared previews cut a description past about 155 characters. */
   description:
-    "Micro Club (MC) is the first student scientific club in Algeria, founded in 1985 at USTHB: workshops, hackathons, events and projects in development, game development, robotics and design.",
+    "Micro Club, the first student scientific club in Algeria (USTHB, 1985): workshops, hackathons, events and projects in development, games, robotics and design.",
   url: "https://www.microclub.info",
   /** Founding year, for structured data. */
   foundingDate: "1985",

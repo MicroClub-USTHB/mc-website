@@ -1,4 +1,4 @@
-import type { Metadata } from "next"
+import type { Metadata, ResolvingMetadata } from "next"
 import { notFound } from "next/navigation"
 import { connection } from "next/server"
 
@@ -6,16 +6,28 @@ import { RegistrationFlow } from "@/components/registrations/registration-flow"
 import { siteRoutes } from "@/config/site"
 import { areRegistrationsOpen } from "@/lib/registrations/window"
 
-export const metadata: Metadata = {
-  title: "Registrations",
-  description:
-    "Join Micro Club: fill in the registration form to become a member of the USTHB student scientific club.",
-  alternates: { canonical: siteRoutes.registrations },
-  openGraph: {
-    title: "Micro Club registrations",
-    description: "Join Micro Club, the first student scientific club in Algeria, at USTHB.",
-    url: siteRoutes.registrations,
-  },
+/**
+ * Its own title and description; the rest of the shared preview (image, site name, type, locale)
+ * comes from the root layout: a page's `openGraph` replaces its parent's instead of merging.
+ */
+export async function generateMetadata(
+  _props: unknown,
+  parent: ResolvingMetadata,
+): Promise<Metadata> {
+  const { openGraph } = await parent
+  return {
+    title: "Registrations",
+    description:
+      "Join Micro Club: fill in the registration form to become a member of the USTHB student scientific club.",
+    alternates: { canonical: siteRoutes.registrations },
+    openGraph: {
+      ...openGraph,
+      title: "Micro Club registrations",
+      description:
+        "Join Micro Club, the first student scientific club in Algeria, at USTHB: register for its workshops, hackathons, events and projects.",
+      url: siteRoutes.registrations,
+    },
+  }
 }
 
 /**

@@ -34,7 +34,7 @@ export const metadata: Metadata = {
     url: siteConfig.url,
     locale: "en_US",
   },
-  // The Open Graph image (`opengraph-image.tsx`) is reused as a large X card.
+  // The Open Graph image (`opengraph-image.png`, 1200×630) is reused as a large X card.
   twitter: { card: "summary_large_image" },
 }
 
