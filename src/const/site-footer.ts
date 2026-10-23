@@ -62,7 +62,7 @@ export const CONTACT_TILES: ContactTile[] = [
     id: "location",
     label: "Address",
     text: ADDRESS,
-    href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Faculté d'Informatique USTHB, Bab Ezzouar")}`,
+    href: "https://maps.app.goo.gl/a5ErbmFrqt4nEYYP6",
     external: true,
   },
 ]
