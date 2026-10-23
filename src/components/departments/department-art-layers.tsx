@@ -94,7 +94,7 @@ export function DepartmentArtLayers({
     <div
       ref={ref}
       style={{ width, height }}
-      className="absolute top-0 left-0 origin-top-left [scale:var(--s)] [--s:tan(atan2(var(--pw,100cqw),610px))] lg:[--s:tan(atan2(38.125rem*var(--k),610px))] [&>svg]:absolute [&>svg]:inset-0 [&>svg]:size-full [&>svg]:overflow-visible"
+      className="absolute top-0 left-0 origin-top-left [scale:var(--s)] [--s:var(--js-s,tan(atan2(var(--pw,100cqw),610px)))] lg:[--s:var(--js-s,tan(atan2(38.125rem*var(--k),610px)))] [&>svg]:absolute [&>svg]:inset-0 [&>svg]:size-full [&>svg]:overflow-visible"
     />
   )
 }
