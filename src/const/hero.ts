@@ -12,6 +12,9 @@ export const HERO_CANVAS = {
   initialView: { x: 469, y: 464, width: 1440, height: 1024 },
 } as const
 
+/** Size of the hero headline (`Headline`) at full scale: "LET'S" over "EXPERIENCE IT", 19px tighter. */
+export const HEADLINE_SIZE = { width: 656.648, height: 114.725 * 2 - 19 }
+
 export type HeroCanvasItemId =
   | "sticky-note"
   | "todo-list"

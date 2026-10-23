@@ -621,6 +621,17 @@
 }
 
 /* Hero headline words (see `headline.tsx`). */
+/*
+ * The page does not scroll under the splash screen (`Splash`), from the server HTML on. The
+ * scrollbar's room stays (classic scrollbars), so nothing moves when it comes back.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-splash]:not([data-leaving])) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+  }
+}
+
 @keyframes headline-in {
   from {
     opacity: 0;

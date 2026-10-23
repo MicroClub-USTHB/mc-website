@@ -74,11 +74,11 @@ const SWAPPED = [
 ]
 
 /** On-load timing (s): "EXPERIENCE" first, then each letter springs into its icon, in turn. */
-const ICONS_START = 1
-const ICON_STAGGER = 0.3
+const ICONS_START = 0.8
+const ICON_STAGGER = 0.25
 
 /**
- * The words fade up on load (0.6s, ease-out-quart). A CSS animation, not Motion: it runs from the
+ * The words fade up as the splash screen plays it (0.6s, ease-out-quart). A CSS animation, not Motion: it runs from the
  * server HTML on, so the headline paints without waiting for JavaScript (it is the page's largest
  * text). None with reduced motion.
  */
@@ -89,15 +89,19 @@ const TEXT = "text-[91.78px] leading-[114.725px] tracking-[-1.8356px] uppercase 
 /**
  * Figma hero headline: "LET'S EXPERIENCE IT", where E, R, N and C are drawn as icons (a stack of
  * DEBUG / CODE / DEPLOY chips, a branch, a network and a signal), centred in the first view.
- * On page load "EXPERIENCE" fades in as plain letters, then E, R, N and C
- * spring into their icons one after another. It plays once, and not at all with reduced motion.
+ * In the hero it is drawn as it ends, icons in place. The splash screen of a page load (`Splash`)
+ * plays it: "EXPERIENCE" fades in as plain letters, then E, R, N and C spring into their icons one
+ * after another (not with reduced motion), and `onSettled` is called once the last icon has landed.
  */
-export function Headline() {
-  const reduceMotion = useReducedMotion()
+export function Headline({
+  animated = false,
+  onSettled,
+}: { animated?: boolean; onSettled?: () => void } = {}) {
+  const still = useReducedMotion() || !animated
 
   // Icon `i` lands after the previous one; the E chips stack one by one first.
   const pop = (i: number) =>
-    reduceMotion
+    still
       ? { initial: false as const }
       : {
           initial: { opacity: 0, scale: 0.3, rotate: -14 },
@@ -124,13 +128,16 @@ export function Headline() {
 
   return (
     // Phones see the canvas at full size: the headline shrinks to fit their width.
-    <div className="flex w-[656.648px] origin-center flex-col items-center max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90">
+    <div
+      data-headline
+      className="flex w-[656.648px] shrink-0 origin-center flex-col items-center max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90"
+    >
       <p className="flex w-full flex-col items-center font-heading">
         {/* The words are drawn in pieces (and icons): screen readers get the sentence. */}
         <span className="sr-only">Let’s experience it</span>
         <span
           aria-hidden
-          className={cn(TEXT, FADE_IN, "mb-[-19px] text-center text-headline-soft")}
+          className={cn(TEXT, animated && FADE_IN, "mb-[-19px] text-center text-headline-soft")}
         >
           let’s
         </span>
@@ -138,19 +145,19 @@ export function Headline() {
           {LETTERS.map(({ text, left, top }) => (
             <span
               key={text}
-              className={cn(TEXT, FADE_IN, "absolute text-foreground")}
+              className={cn(TEXT, animated && FADE_IN, "absolute text-foreground")}
               style={{ left, top }}
             >
               {text}
             </span>
           ))}
 
-          {/* With reduced motion the icons are simply there: no letters to swap. */}
-          {!reduceMotion &&
+          {/* Not played (the hero, reduced motion): the icons are simply there, no letters to swap. */}
+          {!still &&
             SWAPPED.map(({ text, left, swap }) => (
               <span
                 key={text}
-                className={cn(TEXT, FADE_IN, "absolute top-0 text-foreground")}
+                className={cn(TEXT, animated && FADE_IN, "absolute top-0 text-foreground")}
                 style={{ left }}
               >
                 <motion.span {...swapOut(swap)} className="block">
@@ -179,6 +186,7 @@ export function Headline() {
             <motion.span
               key={src.src}
               {...pop(1 + i)}
+              onAnimationComplete={i === ICONS.length - 1 ? onSettled : undefined}
               className="absolute"
               style={{ left: box.left, top: box.top, width: box.width, height: box.height }}
             >

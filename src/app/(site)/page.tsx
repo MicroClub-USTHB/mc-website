@@ -12,6 +12,7 @@ import { Contact } from "@/sections/contact"
 import { Departments } from "@/sections/departments"
 import { FeaturedEvents } from "@/sections/featured-events"
 import { FeaturedProjects } from "@/sections/featured-projects"
+import { Splash } from "@/components/hero/splash"
 import { Hero } from "@/sections/hero"
 import { Statistics } from "@/sections/statistics"
 import { TrustedBy } from "@/sections/trusted-by"
@@ -69,6 +70,7 @@ export default function HomePage() {
   return (
     <>
       <JsonLd data={SITE_JSON_LD} />
+      <Splash />
       <SectionStack>
         <Hero />
         <About />
