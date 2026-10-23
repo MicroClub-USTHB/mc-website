@@ -169,6 +169,16 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           {children}
         </div>
       </div>
+      {/*
+        The first view before hydration: the server HTML would otherwise paint the canvas's top
+        left corner until the effect above scrolls to the Figma first view. Runs as the HTML is
+        parsed, before the first paint (React does not run it again on the client).
+      */}
+      <script
+        dangerouslySetInnerHTML={{
+          __html: `(()=>{const v=document.currentScript.previousElementSibling;v.scrollLeft=${START.x * CANVAS_WIDTH}-v.clientWidth/2;v.scrollTop=${START.y * CANVAS_HEIGHT}-v.clientHeight/2})()`,
+        }}
+      />
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto max-w-site px-4 pb-4 sm:px-6 sm:pb-6 lg:px-20 lg:pb-16">
         <CanvasNavigator
