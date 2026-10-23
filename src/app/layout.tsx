@@ -26,11 +26,16 @@ export const metadata: Metadata = {
     template: `%s | ${siteConfig.name}`,
   },
   description: siteConfig.description,
+  applicationName: siteConfig.name,
+  category: "education",
   openGraph: {
     type: "website",
     siteName: siteConfig.name,
     url: siteConfig.url,
+    locale: "en_US",
   },
+  // The Open Graph image (`opengraph-image.png`, 1200×630) is reused as a large X card.
+  twitter: { card: "summary_large_image" },
 }
 
 export default function RootLayout({ children }: LayoutProps<"/">) {

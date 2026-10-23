@@ -1,0 +1,19 @@
+# Local MongoDB for the registrations form: `pnpm db:up`, then use
+# MONGODB_URI=mongodb://localhost:27017/microclub (see .env.example).
+services:
+  mongodb:
+    image: mongo:8
+    container_name: microclub-mongodb
+    restart: unless-stopped
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongodb-data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  mongodb-data:

@@ -3,6 +3,53 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:where(.dark, .dark *));
+/* Short landscape screens (phones turned sideways, short windows): side-by-side layouts. */
+@custom-variant short (@media (orientation: landscape) and (max-height: 33.75rem));
+/* Short portrait screens (small phones, Safari with its toolbars): tighter text. */
+@custom-variant compact (@media (orientation: portrait) and (max-height: 37.5rem));
+/* Desktop screens shorter than a full design frame (laptops): compact headers. */
+@custom-variant low (@media (width >= 64rem) and (max-height: 56rem));
+
+/* Trusted By logo tile width: registered as a length, so it is computed where it is declared
+   (from the content box, in `cqw`) and inherited as is, also by the full-bleed marquee row. */
+@property --logo-cell {
+  syntax: "<length>";
+  inherits: true;
+  initial-value: 14rem;
+}
+
+/* Two-column event card: large screens, and phones held sideways (short landscape). */
+@custom-variant wide (@media (width >= 64rem) or ((orientation: landscape) and (height <= 40rem)));
+
+/* Hero canvas illustrations (Figma "Elements"): the paper notes and their cards. Not mcoli-ui
+   colors: they only paint those drawings. */
+@theme {
+  --color-note: #fff6e5;
+  --color-note-ink: #d3c69a;
+  --color-note-highlight: #ffe9d0;
+  --color-note-icon: #545454;
+  --color-canvas-dot: #f7f7f7;
+  --color-todo-from: #ffedb0;
+  --color-todo-to: #eed47d;
+  --color-sticky-from: #ebb47c;
+  --color-sticky-to: #be854c;
+  /* Tool logos of the hero playground (their brand backgrounds). */
+  --color-brand-black: #191919;
+  --color-brand-slate: #242938;
+  --color-brand-teal: #00979c;
+  /* Level up button: its teal button and the pixel sparkles of "+1 LVL". */
+  --color-level: #00c1c6;
+  --color-level-light: #65fbff;
+  --color-level-dark: #027b7f;
+  --color-level-button: #175a5c;
+  --color-level-glow: #03c2c7;
+  /* Robotic working space: the drone sticker edge and the blueprint paper. */
+  --color-sticker-edge: #f2f2f0;
+  --color-blueprint-paper: #dad6d7;
+  /* Hero headline: "LET'S" and the light "CODE" chip of the E icon. */
+  --color-headline-soft: #2c2a57;
+  --color-chip-soft: #b6befc;
+}
 
 @theme inline {
   --color-background: var(--background);
@@ -10,6 +57,12 @@
   /* Fonts: CSS variables injected by next/font in src/app/layout.tsx */
   --font-sans: var(--font-dm-sans), ui-sans-serif, system-ui, sans-serif;
   --font-heading: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+  /* Site max width: Figma desktop frames are 1440px wide (`max-w-site`). */
+  --container-site: 90rem;
+  /* Motion easings (`ease-out-expo`, ...), shared by CSS transitions and Motion animations. */
+  --ease-out-expo: cubic-bezier(0.19, 1, 0.22, 1);
+  --ease-out-quart: cubic-bezier(0.165, 0.84, 0.44, 1);
+  --ease-in-out-quart: cubic-bezier(0.77, 0, 0.175, 1);
   --color-sidebar-ring: var(--sidebar-ring);
   --color-sidebar-border: var(--sidebar-border);
   --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
@@ -378,6 +431,26 @@
   --surface-foreground: #fafafa;
 }
 
+/*
+ * Menu bar sizes (Figma: 85px toggle, 96px from the top, 80px from the left on a 1440x1024 frame).
+ * They shrink with both the viewport width and height, so the bar stays small on short screens
+ * (landscape phones, small or zoomed laptops) and keeps the Figma sizes on large ones.
+ */
+:root {
+  --menu-size: clamp(3rem, min(5.9vw, 9.5vh), 5.3125rem);
+  --menu-top: clamp(0.75rem, min(calc(18vh - 5.5rem), 6.67vw), 6rem);
+  --menu-left: clamp(1rem, 5.56vw, 5rem);
+  --menu-icon: clamp(1.5rem, calc(var(--menu-size) * 0.376), 2rem);
+  --menu-text: calc(var(--menu-size) * 0.4235);
+  /* Menu links: 6 rows share the height left under the bar, 120px at most as in Figma. */
+  --menu-row: clamp(
+    2.75rem,
+    calc((100dvh - var(--menu-top) - var(--menu-size) - 2rem) / 6),
+    7.5rem
+  );
+  --menu-row-text: clamp(1.5rem, min(calc(var(--menu-row) * 0.6), 7.5vw), 4.5rem);
+}
+
 @layer base {
   * {
     @apply border-border outline-ring/50;
@@ -482,5 +555,86 @@
   }
   ::-webkit-scrollbar-thumb:hover {
     background: var(--muted-foreground);
+  }
+}
+
+/*
+ * Micro Bot face (Figma "Expressions"): each of the 11 frames is visible during its own 1/11 of the
+ * loop (`step-end` holds every keyframe), shifted with a negative animation delay.
+ */
+@keyframes microbot-frame {
+  0% {
+    visibility: visible;
+  }
+  9.0909%,
+  100% {
+    visibility: hidden;
+  }
+}
+
+/* Hero scroll hint: the mouse bobs 3px. */
+@keyframes scroll-hint-bob {
+  0%,
+  100% {
+    translate: 0 0;
+  }
+  50% {
+    translate: 0 3px;
+  }
+}
+
+/* Registration step indicator (Figma "Luminous blue glaze"): primary core fading to white at the
+   rim, lit from inside by two white inner glows. */
+@utility glaze {
+  background:
+    radial-gradient(
+      circle 55.55px at center,
+      var(--color-primary) 0%,
+      color-mix(
+          in srgb,
+          color-mix(in srgb, var(--color-primary) 55%, var(--color-primary-foreground)) 63%,
+          transparent
+        )
+        89.3%,
+      color-mix(in srgb, var(--color-primary-foreground) 20%, transparent) 100%
+    ),
+    radial-gradient(
+      circle 40.6px at center,
+      var(--color-primary) 23.1%,
+      var(--color-primary-foreground) 100%
+    );
+  box-shadow:
+    inset 0 0 11.33px color-mix(in srgb, var(--color-primary-foreground) 60%, transparent),
+    inset 0 0 8.09px color-mix(in srgb, var(--color-primary-foreground) 86%, transparent);
+}
+
+/* The glossy progress bar between reached steps (Figma "Rectangle 34625063"). */
+@utility glaze-bar {
+  background: radial-gradient(
+    ellipse 50% 1170% at center,
+    var(--color-primary) 23.1%,
+    var(--color-primary-foreground) 100%
+  );
+  box-shadow:
+    inset 0 0 5.72px color-mix(in srgb, var(--color-primary-foreground) 86%, transparent),
+    inset 0 0 29.75px color-mix(in srgb, var(--color-primary-foreground) 60%, transparent);
+}
+
+/* Hero headline words (see `headline.tsx`). */
+/*
+ * The page does not scroll under the splash screen (`Splash`), from the server HTML on. The
+ * scrollbar's room stays (classic scrollbars), so nothing moves when it comes back.
+ */
+@media (prefers-reduced-motion: no-preference) {
+  html:has([data-splash]:not([data-leaving])) {
+    overflow: hidden;
+    scrollbar-gutter: stable;
+  }
+}
+
+@keyframes headline-in {
+  from {
+    opacity: 0;
+    translate: 0 16px;
   }
 }

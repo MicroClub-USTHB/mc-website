@@ -1,0 +1,108 @@
+"use client"
+
+import { useRef } from "react"
+import { AnimatePresence, motion } from "motion/react"
+
+import { FormActions } from "@/components/registrations/form-actions"
+import {
+  RegistrationProvider,
+  useRegistration,
+  useRegistrationSelector,
+} from "@/components/registrations/state/registration-context"
+import { ReviewDialog } from "@/components/registrations/review-dialog"
+import { StepAbout } from "@/components/registrations/steps/step-about"
+import { StepAdditional } from "@/components/registrations/steps/step-additional"
+import { StepIndicator } from "@/components/registrations/step-indicator"
+import { StepPersonal } from "@/components/registrations/steps/step-personal"
+import { stepTitleId } from "@/components/registrations/state/registration-focus"
+import { REGISTRATION_STEPS } from "@/const/registrations"
+import { REGISTRATION_HONEYPOT_FIELD } from "@/lib/registrations/schema"
+import { EASE_OUT_QUART } from "@/lib/easing"
+
+const STEPS = [StepPersonal, StepAbout, StepAdditional]
+
+/** Progress navigation, the current step and its actions, sharing the registration context. */
+export function RegistrationFlow() {
+  return (
+    <RegistrationProvider>
+      <RegistrationSteps />
+    </RegistrationProvider>
+  )
+}
+
+function RegistrationSteps() {
+  const { announcement, next, submit, startOver } = useRegistration()
+  const step = useRegistrationSelector((state) => state.step)
+  const restored = useRegistrationSelector((state) => state.restored)
+  const honeypotRef = useRef<HTMLInputElement>(null)
+  const Step = STEPS[step]
+  const isLast = step === STEPS.length - 1
+
+  return (
+    <div id="registration-top" className="flex w-full flex-col gap-16 md:gap-[122px]">
+      <div className="flex flex-col gap-6">
+        {restored && (
+          <p
+            role="status"
+            className="flex flex-wrap items-center justify-center gap-x-2 text-center text-sm leading-5 text-muted-foreground"
+          >
+            We restored your progress.
+            <button
+              type="button"
+              onClick={startOver}
+              className="cursor-pointer font-medium text-foreground underline underline-offset-2 outline-none hover:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring"
+            >
+              Start over
+            </button>
+          </p>
+        )}
+        <StepIndicator />
+      </div>
+
+      <form
+        noValidate
+        aria-label="Micro Club registration"
+        className="flex flex-col gap-22"
+        onSubmit={(event) => {
+          event.preventDefault()
+          if (isLast) submit(honeypotRef.current?.value ?? "")
+          else next()
+        }}
+      >
+        {/* Decoy for bots: invisible and unreachable for people, a filled one gets a fake success. */}
+        <input
+          ref={honeypotRef}
+          type="text"
+          name={REGISTRATION_HONEYPOT_FIELD}
+          tabIndex={-1}
+          autoComplete="off"
+          aria-hidden
+          className="pointer-events-none absolute h-0 w-0 opacity-0"
+        />
+
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={step}
+            initial={{ opacity: 0, y: 16 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -16 }}
+            transition={{ duration: 0.25, ease: EASE_OUT_QUART }}
+          >
+            <h2 id={stepTitleId(step)} tabIndex={-1} className="sr-only">
+              {`Step ${step + 1} of ${STEPS.length}: ${REGISTRATION_STEPS[step].name}`}
+            </h2>
+            <Step />
+          </motion.div>
+        </AnimatePresence>
+
+        <FormActions />
+      </form>
+
+      <ReviewDialog />
+
+      <p aria-live="polite" className="sr-only">
+        {announcement}
+      </p>
+    </div>
+  )
+}

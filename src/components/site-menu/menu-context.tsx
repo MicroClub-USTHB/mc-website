@@ -1,0 +1,167 @@
+"use client"
+
+import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
+import { usePathname, useRouter } from "next/navigation"
+import { useLenis } from "lenis/react"
+import { animate, useMotionValue, type MotionValue } from "motion/react"
+
+import { isBarePage } from "@/config/site"
+import { isDominantSectionDark } from "@/lib/backdrop"
+import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
+
+/** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */
+const OPEN_TRANSITION = { duration: 0.65, ease: EASE_IN_OUT_QUART }
+const CLOSE_TRANSITION = { duration: 0.5, ease: EASE_OUT_QUART }
+
+type MenuContextValue = {
+  open: boolean
+  toggle: () => void
+  /**
+   * Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling).
+   * Away from the landing page it goes there first (`/#section`, or `/` for the top).
+   */
+  navigateTo: (target: string | number, options?: { immediate?: boolean }) => void
+  /** Whether the panel (and the bar over it) uses the dark tokens: the inverse of the section behind the toggle. */
+  dark: boolean
+  /** Whether the in-page wordmark is still level with the fixed toggle. */
+  attached: boolean
+  /** 0 = closed, 1 = open. Drives the panel wipe and the menu wordmark with the same edge. */
+  reveal: MotionValue<number>
+  toggleRef: RefObject<HTMLButtonElement | null>
+  wordmarkRef: RefObject<HTMLAnchorElement | null>
+}
+
+/**
+ * The top edge of the sections scrolling over the hero (the page's first `SectionStack`, a 1px
+ * marker: a section taller than the screen would never cross an observer threshold).
+ */
+const COVER_EDGE = "[data-stack-edge]"
+
+const MenuContext = createContext<MenuContextValue | null>(null)
+
+export function useMenu() {
+  const menu = useContext(MenuContext)
+  if (!menu) throw new Error("useMenu must be used inside <MenuProvider>")
+  return menu
+}
+
+/**
+ * Menu state, rendered as the site `<header>`. Its children stay Server Components, so the
+ * logo and navigation links are part of the server-rendered HTML.
+ */
+export function MenuProvider({ children }: { children: React.ReactNode }) {
+  const lenis = useLenis()
+  const router = useRouter()
+  const pathname = usePathname()
+  const headerRef = useRef<HTMLElement>(null)
+  const toggleRef = useRef<HTMLButtonElement>(null)
+  const wordmarkRef = useRef<HTMLAnchorElement>(null)
+  const [open, setOpen] = useState(false)
+  const [attached, setAttached] = useState(true)
+  const [dark, setDark] = useState(false)
+  const reveal = useMotionValue(0)
+
+  // The "MICRO CLUB" wordmark belongs to the hero, which stays put while About scrolls over it
+  // (`SectionStack`): it stays attached to the toggle until About's top edge reaches the bar's
+  // bottom, then folds into the compact logo. An IntersectionObserver whose root starts at the
+  // bar's bottom reports that crossing, so scrolling does no layout reads. Rebuilt on resize and
+  // on navigation (the hero, and the wordmark, are only on the landing page).
+  useEffect(() => {
+    const toggle = toggleRef.current
+    const edge = document.querySelector(COVER_EDGE)
+    // No hero on this page: the compact logo from the start.
+    if (!toggle || !edge) return setAttached(false)
+    let observer: IntersectionObserver | null = null
+    const observe = () => {
+      observer?.disconnect()
+      const bottom = toggle.getBoundingClientRect().bottom
+      observer = new IntersectionObserver(
+        ([entry]) => setAttached(entry.boundingClientRect.top > bottom),
+        { rootMargin: `${-Math.max(0, Math.floor(bottom))}px 0px 0px 0px`, threshold: [0, 1] },
+      )
+      observer.observe(edge)
+    }
+    observe()
+    window.addEventListener("resize", observe)
+    return () => {
+      window.removeEventListener("resize", observe)
+      observer?.disconnect()
+    }
+  }, [pathname])
+
+  useEffect(() => {
+    const controls = animate(reveal, open ? 1 : 0, open ? OPEN_TRANSITION : CLOSE_TRANSITION)
+    return () => controls.stop()
+  }, [open, reveal])
+
+  // While open: lock page scroll, close on Escape, keep keyboard focus inside the header.
+  useEffect(() => {
+    if (!open) return
+    lenis?.stop()
+
+    function onKeyDown(event: KeyboardEvent) {
+      if (event.key === "Escape") {
+        setOpen(false)
+        toggleRef.current?.focus()
+      }
+      if (event.key === "Tab") trapFocus(event, headerRef.current)
+    }
+
+    window.addEventListener("keydown", onKeyDown)
+    return () => {
+      window.removeEventListener("keydown", onKeyDown)
+      lenis?.start()
+    }
+  }, [open, lenis])
+
+  const value: MenuContextValue = {
+    open,
+    toggle: () => {
+      // Opens inverted: dark over a light section, light over a dark one. Kept while it closes.
+      const toggle = toggleRef.current
+      if (!open && toggle) {
+        const { left, width } = toggle.getBoundingClientRect()
+        setDark(!isDominantSectionDark(left + width / 2, toggle.closest("header")))
+      }
+      setOpen(!open)
+    },
+    navigateTo: (target, { immediate = false } = {}) => {
+      setOpen(false)
+      lenis?.start()
+      if (pathname !== "/") {
+        router.push(typeof target === "number" ? "/" : `/${target}`)
+        return
+      }
+      lenis?.scrollTo(target, { immediate })
+    },
+    dark,
+    // Bare pages have no in-page wordmark, so the compact logo is always out.
+    attached: attached && !isBarePage(pathname),
+    reveal,
+    toggleRef,
+    wordmarkRef,
+  }
+
+  return (
+    <MenuContext value={value}>
+      <header ref={headerRef}>{children}</header>
+    </MenuContext>
+  )
+}
+
+/** Keeps Tab / Shift+Tab cycling inside `container`. */
+function trapFocus(event: KeyboardEvent, container: HTMLElement | null) {
+  if (!container) return
+  const focusables = container.querySelectorAll<HTMLElement>(
+    "a[href]:not([tabindex='-1']), button:not([disabled])",
+  )
+  const first = focusables[0]
+  const last = focusables[focusables.length - 1]
+  if (event.shiftKey && document.activeElement === first) {
+    event.preventDefault()
+    last.focus()
+  } else if (!event.shiftKey && document.activeElement === last) {
+    event.preventDefault()
+    first.focus()
+  }
+}

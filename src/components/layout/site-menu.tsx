@@ -1,59 +1,40 @@
-"use client"
-
-import { useState } from "react"
-import Link from "next/link"
-import { Dialog } from "@base-ui/react/dialog"
-import { MenuIcon, XIcon } from "lucide-react"
-
-import { homeSections, siteConfig } from "@/config/site"
-
-const iconButton =
-  "inline-flex size-10 items-center justify-center rounded-lg transition-colors hover:bg-secondary focus-visible:ring-3 focus-visible:ring-ring/50 focus-visible:outline-none"
+import { MenuBar } from "@/components/site-menu/menu-bar"
+import { MenuProvider } from "@/components/site-menu/menu-context"
+import { MenuLink } from "@/components/site-menu/menu-link"
+import { MenuPanel } from "@/components/site-menu/menu-panel"
+import { PageWordmark } from "@/components/site-menu/page-wordmark"
+import { RegistrationsCorner } from "@/components/site-menu/registrations-corner"
+import { menuLinks, siteConfig } from "@/config/site"
+import { serverRenderTime } from "@/lib/registrations/window"
 
 /**
- * Hamburger menu used instead of a classic navbar.
- * TODO: swap the raw Base UI dialog for the mcoli-ui component once available.
+ * Site header with the hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
+ * - a "MICRO CLUB" wordmark sits in the page next to the toggle and scrolls away with it,
+ * - the registrations button sits at the other end of the bar,
+ * - once it has passed the toggle, a compact MC mark slides out from behind the fixed toggle,
+ * - the toggle opens a full-screen panel of section links that wipes in from the left.
+ *
+ * Server Component: the header, home links and navigation are in the server-rendered HTML;
+ * only state and animations live in the client islands.
  */
 export function SiteMenu() {
-  const [open, setOpen] = useState(false)
-  const close = () => setOpen(false)
+  const homeLabel = `${siteConfig.name} home`
 
   return (
-    <header className="fixed inset-x-0 top-0 z-40 flex items-center justify-between px-4 py-4 sm:px-6 lg:px-8">
-      <Link href="/" className="font-heading text-lg font-semibold">
-        {siteConfig.name}
-      </Link>
-
-      <Dialog.Root open={open} onOpenChange={setOpen}>
-        <Dialog.Trigger aria-label="Open menu" className={iconButton}>
-          <MenuIcon className="size-5" />
-        </Dialog.Trigger>
-        <Dialog.Portal>
-          <Dialog.Backdrop className="fixed inset-0 z-50 bg-black/20 transition-opacity duration-200 data-ending-style:opacity-0 data-starting-style:opacity-0 supports-backdrop-filter:backdrop-blur-sm" />
-          <Dialog.Popup className="fixed inset-y-0 right-0 z-50 flex w-3/4 flex-col gap-6 border-l bg-background p-6 shadow-lg transition duration-200 ease-in-out data-ending-style:translate-x-10 data-ending-style:opacity-0 data-starting-style:translate-x-10 data-starting-style:opacity-0 sm:max-w-sm">
-            <div className="flex items-center justify-between">
-              <Dialog.Title className="font-heading text-lg font-semibold">
-                {siteConfig.name}
-              </Dialog.Title>
-              <Dialog.Close aria-label="Close menu" className={iconButton}>
-                <XIcon className="size-5" />
-              </Dialog.Close>
-            </div>
-            <nav aria-label="Main" className="flex flex-col gap-1">
-              {homeSections.map((section) => (
-                <Link
-                  key={section.id}
-                  href={`/#${section.id}`}
-                  onClick={close}
-                  className="py-2 hover:text-primary"
-                >
-                  {section.label}
-                </Link>
-              ))}
-            </nav>
-          </Dialog.Popup>
-        </Dialog.Portal>
-      </Dialog.Root>
-    </header>
+    <MenuProvider>
+      <PageWordmark label={homeLabel} />
+      {/* The page's render time: the countdown is in the server HTML (see `revalidate` on `/`). */}
+      <RegistrationsCorner renderedAt={serverRenderTime()} />
+      <MenuBar homeLabel={homeLabel} />
+      <MenuPanel>
+        <ul className="mx-auto max-w-site px-(--menu-left) pt-[calc(var(--menu-top)+var(--menu-size))] pb-8">
+          {menuLinks.map((link) => (
+            <li key={link.id}>
+              <MenuLink sectionId={link.id}>{link.label}</MenuLink>
+            </li>
+          ))}
+        </ul>
+      </MenuPanel>
+    </MenuProvider>
   )
 }
