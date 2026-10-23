@@ -11,7 +11,9 @@
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d mongodb",
-    "db:down": "docker compose down"
+    "db:down": "docker compose down",
+    "auth:create-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/create-president.ts",
+    "auth:deactivate-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/deactivate-president.ts"
   },
   "dependencies": {
     "@base-ui/react": "^1.8.0",
