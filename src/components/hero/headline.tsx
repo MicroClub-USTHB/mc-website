@@ -3,7 +3,6 @@
 import Image, { type StaticImageData } from "next/image"
 import { motion, useReducedMotion } from "motion/react"
 
-import { Registration } from "@/components/hero/registration"
 import { EASE_OUT_QUART } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 import branch from "@/assets/hero/headline/branch.svg"
@@ -83,8 +82,8 @@ const TEXT = "text-[91.78px] leading-[114.725px] tracking-[-1.8356px] uppercase 
 
 /**
  * Figma hero headline: "LET'S EXPERIENCE IT", where E, R, N and C are drawn as icons (a stack of
- * DEBUG / CODE / DEPLOY chips, a branch, a network and a signal), above the registration button
- * and its countdown. On page load "EXPERIENCE" fades in as plain letters, then E, R, N and C
+ * DEBUG / CODE / DEPLOY chips, a branch, a network and a signal), centred in the first view.
+ * On page load "EXPERIENCE" fades in as plain letters, then E, R, N and C
  * spring into their icons one after another. It plays once, and not at all with reduced motion.
  */
 export function Headline() {
@@ -126,7 +125,7 @@ export function Headline() {
 
   return (
     // Phones see the canvas at full size: the headline shrinks to fit their width.
-    <div className="flex w-[656.648px] origin-center flex-col items-center gap-7 max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90">
+    <div className="flex w-[656.648px] origin-center flex-col items-center max-[479px]:scale-[0.52] min-[480px]:max-sm:scale-[0.68] sm:max-md:scale-90">
       <p
         aria-label="Let's experience it"
         className="flex w-full flex-col items-center font-heading"
@@ -201,10 +200,6 @@ export function Headline() {
           ))}
         </span>
       </p>
-
-      <motion.div {...fadeIn}>
-        <Registration />
-      </motion.div>
     </div>
   )
 }

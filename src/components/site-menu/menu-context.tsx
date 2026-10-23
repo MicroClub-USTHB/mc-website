@@ -1,9 +1,11 @@
 "use client"
 
 import { createContext, useContext, useEffect, useRef, useState, type RefObject } from "react"
+import { usePathname, useRouter } from "next/navigation"
 import { useLenis } from "lenis/react"
 import { animate, useMotionValue, type MotionValue } from "motion/react"
 
+import { isBarePage } from "@/config/site"
 import { isDominantSectionDark } from "@/lib/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
@@ -14,7 +16,10 @@ const CLOSE_TRANSITION = { duration: 0.5, ease: EASE_OUT_QUART }
 type MenuContextValue = {
   open: boolean
   toggle: () => void
-  /** Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling). */
+  /**
+   * Closes the menu and scrolls to `target` (`immediate` jumps instead of smooth scrolling).
+   * Away from the landing page it goes there first (`/#section`, or `/` for the top).
+   */
   navigateTo: (target: string | number, options?: { immediate?: boolean }) => void
   /** Whether the panel (and the bar over it) uses the dark tokens: the inverse of the section behind the toggle. */
   dark: boolean
@@ -25,6 +30,12 @@ type MenuContextValue = {
   toggleRef: RefObject<HTMLButtonElement | null>
   wordmarkRef: RefObject<HTMLAnchorElement | null>
 }
+
+/**
+ * The top edge of the sections scrolling over the hero (the page's first `SectionStack`, a 1px
+ * marker: a section taller than the screen would never cross an observer threshold).
+ */
+const COVER_EDGE = "[data-stack-edge]"
 
 const MenuContext = createContext<MenuContextValue | null>(null)
 
@@ -40,6 +51,8 @@ export function useMenu() {
  */
 export function MenuProvider({ children }: { children: React.ReactNode }) {
   const lenis = useLenis()
+  const router = useRouter()
+  const pathname = usePathname()
   const headerRef = useRef<HTMLElement>(null)
   const toggleRef = useRef<HTMLButtonElement>(null)
   const wordmarkRef = useRef<HTMLAnchorElement>(null)
@@ -48,22 +61,25 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [dark, setDark] = useState(false)
   const reveal = useMotionValue(0)
 
-  // The in-page wordmark stays attached until its bottom edge scrolls past the toggle's top edge.
-  // An IntersectionObserver whose root starts at the toggle's top edge reports exactly that
-  // crossing, so scrolling does no layout reads (rebuilt when the window resizes).
+  // The "MICRO CLUB" wordmark belongs to the hero, which stays put while About scrolls over it
+  // (`SectionStack`): it stays attached to the toggle until About's top edge reaches the bar's
+  // bottom, then folds into the compact logo. An IntersectionObserver whose root starts at the
+  // bar's bottom reports that crossing, so scrolling does no layout reads. Rebuilt on resize and
+  // on navigation (the hero, and the wordmark, are only on the landing page).
   useEffect(() => {
-    const wordmark = wordmarkRef.current
     const toggle = toggleRef.current
-    if (!wordmark || !toggle) return
+    const edge = document.querySelector(COVER_EDGE)
+    // No hero on this page: the compact logo from the start.
+    if (!toggle || !edge) return setAttached(false)
     let observer: IntersectionObserver | null = null
     const observe = () => {
       observer?.disconnect()
-      const top = toggle.getBoundingClientRect().top
+      const bottom = toggle.getBoundingClientRect().bottom
       observer = new IntersectionObserver(
-        ([entry]) => setAttached(entry.boundingClientRect.bottom > top),
-        { rootMargin: `${-Math.max(0, Math.floor(top))}px 0px 0px 0px`, threshold: [0, 1] },
+        ([entry]) => setAttached(entry.boundingClientRect.top > bottom),
+        { rootMargin: `${-Math.max(0, Math.floor(bottom))}px 0px 0px 0px`, threshold: [0, 1] },
       )
-      observer.observe(wordmark)
+      observer.observe(edge)
     }
     observe()
     window.addEventListener("resize", observe)
@@ -71,7 +87,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
       window.removeEventListener("resize", observe)
       observer?.disconnect()
     }
-  }, [])
+  }, [pathname])
 
   useEffect(() => {
     const controls = animate(reveal, open ? 1 : 0, open ? OPEN_TRANSITION : CLOSE_TRANSITION)
@@ -112,10 +128,15 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     navigateTo: (target, { immediate = false } = {}) => {
       setOpen(false)
       lenis?.start()
+      if (pathname !== "/") {
+        router.push(typeof target === "number" ? "/" : `/${target}`)
+        return
+      }
       lenis?.scrollTo(target, { immediate })
     },
     dark,
-    attached,
+    // Bare pages have no in-page wordmark, so the compact logo is always out.
+    attached: attached && !isBarePage(pathname),
     reveal,
     toggleRef,
     wordmarkRef,
