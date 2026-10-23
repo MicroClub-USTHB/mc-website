@@ -56,7 +56,7 @@ export function TrustedBy() {
         <div className="@container mx-auto max-w-site px-4 pt-24 pb-24 sm:px-6 lg:px-20">
           <h2
             id="trusted-by-title"
-            className="flex min-w-0 items-center header-lg whitespace-nowrap text-primary uppercase lg:header-xl"
+            className="flex min-w-0 items-center header-md whitespace-nowrap text-primary uppercase sm:header-lg lg:header-xl short:header-md"
           >
             Trusted By
             <HoveredPartnerName nameClassName="header-md font-medium text-accent-foreground lg:header-lg" />

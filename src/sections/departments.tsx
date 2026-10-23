@@ -47,7 +47,7 @@ export function Departments() {
         <header className="flex flex-col gap-2 low:flex-row low:items-end low:justify-between low:gap-12">
           <h2
             id="departments-title"
-            className="header-md text-primary uppercase md:header-lg lg:header-xl low:shrink-0 low:header-lg"
+            className="header-md text-primary uppercase sm:header-lg lg:header-xl short:header-md low:shrink-0 low:header-lg"
           >
             Our Departments
           </h2>

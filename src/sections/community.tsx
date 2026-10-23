@@ -40,7 +40,7 @@ export function Community() {
         <header className="flex flex-col items-start">
           <h2
             id="community-title"
-            className="header-md font-medium whitespace-pre text-primary uppercase sm:header-lg lg:header-xl"
+            className="header-md font-medium whitespace-pre text-primary uppercase sm:header-lg lg:header-xl short:header-md"
           >
             {COMMUNITY.title}
           </h2>
