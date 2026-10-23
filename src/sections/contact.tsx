@@ -33,7 +33,7 @@ export function Contact() {
         <div className="flex w-full flex-col gap-7 lg:w-110">
           <h2
             id="contact-title"
-            className="header-md font-normal text-primary uppercase sm:header-lg lg:header-xl"
+            className="header-md font-normal text-primary uppercase sm:header-lg lg:header-xl short:header-md"
           >
             {CONTACT.title}
           </h2>

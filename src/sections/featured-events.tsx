@@ -71,7 +71,7 @@ export function FeaturedEvents() {
                 <header>
                   <h2
                     id="featured-events-title"
-                    className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl [@media(max-height:32.5rem)]:header-md"
+                    className="header-md text-primary uppercase sm:header-lg lg:w-93.5 lg:header-xl [@media(max-height:32.5rem)]:header-md"
                   >
                     Event Hub
                   </h2>

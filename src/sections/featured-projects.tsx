@@ -46,11 +46,11 @@ export function FeaturedProjects() {
         <header className="flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-26">
           <h2
             id="featured-projects-title"
-            className="header-lg text-primary uppercase lg:w-93.5 lg:header-xl"
+            className="header-md text-primary uppercase sm:header-lg lg:w-93.5 lg:header-xl short:header-md"
           >
             Hall of Projects
           </h2>
-          <p className="header-sm text-muted-foreground lg:py-3.25 lg:header-lg">
+          <p className="header-sm text-muted-foreground sm:header-md lg:py-3.25 lg:header-lg">
             {PROJECTS.length} projects
           </p>
         </header>

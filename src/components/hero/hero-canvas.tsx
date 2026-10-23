@@ -1,6 +1,6 @@
 "use client"
 
-import { useEffect, useRef, useState } from "react"
+import { useEffect, useRef, useState, useSyncExternalStore } from "react"
 import { useLenis } from "lenis/react"
 
 import { XIcon } from "@/components/icons/x"
@@ -36,8 +36,16 @@ const START = {
  * The visible area is the scroll position of the viewport (overflow hidden, so only this code
  * moves it): panning is native scrolling, no transform is animated per frame.
  */
+const noSubscription = () => () => {}
+
 export function HeroCanvas({ children }: { children?: React.ReactNode }) {
   const viewportRef = useRef<HTMLDivElement>(null)
+  // True in the server HTML and while it hydrates, false when rendered on the client.
+  const serverHtml = useSyncExternalStore(
+    noSubscription,
+    () => false,
+    () => true,
+  )
   const navigatorRef = useRef<NavigatorHandle>(null)
   const [exploring, setExploring] = useState(false)
   const [grabbing, setGrabbing] = useState(false)
@@ -94,9 +102,16 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setExploring(false)
     }
+    // The menu bar stays usable over the canvas: opening the menu (to go to another section) or
+    // following a link from the bar leaves the explore mode first.
+    const onBarClick = (event: MouseEvent) => {
+      if ((event.target as Element).closest("header a, header button")) setExploring(false)
+    }
     document.addEventListener("keydown", onKeyDown)
+    document.addEventListener("click", onBarClick, true)
     return () => {
       document.removeEventListener("keydown", onKeyDown)
+      document.removeEventListener("click", onBarClick, true)
       lenis?.start()
     }
   }, [exploring, lenis])
@@ -162,6 +177,19 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           {children}
         </div>
       </div>
+      {/*
+        The first view before hydration: the server HTML would otherwise paint the canvas's top
+        left corner until the effect above scrolls to the Figma first view. Runs as the HTML is
+        parsed, before the first paint. Only in the server HTML (and kept while it hydrates):
+        rendered on the client (after a navigation) it would never run, and the effect does it.
+      */}
+      {serverHtml && (
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `(()=>{const v=document.currentScript.previousElementSibling;v.scrollLeft=${START.x * CANVAS_WIDTH}-v.clientWidth/2;v.scrollTop=${START.y * CANVAS_HEIGHT}-v.clientHeight/2})()`,
+          }}
+        />
+      )}
 
       <div className="pointer-events-none absolute inset-x-0 bottom-0 mx-auto max-w-site px-4 pb-4 sm:px-6 sm:pb-6 lg:px-20 lg:pb-16">
         <CanvasNavigator
@@ -185,7 +213,13 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           iconDefinition={<XIcon size={20} />}
           aria-label="Close the canvas"
           onClick={() => setExploring(false)}
-          className="absolute top-4 right-4"
+          // The fixed menu bar stays over the canvas. Lined up with its right end (where the bar's
+          // content stops, past 1440px too) and centred on it, unless the registrations button sits
+          // there: then just under the bar.
+          className={cn(
+            "absolute top-[calc(var(--menu-top)+(var(--menu-size)-2.75rem)/2)] right-[max(var(--menu-left),calc((100%-90rem)/2+var(--menu-left)))] size-11",
+            "[:root:has([data-registrations-corner])_&]:top-[calc(var(--menu-top)+var(--menu-size)+0.75rem)]",
+          )}
         />
       )}
     </div>

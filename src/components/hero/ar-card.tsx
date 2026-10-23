@@ -52,6 +52,8 @@ function CardShape() {
       // Exact size: the import rounds it to whole pixels.
       width={295.65}
       height={362.14}
+      // The largest paint of the first view on very wide screens: not lazy.
+      loading="eager"
       unoptimized
       draggable={false}
       className="absolute top-[-3.45px] left-[-10.31px] max-w-none"

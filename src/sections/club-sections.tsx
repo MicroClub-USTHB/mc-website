@@ -54,7 +54,7 @@ export function ClubSections() {
           heading={
             <h2
               id="club-sections-title"
-              className="header-sm font-normal text-primary uppercase md:header-lg lg:header-xl short:header-xs compact:header-xs"
+              className="header-md font-normal text-primary uppercase sm:header-lg lg:header-xl short:header-xs compact:header-xs"
             >
               <span className="lg:block short:inline">Our</span>{" "}
               <span className="lg:block short:inline">Sections</span>

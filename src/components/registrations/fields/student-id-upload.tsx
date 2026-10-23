@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useState } from "react"
-import { FileIcon, UploadIcon, XIcon } from "lucide-react"
+import { FileIcon, ShareIcon, XIcon } from "lucide-react"
 
 import { FIELD_LABEL_CLASS } from "@/components/registrations/fields/field-styles"
 import { useRegistration } from "@/components/registrations/state/registration-context"
@@ -9,17 +9,17 @@ import { fieldId, STUDENT_ID_FIELD } from "@/components/registrations/state/regi
 import { STUDENT_ID_RULES } from "@/const/registrations"
 import { cn } from "@/lib/utils"
 
-function formatSize(bytes: number) {
-  return bytes < 1024 * 1024
-    ? `${(bytes / 1024).toFixed(1)} KB`
-    : `${(bytes / (1024 * 1024)).toFixed(1)} MB`
+/** The name cut before its extension when too long ("Screenshot 2026-10-20 AM….png"). */
+function splitName(name: string) {
+  const dot = name.lastIndexOf(".")
+  return dot > 0 ? [name.slice(0, dot), name.slice(dot)] : [name, ""]
 }
 
 /**
- * Student ID upload (Figma "_Input field base"), one file: a 232px drop zone that becomes the file
- * once chosen. An image fills the card, a PDF shows as a file icon, and the Figma "File Upload" bar
- * at its bottom gives the name, size and a remove button. Clicking or dropping on the card again
- * replaces the file.
+ * Student ID upload (Figma "_Input field base"), one file: a 232px drop zone. Once a file is
+ * chosen (Figma "Uploaded"), the card shows its preview in the middle (196×122, a file icon for a
+ * PDF) with its name under it and a remove button above its corner. Clicking or dropping on the
+ * card again replaces the file.
  */
 export function StudentIdUpload() {
   const { studentId, studentIdError, setStudentId } = useRegistration()
@@ -47,7 +47,7 @@ export function StudentIdUpload() {
     <div className="flex flex-col gap-1.5">
       <span className={FIELD_LABEL_CLASS}>Certificate of enrollment or student ID</span>
 
-      {/* One 232px card: the drop zone, then the uploaded file itself once there is one. */}
+      {/* One 232px card: the drop zone, then the uploaded file's preview once there is one. */}
       <div className="relative h-58">
         <label
           htmlFor={id}
@@ -65,11 +65,9 @@ export function StudentIdUpload() {
             setStudentId(event.dataTransfer.files[0] ?? null)
           }}
           className={cn(
-            "group absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-border bg-input px-3.5 py-2.5 text-center shadow-xs transition-all",
+            "absolute inset-0 flex cursor-pointer flex-col items-center justify-center gap-2 overflow-hidden rounded-lg border border-border bg-input px-3.5 py-2.5 text-center shadow-xs transition-all",
             "hover:border-ring has-focus-visible:ring-4 has-focus-visible:ring-ring",
             "data-dragging:border-ring data-dragging:bg-secondary data-error:border-destructive",
-            // Filled: the file fills the card above its details bar (66px + 8px margins).
-            "data-filled:p-2 data-filled:pb-[82px]",
           )}
         >
           <input
@@ -93,58 +91,54 @@ export function StudentIdUpload() {
 
           {!studentId ? (
             <>
-              <UploadIcon className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden />
+              <ShareIcon className="size-6 text-muted-foreground" strokeWidth={1.5} aria-hidden />
               <span className="w-49.75 text-base leading-6 text-muted-foreground uppercase">
                 Click to upload student ID
               </span>
             </>
-          ) : previewUrl ? (
-            // A local data URL: next/image cannot optimize it.
-            // eslint-disable-next-line @next/next/no-img-element
-            <img
-              src={previewUrl}
-              alt={`Preview of ${studentId.name}`}
-              className="size-full rounded-md object-contain"
-            />
           ) : (
-            <FileIcon className="size-14 text-muted-foreground" strokeWidth={1.25} aria-hidden />
-          )}
-
-          {/* Replacing it: the same card, clicked again or dropped on. */}
-          {studentId && (
-            <span
-              aria-hidden
-              className="absolute top-2 right-2 rounded-full border border-border bg-card px-2.5 py-0.5 text-xs leading-5 font-medium text-muted-foreground opacity-0 transition-opacity group-hover:opacity-100 group-data-dragging:opacity-100"
-            >
-              Click or drop to replace
+            // Figma "Uploaded File Preview": room for the remove button (over it, outside the
+            // label), then the preview and the file name.
+            <span className="flex w-49 flex-col items-center pt-6">
+              {previewUrl ? (
+                // A local data URL: next/image cannot optimize it.
+                // eslint-disable-next-line @next/next/no-img-element
+                <img
+                  src={previewUrl}
+                  alt={`Preview of ${studentId.name}`}
+                  className="h-30.5 w-full rounded-[6.224px] object-cover"
+                />
+              ) : (
+                <span className="grid h-30.5 w-full place-items-center rounded-[6.224px] border border-border bg-card">
+                  <FileIcon
+                    className="size-12 text-muted-foreground"
+                    strokeWidth={1.25}
+                    aria-hidden
+                  />
+                </span>
+              )}
+              <span
+                title={studentId.name}
+                className="flex w-full justify-center text-xs leading-4.5 text-muted-foreground"
+              >
+                <span className="truncate">{splitName(studentId.name)[0]}</span>
+                <span className="shrink-0">{splitName(studentId.name)[1]}</span>
+              </span>
             </span>
           )}
         </label>
 
-        {/* Figma "File Upload": the file's details at the bottom of the card. */}
+        {/* Figma "Remove File": above the preview's top right corner (the preview, 164px high
+            with it, sits in the middle of the card). */}
         {studentId && (
-          <div className="absolute inset-x-2 bottom-2 flex items-start gap-3 rounded-lg border border-border bg-card px-4 py-3">
-            <FileIcon
-              className="h-[25.333px] w-[16.667px] shrink-0 text-muted-foreground"
-              aria-hidden
-            />
-            <div className="flex min-w-0 flex-1 flex-col justify-center">
-              <span className="truncate text-base leading-6 font-medium text-card-foreground">
-                {studentId.name}
-              </span>
-              <span className="text-xs leading-6 font-medium text-muted-foreground">
-                {formatSize(studentId.size)}
-              </span>
-            </div>
-            <button
-              type="button"
-              aria-label={`Remove ${studentId.name}`}
-              onClick={() => setStudentId(null)}
-              className="grid size-5 shrink-0 cursor-pointer place-items-center rounded-sm text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
-            >
-              <XIcon className="size-4" aria-hidden />
-            </button>
-          </div>
+          <button
+            type="button"
+            aria-label={`Remove ${studentId.name}`}
+            onClick={() => setStudentId(null)}
+            className="absolute top-[calc(50%-5.125rem)] left-[calc(50%+4.875rem)] grid size-5 cursor-pointer place-items-center rounded-sm text-muted-foreground transition-colors outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
+          >
+            <XIcon className="size-5" strokeWidth={1.2} aria-hidden />
+          </button>
         )}
       </div>
 

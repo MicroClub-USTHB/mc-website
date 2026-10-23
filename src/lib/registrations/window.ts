@@ -26,3 +26,11 @@ export function registrationsPhase(now: number): RegistrationsPhase {
 export function areRegistrationsOpen() {
   return registrationsPhase(Date.now()).status === "open"
 }
+
+/**
+ * The time a server render happens at, handed to the client so the countdown hydrates with the
+ * server's HTML (the page is static, regenerated every minute).
+ */
+export function serverRenderTime() {
+  return Date.now()
+}

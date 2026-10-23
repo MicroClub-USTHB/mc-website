@@ -15,7 +15,7 @@ export function StepAdditional() {
           type="url"
           inputMode="url"
           label={label}
-          placeholder="Paste your link here ..."
+          placeholder="Paste your link here (optional)"
           autoComplete="off"
           autoCapitalize="none"
           spellCheck={false}

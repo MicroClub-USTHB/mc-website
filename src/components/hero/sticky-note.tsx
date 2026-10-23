@@ -471,36 +471,7 @@ export function StickyNote() {
     <div className="relative h-[279px] w-[262.61px] rounded-[25px] bg-linear-to-b from-sticky-from to-sticky-to">
       {/* Second sheet under the note: the light background behind the toolbar. */}
       <div className="absolute top-[30.73px] left-[19.62px] h-[225.857px] w-[223.2px] rounded-[7.971px] bg-note" />
-      <Image
-        src={noteShape}
-        alt=""
-        unoptimized
-        draggable={false}
-        className="absolute top-[10.75px] left-[4.01px] max-w-none"
-      />
-      <p className="absolute top-[14.92px] left-[33.72px] font-sans text-[23.299px] leading-[87.869px] font-medium tracking-[-1.398px] whitespace-nowrap text-note-ink uppercase">
-        MC Events
-      </p>
-      <div
-        ref={editorRef}
-        contentEditable="true"
-        suppressContentEditableWarning
-        role="textbox"
-        aria-multiline="true"
-        aria-label="MC events note"
-        spellCheck={false}
-        onInput={() => {
-          if (editorRef.current) linesRef.current = parse(editorRef.current)
-        }}
-        onCompositionEnd={() => {
-          const selection = readSelection()
-          if (selection) commit(selection.start, selection.end)
-        }}
-        onPaste={onPaste}
-        onDrop={(event) => event.preventDefault()}
-        onMouseDown={onMouseDown}
-        className="absolute top-[98.55px] left-[36.27px] flex max-h-[104px] w-[182.19px] cursor-text [scrollbar-width:none] flex-col gap-[7px] overflow-y-auto font-sans text-sm leading-[15.318px] tracking-[-0.84px] text-muted-foreground outline-none select-text [&_strong]:font-semibold"
-      />
+      {/* Under the note paper (Figma): its shadow falls on the buttons and their highlight. */}
       <div
         role="toolbar"
         aria-label="Text formatting"
@@ -537,6 +508,39 @@ export function StickyNote() {
           )
         })}
       </div>
+      {/* In the canvas's first view on large screens, where it is the largest paint: not lazy. */}
+      <Image
+        src={noteShape}
+        alt=""
+        unoptimized
+        loading="eager"
+        draggable={false}
+        // Its shadow lies over the toolbar: clicks go through to the buttons.
+        className="pointer-events-none absolute top-[10.75px] left-[4.01px] max-w-none"
+      />
+      <p className="absolute top-[14.92px] left-[33.72px] font-sans text-[23.299px] leading-[87.869px] font-medium tracking-[-1.398px] whitespace-nowrap text-note-ink uppercase">
+        MC Events
+      </p>
+      <div
+        ref={editorRef}
+        contentEditable="true"
+        suppressContentEditableWarning
+        role="textbox"
+        aria-multiline="true"
+        aria-label="MC events note"
+        spellCheck={false}
+        onInput={() => {
+          if (editorRef.current) linesRef.current = parse(editorRef.current)
+        }}
+        onCompositionEnd={() => {
+          const selection = readSelection()
+          if (selection) commit(selection.start, selection.end)
+        }}
+        onPaste={onPaste}
+        onDrop={(event) => event.preventDefault()}
+        onMouseDown={onMouseDown}
+        className="absolute top-[98.55px] left-[36.27px] flex max-h-[104px] w-[182.19px] cursor-text [scrollbar-width:none] flex-col gap-[7px] overflow-y-auto font-sans text-sm leading-[15.318px] tracking-[-0.84px] text-muted-foreground outline-none select-text [&_strong]:font-semibold"
+      />
     </div>
   )
 }
