@@ -13,12 +13,13 @@ import { cn } from "@/lib/utils"
  * (Figma "Other section"): "Opening soon" or "Register now" with its countdown, nothing once the
  * registrations close. Scaled with the bar (1 at its 85px design size), and to fit beside the wordmark on phones.
  * Hidden while the menu is open (it would sit over the menu's wordmark), and on the
- * registrations page itself. Drawn once hydrated: the phase needs the visitor's clock.
+ * registrations page itself. Server rendered at `renderedAt` (so it is in the first paint), then
+ * kept on the visitor's clock.
  */
-export function RegistrationsCorner() {
+export function RegistrationsCorner({ renderedAt }: { renderedAt: number }) {
   const pathname = usePathname()
   const { open } = useMenu()
-  const state = useRegistrationsPhase()
+  const state = useRegistrationsPhase(renderedAt)
   if (!state || state.phase.status === "closed" || pathname === siteRoutes.registrations) {
     return null
   }

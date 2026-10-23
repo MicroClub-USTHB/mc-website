@@ -35,16 +35,14 @@ function getSnapshot() {
   return now
 }
 
-/** No clock on the server: the countdown is drawn once hydrated. */
-function getServerSnapshot() {
-  return null
-}
-
 /**
- * The registrations phase and the current time (ms), updated every second; `null` while the page
- * hydrates, since the server cannot know the visitor's time.
+ * The registrations phase and the current time (ms), updated every second. `renderedAt` is the
+ * time the server rendered the page at: the page hydrates with it (the same HTML as the server's),
+ * then switches to the visitor's clock. Without it, `null` while the page hydrates.
  */
-export function useRegistrationsPhase(): { phase: RegistrationsPhase; now: number } | null {
-  const time = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot)
+export function useRegistrationsPhase(
+  renderedAt?: number,
+): { phase: RegistrationsPhase; now: number } | null {
+  const time = useSyncExternalStore(subscribe, getSnapshot, () => renderedAt ?? null)
   return time === null ? null : { phase: registrationsPhase(time), now: time }
 }

@@ -5,6 +5,7 @@ import { MenuPanel } from "@/components/site-menu/menu-panel"
 import { PageWordmark } from "@/components/site-menu/page-wordmark"
 import { RegistrationsCorner } from "@/components/site-menu/registrations-corner"
 import { menuLinks, siteConfig } from "@/config/site"
+import { serverRenderTime } from "@/lib/registrations/window"
 
 /**
  * Site header with the hamburger menu (Figma "Menu Bar"), like wondermake.xyz:
@@ -22,7 +23,8 @@ export function SiteMenu() {
   return (
     <MenuProvider>
       <PageWordmark label={homeLabel} />
-      <RegistrationsCorner />
+      {/* The page's render time: the countdown is in the server HTML (see `revalidate` on `/`). */}
+      <RegistrationsCorner renderedAt={serverRenderTime()} />
       <MenuBar homeLabel={homeLabel} />
       <MenuPanel>
         <ul className="mx-auto max-w-site px-(--menu-left) pt-[calc(var(--menu-top)+var(--menu-size))] pb-8">

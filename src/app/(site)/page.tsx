@@ -16,6 +16,13 @@ import { Hero } from "@/sections/hero"
 import { Statistics } from "@/sections/statistics"
 import { TrustedBy } from "@/sections/trusted-by"
 
+/**
+ * Static, regenerated at most once a minute: the menu bar's registrations countdown is server
+ * rendered with the page, so it is never more than about a minute behind before the visitor's
+ * clock takes over (and the registrations phase follows the window).
+ */
+export const revalidate = 60
+
 export const metadata: Metadata = {
   alternates: { canonical: "/" },
 }
