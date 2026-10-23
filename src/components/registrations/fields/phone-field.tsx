@@ -25,11 +25,9 @@ export function PhoneField() {
       onBlur={onBlur}
       className={INPUT_FIELD_CLASS}
       addonStart={
-        <span
-          className="pr-1 pl-1.5 text-base leading-6 text-muted-foreground"
-          aria-label="Algeria, +213"
-        >
+        <span className="pr-1 pl-1.5 text-base leading-6 text-muted-foreground">
           {ALGERIA.code}
+          <span className="sr-only"> (Algeria, {ALGERIA.dialCode})</span>
         </span>
       }
     />

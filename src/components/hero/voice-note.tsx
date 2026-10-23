@@ -148,12 +148,12 @@ export function VoiceNote() {
             ))}
           </div>
           <span
-            aria-label="Time left"
             className={cn(
               "paragraph-sm whitespace-nowrap tabular-nums",
               active ? "text-foreground" : "text-muted-foreground",
             )}
           >
+            <span className="sr-only">Time left: </span>
             {formatTime((duration ?? 0) - current)}
           </span>
         </div>
