@@ -32,6 +32,14 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         url: `${ORGANIZATION_URL}/mcoli-ui`,
       },
       {
+        name: "MCID",
+        tags: ["IDENTITY", "SSO", "OPEN SOURCE"],
+        year: 2026,
+        description:
+          "Micro Club Identity: sign in once, be recognized across every Micro Club project. A NestJS API that centralizes Discord identity and access through Discord OAuth, with a Next.js admin panel to manage it, and a CLI to connect projects to it.",
+        url: `${ORGANIZATION_URL}/MCID`,
+      },
+      {
         name: "mAIcro",
         tags: ["AI", "OPEN SOURCE"],
         year: 2026,
