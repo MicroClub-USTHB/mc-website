@@ -204,7 +204,7 @@ export function MicroBotWidget({
       aria-label={MICROBOT_NAME}
       className={cn(
         "pointer-events-none fixed right-4 bottom-4 z-30 flex flex-col items-end gap-7.5 sm:right-6 sm:bottom-6 lg:right-20 lg:bottom-16",
-        open && "max-sm:z-60",
+        open && "z-60",
       )}
     >
       <AnimatePresence>
