@@ -58,6 +58,7 @@ function Print(layer: Layer) {
         src={printedPaper}
         alt=""
         sizes="470px"
+        loading="eager"
         className="size-full max-w-none object-cover"
       />
     </div>

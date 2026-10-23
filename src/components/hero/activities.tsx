@@ -77,6 +77,7 @@ function PrintedPhoto({ box, rotate, print, shadow, photo, crop, src, alt }: Pri
             src={printedPaper}
             alt=""
             sizes="240px"
+            loading="eager"
             className="size-full max-w-none object-cover"
           />
         </span>
