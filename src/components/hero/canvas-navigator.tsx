@@ -33,6 +33,9 @@ export function CanvasNavigator({
   className?: string
 }) {
   const indicatorRef = useRef<HTMLSpanElement>(null)
+  // The pointer that pressed the map: iOS Safari fires `click` as a plain MouseEvent, without a
+  // pointer type, so the tap is recognised from the `pointerdown` that started it.
+  const pressedWith = useRef<string | null>(null)
 
   useImperativeHandle(ref, () => ({
     update({ x, y, width, height }) {
@@ -46,6 +49,7 @@ export function CanvasNavigator({
   }))
 
   function onPointerDown(event: React.PointerEvent<HTMLButtonElement>) {
+    pressedWith.current = event.pointerType
     if (event.pointerType === "touch" && onExplore) return // A tap: handled by `onClick`.
     event.preventDefault()
     const map = event.currentTarget
@@ -73,11 +77,11 @@ export function CanvasNavigator({
       type="button"
       aria-label={onExplore ? "Explore the canvas" : "Canvas map"}
       onPointerDown={onPointerDown}
-      onClick={(event) => {
-        // A tap on a touch screen opens the explore mode; mouse clicks already navigated.
-        if (onExplore && event.nativeEvent instanceof PointerEvent) {
-          if (event.nativeEvent.pointerType === "touch") onExplore()
-        }
+      onClick={() => {
+        // A tap on a touch screen opens the explore mode; mouse clicks already navigated (and
+        // keyboard activation is handled by `onKeyDown`).
+        if (onExplore && pressedWith.current === "touch") onExplore()
+        pressedWith.current = null
       }}
       onKeyDown={(event) => {
         if ((event.key === "Enter" || event.key === " ") && onExplore) {

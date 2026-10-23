@@ -94,9 +94,16 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
     const onKeyDown = (event: KeyboardEvent) => {
       if (event.key === "Escape") setExploring(false)
     }
+    // The menu bar stays usable over the canvas: opening the menu (to go to another section) or
+    // following a link from the bar leaves the explore mode first.
+    const onBarClick = (event: MouseEvent) => {
+      if ((event.target as Element).closest("header a, header button")) setExploring(false)
+    }
     document.addEventListener("keydown", onKeyDown)
+    document.addEventListener("click", onBarClick, true)
     return () => {
       document.removeEventListener("keydown", onKeyDown)
+      document.removeEventListener("click", onBarClick, true)
       lenis?.start()
     }
   }, [exploring, lenis])
@@ -185,7 +192,8 @@ export function HeroCanvas({ children }: { children?: React.ReactNode }) {
           iconDefinition={<XIcon size={20} />}
           aria-label="Close the canvas"
           onClick={() => setExploring(false)}
-          className="absolute top-4 right-4"
+          // Under the fixed menu bar (which stays over the canvas, with its registrations button).
+          className="absolute top-[calc(var(--menu-top)+var(--menu-size)+0.75rem)] right-(--menu-left) size-11"
         />
       )}
     </div>
