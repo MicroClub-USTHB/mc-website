@@ -48,6 +48,70 @@ function fitLayers(root: HTMLElement) {
   }
 }
 
+/** Device pixels per CSS pixel of the bitmaps, capped: sharp on phones, without their 3x memory. */
+const MAX_RASTER_DPR = 2
+
+/**
+ * Touch devices (phones, tablets): each layer is drawn once into a bitmap (a `<canvas>` in its
+ * place), and the bitmaps are what move. Safari renders SVG filters (the blurs and glows) on the
+ * CPU and outside its compositor, so an SVG layer moved or uncovered by the accordion is redrawn,
+ * filters included, frame after frame; a bitmap is only moved by the GPU. Desktops keep the
+ * vector layers, which they already move smoothly, and stay sharp at every scale.
+ *
+ * Each layer becomes a standalone SVG image (with the defs it references and the page's color
+ * tokens written out), decoded off the main thread, drawn at its on-screen size, then swapped in
+ * with the same attributes, styles and transforms. Runs once the art is in, before it is used.
+ */
+async function rasterizeLayers(root: HTMLElement, signal: AbortSignal) {
+  const defs = root.querySelector("svg:not([data-el]) defs")
+  const tokens = getComputedStyle(root)
+  const scale =
+    (parseFloat(getComputedStyle(root).scale) || 1) *
+    Math.min(MAX_RASTER_DPR, devicePixelRatio || 1)
+  const byId = new Map([...(defs?.children ?? [])].map((element) => [element.id, element]))
+
+  /** The defs a piece of markup uses, and the defs those use in turn. */
+  function usedDefs(markup: string, found = new Set<string>()) {
+    for (const [, id] of markup.matchAll(/(?:url\(#|href="#)([^)"]+)/g)) {
+      const def = byId.get(id)
+      if (!def || found.has(id)) continue
+      found.add(id)
+      usedDefs(def.outerHTML, found)
+    }
+    return found
+  }
+
+  for (const layer of root.querySelectorAll<SVGSVGElement>("svg[data-el]")) {
+    if (signal.aborted) return
+    const [, , width, height] = (layer.getAttribute("viewBox") ?? "").split(" ").map(Number)
+    if (!width || !height) continue
+    const body = layer.innerHTML
+    const shared = [...usedDefs(body)].map((id) => byId.get(id)!.outerHTML).join("")
+    const markup =
+      `<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" viewBox="${layer.getAttribute("viewBox")}" width="${width}" height="${height}" fill="none"><defs>${shared}</defs>${body}</svg>`.replace(
+        /var\((--[\w-]+)\)/g,
+        (token, name: string) => tokens.getPropertyValue(name).trim() || token,
+      )
+    const image = new Image()
+    image.src = `data:image/svg+xml;charset=utf-8,${encodeURIComponent(markup)}`
+    try {
+      await image.decode()
+    } catch {
+      continue // This layer stays a vector.
+    }
+    if (signal.aborted) return
+    const canvas = document.createElement("canvas")
+    canvas.width = Math.max(1, Math.ceil(width * scale))
+    canvas.height = Math.max(1, Math.ceil(height * scale))
+    canvas.getContext("2d")?.drawImage(image, 0, 0, canvas.width, canvas.height)
+    for (const { name, value } of layer.attributes) {
+      if (name === "data-el" || name === "style" || name === "aria-hidden")
+        canvas.setAttribute(name, value)
+    }
+    layer.replaceWith(canvas)
+  }
+}
+
 /**
  * The art's layers, drawn at the art's size in px (one px per viewBox unit, so the transforms keep
  * the art's units) and scaled to the panel (`--s`: below `lg` the art spans the panel, `--pw`).
@@ -78,6 +142,9 @@ export function DepartmentArtLayers({
           .then((html) => {
             element.innerHTML = html
             fitLayers(element)
+            if (window.matchMedia("(pointer: coarse)").matches) {
+              return rasterizeLayers(element, controller.signal)
+            }
           })
           .catch(() => {})
       },
@@ -94,7 +161,7 @@ export function DepartmentArtLayers({
     <div
       ref={ref}
       style={{ width, height }}
-      className="absolute top-0 left-0 origin-top-left [scale:var(--s)] [--s:var(--js-s,tan(atan2(var(--pw,100cqw),610px)))] lg:[--s:var(--js-s,tan(atan2(38.125rem*var(--k),610px)))] [&>svg]:absolute [&>svg]:inset-0 [&>svg]:size-full [&>svg]:overflow-visible"
+      className="absolute top-0 left-0 origin-top-left [scale:var(--s)] [--s:var(--js-s,tan(atan2(var(--pw,100cqw),610px)))] lg:[--s:var(--js-s,tan(atan2(38.125rem*var(--k),610px)))] [&>*]:absolute [&>*]:inset-0 [&>*]:size-full [&>svg]:overflow-visible"
     />
   )
 }
