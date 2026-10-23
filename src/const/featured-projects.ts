@@ -24,7 +24,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
     name: "IT",
     projects: [
       {
-        name: "Mcoli-ui",
+        name: "Mcoli UI",
         tags: ["WEB", "OPEN SOURCE"],
         year: 2026,
         description:
