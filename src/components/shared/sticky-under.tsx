@@ -15,8 +15,10 @@ export function StickyUnder({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const element = ref.current
     if (!element) return
+    // `top` itself, not an inherited custom property: a section that grows (an accordion opening)
+    // reports a new height every frame, and a custom property would restyle the whole section.
     const observer = new ResizeObserver(([entry]) => {
-      element.style.setProperty("--under-height", `${entry.borderBoxSize[0].blockSize}px`)
+      element.style.top = `min(0px, calc(100svh - ${entry.borderBoxSize[0].blockSize}px))`
     })
     observer.observe(element)
 
@@ -33,7 +35,7 @@ export function StickyUnder({ children }: { children: React.ReactNode }) {
   }, [])
 
   return (
-    <div ref={ref} className="sticky top-[min(0px,calc(100svh-var(--under-height,0px)))] z-0">
+    <div ref={ref} className="sticky top-0 z-0">
       {children}
     </div>
   )
