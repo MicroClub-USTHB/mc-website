@@ -15,7 +15,7 @@ export type ContactTile = {
 
 export type ProfessionalLink = { label: string; href: string }
 
-/** Micro Club was founded in 1985: the copyright counts the years of progress from it. */
+/** Micro Club was founded in 1985: the footer copyright says since when. */
 export const FOUNDING_YEAR = 1985
 
 /** "CS Faculty, USTHB, BP32, Bab Ezzouar", from the club address shared with Contact Us. */
