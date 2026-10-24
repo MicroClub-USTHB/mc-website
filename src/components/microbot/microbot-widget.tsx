@@ -226,23 +226,27 @@ export function MicroBotWidget({
               "max-sm:fixed max-sm:inset-0 max-sm:h-auto max-sm:max-h-none max-sm:w-auto max-sm:rounded-none max-sm:border-0",
             )}
           >
+            {/* Outside the scroll area, so the conversation scrolls under the top edge of the log
+                (faded) and never under the close button. Same place and size as before. */}
+            <div className="flex h-12 shrink-0 justify-end px-5 pt-6 sm:px-6">
+              <button
+                type="button"
+                onClick={close}
+                aria-label={`Close ${MICROBOT_NAME}`}
+                className="grid size-6 shrink-0 cursor-pointer place-items-center rounded-sm text-foreground outline-none focus-visible:ring-4 focus-visible:ring-secondary"
+              >
+                <XIcon size={24} />
+              </button>
+            </div>
+
             <div
               ref={scrollRef}
               data-lenis-prevent
               role="log"
               aria-live="polite"
               aria-relevant="additions"
-              className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain px-5 pt-6 pb-3.5 sm:px-6"
+              className="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain mask-[linear-gradient(to_bottom,transparent,black_1rem)] px-5 pb-3.5 sm:px-6"
             >
-              <button
-                type="button"
-                onClick={close}
-                aria-label={`Close ${MICROBOT_NAME}`}
-                className="sticky top-0 z-10 ml-auto grid size-6 shrink-0 cursor-pointer place-items-center rounded-sm text-foreground outline-none focus-visible:ring-4 focus-visible:ring-secondary"
-              >
-                <XIcon size={24} />
-              </button>
-
               <div
                 className={cn(
                   "flex flex-col gap-7.75 pt-6",
