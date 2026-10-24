@@ -3,7 +3,7 @@ import Image from "next/image"
 import Link from "next/link"
 import { VT323 } from "next/font/google"
 
-import { McButton } from "@/components/ui/mc-button"
+import { MicroBotFaceFrames } from "@/components/microbot/microbot-face"
 import { NOT_FOUND_LINES, type NotFoundLine } from "@/const/not-found"
 import { cn } from "@/lib/utils"
 import barcode from "@/assets/not-found/barcode.svg"
@@ -74,17 +74,12 @@ export default function NotFound() {
 
       <div className="relative flex flex-col items-center">
         {/* Figma "Expressions" (`>_<`): Micro Bot's glassy screen. */}
+        {/* Figma "Expressions": Micro Bot's face, the same frames as the launcher (120px wide). */}
         <span
           aria-hidden
-          className="relative h-[calc(59.618*var(--u))] w-[calc(120*var(--u))] border-[calc(1.529*var(--u))] border-white/12 backdrop-blur-[16px]"
+          className="relative block h-[calc(59.618*var(--u))] w-[calc(120*var(--u))] overflow-hidden border-[calc(1.529*var(--u))] border-primary-foreground/12 backdrop-blur-[16px]"
         >
-          <span className="absolute top-[calc(-12.99*var(--u))] left-[calc(14.42*var(--u))] font-heading text-[calc(53.809*var(--u))] leading-[calc(71.745*var(--u))] font-medium">
-            {">"}
-          </span>
-          <span className="absolute top-[calc(41.19*var(--u))] left-[calc(45.31*var(--u))] h-[calc(4.12*var(--u))] w-[calc(30.573*var(--u))] bg-current" />
-          <span className="absolute top-[calc(-12.99*var(--u))] left-[calc(72.77*var(--u))] -scale-x-100 font-heading text-[calc(53.809*var(--u))] leading-[calc(71.745*var(--u))] font-medium">
-            {">"}
-          </span>
+          <MicroBotFaceFrames unit={`calc(var(--u) * ${120 / 54})`} />
         </span>
         <h1
           className={cn(
@@ -95,13 +90,13 @@ export default function NotFound() {
           (ERROR 404)<span className="sr-only"> Page not found</span>
         </h1>
         <p className="mt-4 text-sm text-cyan-500 lg:hidden">( PAGE NOT FOUND )</p>
-        <McButton
-          nativeButton={false}
-          render={<Link href="/" />}
-          className="mt-[max(1.5rem,calc(34*var(--u)))] h-10 w-41.25 rounded-none border border-border bg-primary-foreground text-sm leading-5 font-medium text-primary shadow-none hover:bg-secondary"
+        {/* Figma "Buttons": white with the primary label, cyan with a white label on hover. */}
+        <Link
+          href="/"
+          className="mt-[max(1.5rem,calc(34*var(--u)))] flex h-10 w-41.25 items-center justify-center border border-border bg-primary-foreground text-sm leading-5 font-medium text-primary transition-colors duration-200 outline-none hover:bg-cyan-500 hover:text-primary-foreground focus-visible:ring-4 focus-visible:ring-ring"
         >
           GO HOME
-        </McButton>
+        </Link>
       </div>
     </main>
   )

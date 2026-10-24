@@ -42,10 +42,12 @@ const LOOP_MS = FRAMES.length * FRAME_MS
 /** Frame shown with reduced motion: `>_▬`. */
 const STILL = 5
 
-/** The face is drawn on the Figma screen (54px wide) then scaled to the launcher screen. */
+/** One Figma px of the face (54px wide screen) on the launcher screen. */
 const SCALE = 58.268 / 54
 
-const glyph = "absolute top-[-5.85px] font-heading text-[24.214px] leading-[32.285px] font-medium"
+/** Size of the `>` glyph in Figma px: its own offsets are in its em, the rest in the unit's. */
+const GLYPH = 24.214
+const glyph = "absolute font-heading text-[24.214em] leading-[1.3333] font-medium"
 
 /**
  * Glassy terminal screen of Micro Bot, the face of the launcher: the 11 Figma "Expressions" frames
@@ -63,44 +65,58 @@ export function MicroBotFace({ className }: { className?: string }) {
       )}
     >
       <div className="absolute inset-0 bg-[radial-gradient(40px_20px_at_50%_50%,var(--foreground),var(--secondary))] opacity-56" />
-      <div
-        className="absolute top-0 left-0 h-[26.828px] w-[54px] origin-top-left text-primary-foreground"
-        style={{ scale: SCALE }}
-      >
-        {FRAMES.map((shapes, i) => (
-          <div
-            key={i}
-            className={cn(
-              "invisible absolute inset-0 animate-[microbot-frame_var(--loop)_step-end_infinite] motion-reduce:animate-none",
-              i === STILL && "motion-reduce:visible",
-            )}
-            style={
-              {
-                "--loop": `${LOOP_MS}ms`,
-                animationDelay: `${i * FRAME_MS - LOOP_MS}ms`,
-              } as React.CSSProperties
-            }
-          >
-            {shapes.map((shape, j) =>
-              shape.kind === "bar" ? (
-                <span
-                  key={j}
-                  className="absolute w-[13.758px] bg-current"
-                  style={{ left: shape.left, top: shape.top, height: shape.height }}
-                />
-              ) : (
-                <span
-                  key={j}
-                  className={cn(glyph, shape.kind === "wink" && "-scale-x-100")}
-                  style={{ left: shape.left }}
-                >
-                  {">"}
-                </span>
-              ),
-            )}
-          </div>
-        ))}
-      </div>
+      <MicroBotFaceFrames unit={`${SCALE}px`} />
+    </div>
+  )
+}
+
+/**
+ * The 11 face frames alone, drawn on the 54px Figma screen in `em`: `unit` is one Figma px on the
+ * screen they sit in (the launcher, the 404 page), any CSS length.
+ */
+export function MicroBotFaceFrames({ unit }: { unit: string }) {
+  return (
+    <div
+      className="absolute top-0 left-0 h-[26.828em] w-[54em] text-primary-foreground"
+      style={{ fontSize: unit }}
+    >
+      {FRAMES.map((shapes, i) => (
+        <div
+          key={i}
+          className={cn(
+            "invisible absolute inset-0 animate-[microbot-frame_var(--loop)_step-end_infinite] motion-reduce:animate-none",
+            i === STILL && "motion-reduce:visible",
+          )}
+          style={
+            {
+              "--loop": `${LOOP_MS}ms`,
+              animationDelay: `${i * FRAME_MS - LOOP_MS}ms`,
+            } as React.CSSProperties
+          }
+        >
+          {shapes.map((shape, j) =>
+            shape.kind === "bar" ? (
+              <span
+                key={j}
+                className="absolute w-[13.758em] bg-current"
+                style={{
+                  left: `${shape.left}em`,
+                  top: `${shape.top}em`,
+                  height: `${shape.height}em`,
+                }}
+              />
+            ) : (
+              <span
+                key={j}
+                className={cn(glyph, shape.kind === "wink" && "-scale-x-100")}
+                style={{ left: `${shape.left / GLYPH}em`, top: `${-5.85 / GLYPH}em` }}
+              >
+                {">"}
+              </span>
+            ),
+          )}
+        </div>
+      ))}
     </div>
   )
 }
