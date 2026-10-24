@@ -5,6 +5,7 @@ type Shape =
   | { kind: "prompt"; left: number }
   | { kind: "wink"; left: number }
   | { kind: "bar"; left: number; top: number; height: number }
+  | { kind: "dead" }
 
 const PROMPT_AT = (left: number): Shape => ({ kind: "prompt", left })
 const BLOCK: Shape = { kind: "bar", left: 19.92, top: 12.98, height: 7.414 }
@@ -37,8 +38,9 @@ const FRAMES = [
   TYPED_CURSOR,
   WINK,
 ]
+/** The 404 page's last frame (Figma "Expressions" variant 13): `×_×`. */
+const DEAD_FRAMES = [...FRAMES, [{ kind: "dead" } as Shape]]
 const FRAME_MS = 420
-const LOOP_MS = FRAMES.length * FRAME_MS
 /** Frame shown with reduced motion: `>_▬`. */
 const STILL = 5
 
@@ -74,28 +76,49 @@ export function MicroBotFace({ className }: { className?: string }) {
  * The 11 face frames alone, drawn on the 54px Figma screen in `em`: `unit` is one Figma px on the
  * screen they sit in (the launcher, the 404 page), any CSS length.
  */
-export function MicroBotFaceFrames({ unit }: { unit: string }) {
+export function MicroBotFaceFrames({ unit, dead = false }: { unit: string; dead?: boolean }) {
+  const frames = dead ? DEAD_FRAMES : FRAMES
+  const loop = frames.length * FRAME_MS
   return (
     <div
       className="absolute top-0 left-0 h-[26.828em] w-[54em] text-primary-foreground"
       style={{ fontSize: unit }}
     >
-      {FRAMES.map((shapes, i) => (
+      {frames.map((shapes, i) => (
         <div
           key={i}
           className={cn(
-            "invisible absolute inset-0 animate-[microbot-frame_var(--loop)_step-end_infinite] motion-reduce:animate-none",
+            "invisible absolute inset-0 motion-reduce:animate-none",
+            // Each frame shows for its slot: 1/11 or 1/12 of the loop.
+            dead
+              ? "animate-[microbot-frame-12_var(--loop)_step-end_infinite]"
+              : "animate-[microbot-frame_var(--loop)_step-end_infinite]",
             i === STILL && "motion-reduce:visible",
           )}
           style={
             {
-              "--loop": `${LOOP_MS}ms`,
-              animationDelay: `${i * FRAME_MS - LOOP_MS}ms`,
+              "--loop": `${loop}ms`,
+              animationDelay: `${i * FRAME_MS - loop}ms`,
             } as React.CSSProperties
           }
         >
           {shapes.map((shape, j) =>
-            shape.kind === "bar" ? (
+            shape.kind === "dead" ? (
+              <svg
+                key={j}
+                viewBox="0 0 98.8333 40.8333"
+                fill="none"
+                stroke="currentColor"
+                className="absolute top-[2.551em] left-[3.812em] h-[18.375em] w-[44.475em] overflow-visible"
+              >
+                <path d="M34.2671 36.0449H64.8403" strokeWidth="4.1189" />
+                <path
+                  d="M30.625 10.2083 10.2083 30.625M10.2083 10.2083 30.625 30.625M88.625 10.2083 68.2083 30.625M68.2083 10.2083 88.625 30.625"
+                  strokeWidth="3.98682"
+                  strokeLinejoin="round"
+                />
+              </svg>
+            ) : shape.kind === "bar" ? (
               <span
                 key={j}
                 className="absolute w-[13.758em] bg-current"
