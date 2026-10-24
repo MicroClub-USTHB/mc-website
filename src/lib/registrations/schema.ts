@@ -1,7 +1,6 @@
 import { z } from "zod"
 
 import {
-  ANSWER_MAX_LENGTH,
   ANSWER_MIN_LENGTH,
   PHONE_COUNTRIES,
   SKILLS_MAX,
@@ -27,7 +26,6 @@ const answer = z
   .trim()
   .min(1, "Please write your answer.")
   .min(ANSWER_MIN_LENGTH, `Please write at least ${ANSWER_MIN_LENGTH} characters.`)
-  .max(ANSWER_MAX_LENGTH, `Your answer must be at most ${ANSWER_MAX_LENGTH} characters.`)
 
 const optionalLink = z
   .string()

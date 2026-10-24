@@ -10,7 +10,7 @@ export const INPUT_FIELD_CLASS = [
 /** Textareas of step 2: 200px high with the label, answers in the foreground color. */
 export const TEXTAREA_FIELD_CLASS = [
   "[&_[data-slot=textarea-label]]:text-base [&_[data-slot=textarea-label]]:leading-6",
-  "[&_[data-slot=textarea]]:h-42 [&_[data-slot=textarea]]:pb-7 [&_[data-slot=textarea]]:text-base [&_[data-slot=textarea]]:leading-6",
+  "[&_[data-slot=textarea]]:h-42 [&_[data-slot=textarea]]:text-base [&_[data-slot=textarea]]:leading-6",
   "[&_[data-slot=textarea]]:placeholder:text-foreground",
 ].join(" ")
 
