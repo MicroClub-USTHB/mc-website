@@ -16,8 +16,8 @@ export const siteRoutes = {
 } as const
 
 /**
- * Pages drawn without the in-page "MICRO CLUB" wordmark, the footer and the chatbot (Figma: only
- * the toggle and the compact logo). The wordmark still shows while the menu is open.
+ * Pages drawn without the in-page "MICRO CLUB" wordmark (Figma shows only the toggle and the compact
+ * logo). Their route group has its own layout, without footer and chatbot.
  */
 export function isBarePage(pathname: string) {
   return pathname === siteRoutes.registrations
