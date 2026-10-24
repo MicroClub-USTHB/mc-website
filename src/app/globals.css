@@ -625,8 +625,12 @@
  * The page does not scroll under the splash screen (`Splash`), from the server HTML on. The
  * scrollbar's room stays (classic scrollbars), so nothing moves when it comes back.
  */
+html[data-splash-skip] [data-splash] {
+  display: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  html:has([data-splash]:not([data-leaving])) {
+  html:not([data-splash-skip]):has([data-splash]:not([data-leaving])) {
     overflow: hidden;
     scrollbar-gutter: stable;
   }
