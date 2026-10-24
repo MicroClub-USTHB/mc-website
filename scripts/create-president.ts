@@ -10,7 +10,8 @@ import { credentialsEmail, sendAuthEmail } from "@/lib/auth/emails"
 import { generatePassword } from "@/lib/auth/password"
 import { hrUserSchema } from "@/lib/auth/schema"
 
-import { findPresidents, readOptions, run } from "./president"
+import { findPresidents, readOptions } from "./president"
+import { run } from "./run"
 
 run(async () => {
   const options = readOptions(

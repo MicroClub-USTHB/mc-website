@@ -6,7 +6,6 @@
 import { parseArgs } from "node:util"
 
 import { auth } from "@/lib/auth/auth"
-import { getMongoClient } from "@/lib/mongodb"
 
 export type PresidentUser = { id: string; name: string; email: string; banned?: boolean | null }
 
@@ -30,16 +29,4 @@ export async function findPresidents() {
     model: "user",
     where: [{ field: "role", value: "president" }],
   })
-}
-
-/** Runs a script, then closes the MongoDB client so the process exits. */
-export async function run(script: () => Promise<void>) {
-  try {
-    await script()
-  } catch (error) {
-    console.error(error instanceof Error ? error.message : error)
-    process.exitCode = 1
-  } finally {
-    await getMongoClient().close()
-  }
 }
