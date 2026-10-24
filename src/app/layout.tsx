@@ -40,7 +40,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}>
+    // The splash screen's script (`Splash`) marks the root before hydration (`data-splash-skip`).
+    // Only this element's own attributes are exempt from the hydration check.
+    <html
+      lang="en"
+      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-full flex-col">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
       </body>
