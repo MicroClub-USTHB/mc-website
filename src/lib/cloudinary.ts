@@ -100,3 +100,41 @@ export async function deleteStudentId(
     resource_type: upload.resourceType,
   })
 }
+
+const CONTENT_TYPES: Record<string, string> = {
+  jpg: "image/jpeg",
+  jpeg: "image/jpeg",
+  png: "image/png",
+  webp: "image/webp",
+  pdf: "application/pdf",
+}
+
+/**
+ * Downloads a student ID through Cloudinary's signed API download (valid 1 minute, used once by
+ * this server), so the admin area can serve it without ever giving a Cloudinary URL to a browser.
+ * Unlike a signed delivery URL, it also works for PDFs when the account blocks PDF delivery.
+ * `null` when the file is gone.
+ */
+export async function downloadStudentId(upload: {
+  publicId: string
+  resourceType: string
+  format?: string | null
+}) {
+  configure()
+  const format = upload.format ?? ""
+  const url = cloudinary.utils.private_download_url(upload.publicId, format, {
+    resource_type: upload.resourceType as "image" | "raw" | "video",
+    type: "authenticated",
+    expires_at: Math.round(Date.now() / 1000) + 60,
+  })
+
+  const response = await fetch(url, { cache: "no-store" })
+  if (response.status === 404) return null
+  if (!response.ok || !response.body) {
+    throw new Error(`Cloudinary download failed with status ${response.status}`)
+  }
+  return {
+    body: response.body,
+    contentType: CONTENT_TYPES[format] ?? "application/octet-stream",
+  }
+}
