@@ -81,6 +81,8 @@ export default function NotFound() {
           src={barcode}
           alt=""
           unoptimized
+          // In the first view, often the largest paint of the page: not lazy.
+          loading="eager"
           className={cn("absolute h-auto", BOOT)}
           style={{
             left: `${(1001 / 1440) * 100}%`,
