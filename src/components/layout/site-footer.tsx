@@ -107,7 +107,7 @@ export function SiteFooter() {
             </div>
 
             <p className="mt-12 paragraph-md text-muted-foreground lg:mt-auto lg:pt-12">
-              © {year} Micro Club | Since {FOUNDING_YEAR} • {year - FOUNDING_YEAR} years of progress
+              © {year} Micro Club | Since {FOUNDING_YEAR}
             </p>
           </div>
         </div>

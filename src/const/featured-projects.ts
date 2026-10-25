@@ -24,12 +24,20 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
     name: "IT",
     projects: [
       {
-        name: "Mcoli-ui",
+        name: "Mcoli UI",
         tags: ["WEB", "OPEN SOURCE"],
         year: 2026,
         description:
           "The premier React component library that brings professional-grade UI components with a bold Micro Club DNA to developers everywhere. We’ve combined world-class design standards with an elite visual identity to help you build stunning web applications in record time.",
-        url: `${ORGANIZATION_URL}/mcoli-ui`,
+        url: "https://mcoli-ui.microclub.info/",
+      },
+      {
+        name: "MCID",
+        tags: ["IDENTITY", "SSO", "OPEN SOURCE"],
+        year: 2026,
+        description:
+          "Micro Club Identity: sign in once, be recognized across every Micro Club project. A NestJS API that centralizes Discord identity and access through Discord OAuth, with a Next.js admin panel to manage it, and a CLI to connect projects to it.",
+        url: "https://mcid.microclub.info/",
       },
       {
         name: "mAIcro",
@@ -113,7 +121,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2026,
         description:
           "A physics-based game where you play as a hardworking alien waiter delivering drinks to customers. Balance your tray carefully, as every movement affects the stability of the cups. Serve everyone efficiently to earn top ratings, with charming 2D art and accessible controls.",
-        url: ORGANIZATION_URL,
+        url: "https://cactipie02.itch.io/area9to5",
       },
       {
         name: "Unstable connection",
@@ -121,7 +129,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2026,
         description:
           "You play as a guy gaming at home, but there's one problem: your TV is completely unstable. Try to solve the puzzles using the manual while dealing with the TV constantly glitching, changing, and making things harder than they should be. Keep your sanity, figure out what's going on, and try not to lose your mind because of that unstable TV.",
-        url: ORGANIZATION_URL,
+        url: "https://lionthedev.itch.io/unstable-connection",
       },
       {
         name: "Don’t implode",
@@ -129,7 +137,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2025,
         description:
           "A horror game where you play as a man exploring the bottom of the ocean in an old submarine that is slowly falling apart. As you descend deeper, you must repair failing systems using the right tools while paying attention to sounds, visual clues, and yellow indicators. With its PSX-inspired style and creepy environments, the game focuses on exploration, repairs, and survival.",
-        url: ORGANIZATION_URL,
+        url: "https://dweller-de.itch.io/dont-implode",
       },
       {
         name: "Crowd rush hour",
@@ -137,7 +145,7 @@ export const PROJECT_CATEGORIES: ProjectCategory[] = [
         year: 2025,
         description:
           "A fast-paced point-and-click game where your mission is to keep the crowd satisfied at all costs. Jump between funny mini-games that test your focus, speed, and precision, while keeping an eye on the satisfaction bar. As the pressure builds, the challenges become harder, and letting the bar drop too low means game over.",
-        url: ORGANIZATION_URL,
+        url: "https://naaylla.itch.io/crowd-rush-hour",
       },
     ],
   },

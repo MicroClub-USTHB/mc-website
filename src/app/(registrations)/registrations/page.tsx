@@ -14,6 +14,10 @@ export async function generateMetadata(
   _props: unknown,
   parent: ResolvingMetadata,
 ): Promise<Metadata> {
+  await connection()
+  // Closed: a 404, with the title and preview of the 404 page, not these.
+  if (!areRegistrationsOpen()) notFound()
+
   const { openGraph } = await parent
   return {
     title: "Registrations",

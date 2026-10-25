@@ -30,6 +30,11 @@ export const DEPARTMENTS: Department[] = [
     tagline: "Create experiences that inspire.",
     description:
       "Our creative minds, where creativity meets user experience. The Design department shapes the club’s visual identity. From visuals to UI/UX, they create modern interfaces and ensure every experience is clear, attractive, and impactful. They give Micro Club its unique shape, look and feel.",
+    link: {
+      lead: "Discover the visuals and experiences crafted by our team:",
+      label: "Behance",
+      href: "https://www.behance.net/Microclub",
+    },
   },
   {
     id: "marketing",
@@ -46,6 +51,11 @@ export const DEPARTMENTS: Department[] = [
     tagline: "Code the future.",
     description:
       "The builders of ideas, our team that turns ideas into real solutions. Dev is where creativity meets code. The department creates the club’s digital tools and technical projects: websites, tech challenges, automation, and innovative solutions.",
+    link: {
+      lead: "Explore our projects, articles and more!",
+      label: "Linktree",
+      href: "https://linktr.ee/microclub_dev",
+    },
   },
   {
     id: "comm",

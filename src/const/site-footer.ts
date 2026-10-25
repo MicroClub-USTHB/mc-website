@@ -15,7 +15,7 @@ export type ContactTile = {
 
 export type ProfessionalLink = { label: string; href: string }
 
-/** Micro Club was founded in 1985: the copyright counts the years of progress from it. */
+/** Micro Club was founded in 1985: the footer copyright says since when. */
 export const FOUNDING_YEAR = 1985
 
 /** "CS Faculty, USTHB, BP32, Bab Ezzouar", from the club address shared with Contact Us. */
@@ -62,7 +62,7 @@ export const CONTACT_TILES: ContactTile[] = [
     id: "location",
     label: "Address",
     text: ADDRESS,
-    href: `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent("Faculté d'Informatique USTHB, Bab Ezzouar")}`,
+    href: "https://maps.app.goo.gl/a5ErbmFrqt4nEYYP6",
     external: true,
   },
 ]
