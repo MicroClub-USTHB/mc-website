@@ -40,7 +40,7 @@ export function ClubSections() {
       theme="dark"
       aria-labelledby="club-sections-title"
       bleed
-      className="h-[111svh] overflow-x-clip"
+      className="h-[120svh] overflow-x-clip"
     >
       <JsonLd data={SECTIONS_JSON_LD} />
 
