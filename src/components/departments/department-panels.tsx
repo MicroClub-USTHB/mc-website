@@ -33,27 +33,13 @@ const transition = "motion-safe:duration-700 motion-safe:ease-out-expo"
  * Illustration shapes, tagged by `scripts/department-art.mjs`. A closed panel draws each shape at
  * its place in the strip from `lg` (`--closed`), in the accordion's bar below (`--bar`); opening
  * moves them into the card along with the widening, fades in the card-only shapes and fades out
- * the strip-only ones towards their partner (`--open`).
+ * the strip-only ones towards their partner (`--open`), from the top of the art down (`--d`,
+ * see `department-art-motion.ts`, which also plays inside the shapes on the way).
  */
 const art = {
   base: cn(
     "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0]",
-    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart),translate_500ms_var(--ease-out-quart)]",
-  ),
-  /**
-   * Hover (pointer devices): the shapes drift a little, each a different way (`translate`, which
-   * adds to their layout `transform` without touching it), back when the pointer leaves. Stronger
-   * on a closed strip ("open me"), lighter on the open card ("click again to close").
-   */
-  hoverClosed: cn(
-    "group-hover/panel:[&_[data-el]:nth-child(3n+1)]:[translate:0_-14px]",
-    "group-hover/panel:[&_[data-el]:nth-child(3n+2)]:[translate:9px_-6px]",
-    "group-hover/panel:[&_[data-el]:nth-child(3n)]:[translate:-9px_7px]",
-  ),
-  hoverOpen: cn(
-    "group-hover/panel:[&_[data-el]:nth-child(3n+1)]:[translate:0_-6px]",
-    "group-hover/panel:[&_[data-el]:nth-child(3n+2)]:[translate:4px_-3px]",
-    "group-hover/panel:[&_[data-el]:nth-child(3n)]:[translate:-4px_3px]",
+    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo)_var(--d,0ms),opacity_500ms_var(--ease-out-quart)_var(--d,0ms)]",
   ),
   open: "[&_[data-el=out]]:[transform:var(--open,none)]",
   closed: cn(
@@ -235,6 +221,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
             <div
               key={panel.id}
               data-panel
+              data-open={isOpen || undefined}
               // Clicking anywhere on the open card closes it (its tab already does).
               onClick={isOpen ? (event) => closeOnClick(event) : undefined}
               className={cn(
@@ -314,13 +301,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   isOpen && "grid-rows-[1fr]",
                 )}
               >
-                {/* Holds the illustration: `group-hover` styles only reach inside the panel. */}
-                <div
-                  className={cn(
-                    "flex min-h-0 flex-col overflow-hidden lg:block",
-                    isOpen ? art.hoverOpen : art.hoverClosed,
-                  )}
-                >
+                <div className="flex min-h-0 flex-col overflow-hidden lg:block">
                   {/*
                     Card width from the start: the text never reflows while the panel widens.
                     Zoomed with the row, it keeps the design's line breaks at any height.
