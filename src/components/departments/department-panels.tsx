@@ -33,12 +33,13 @@ const transition = "motion-safe:duration-700 motion-safe:ease-out-expo"
  * Illustration shapes, tagged by `scripts/department-art.mjs`. A closed panel draws each shape at
  * its place in the strip from `lg` (`--closed`), in the accordion's bar below (`--bar`); opening
  * moves them into the card along with the widening, fades in the card-only shapes and fades out
- * the strip-only ones towards their partner (`--open`).
+ * the strip-only ones towards their partner (`--open`), from the top of the art down (`--d`,
+ * see `department-art-motion.ts`, which also plays inside the shapes on the way).
  */
 const art = {
   base: cn(
     "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0]",
-    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
+    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo)_var(--d,0ms),opacity_500ms_var(--ease-out-quart)_var(--d,0ms)]",
   ),
   open: "[&_[data-el=out]]:[transform:var(--open,none)]",
   closed: cn(
@@ -220,6 +221,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
             <div
               key={panel.id}
               data-panel
+              data-open={isOpen || undefined}
               // Clicking anywhere on the open card closes it (its tab already does).
               onClick={isOpen ? (event) => closeOnClick(event) : undefined}
               className={cn(
