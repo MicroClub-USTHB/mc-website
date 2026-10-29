@@ -37,10 +37,4 @@ export const COMMUNITY_ACTIVITIES: CommunityActivity[] = [
     description:
       "Built something cool? Show it off. Looking for a hackathon team, an internship lead, or a collab partner? This is where opportunities find you. The MCC family members are always building, always sharing, always opening doors for each other.",
   },
-  {
-    title: "Games & Movie Nights",
-    icon: { src: "/MCC/manette.svg", width: 68, height: 42 },
-    description:
-      "Yes, we work hard. But we also know how to have fun. Our game and movie nights are legendary within the family.",
-  },
 ]
