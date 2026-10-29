@@ -9,44 +9,59 @@ import {
   createWorld,
   endDrag,
   isAsleep,
+  kick,
   moveDrag,
   pose,
   startDrag,
   step,
   tileAt,
+  wake,
   type Tile,
 } from "@/lib/box-physics"
 import { cn } from "@/lib/utils"
 
 /** Physics step (ms): fixed 60 Hz, whatever the display rate. */
 const STEP = 1000 / 60
-/** Steps simulated at once to rest the pile without animation (reduced motion, resize). */
+/** Steps simulated at once to rest the pile after a grab and a resize. */
 const SETTLE_STEPS = 600
 /** Pointer travel (px) past which a press on a tile is a drag, not a click. */
 const DRAG_THRESHOLD = 4
-/** Steps between the release of one row of tiles and the next, bottom row first. */
-const ROW_STAGGER = 5
+/** Steps between the release of one tile and the next, in the order the pile is built. */
+const RELEASE_STEPS = 7
+/** Push (px/step) and spin (px/step of the top corners) a tile gets when it is released, at most. */
+const KICK_PUSH = 1
+const KICK_SPIN = 1.5
+/** Steps after which a fall that has not come to rest is finished anyway. */
+const MAX_FALL_STEPS = 60 * 6
+/** Duration (ms) of the last easing of the tiles onto their exact place in the pile. */
+const SETTLE_MS = 260
 /** Speed (px/s) the page must hit its bottom with to knock the tiles down. */
 const IMPACT_SPEED = 50
 
 /**
  * Falling tags (Figma dev notes, like the Framer "Falling Tags" component): the `[data-tile]`
- * links inside hang in their layout until the page hits its bottom fast enough (`IMPACT_SPEED`;
- * the scroll keeps its speed into the bottom, see `SmoothScrollProvider`), then fall with physics
- * (Matter.js), row by row from the bottom, and pile up at the bottom of the box. A slow arrival
- * leaves them hanging. With a mouse, tiles can be dragged and thrown; a press without moving
- * stays a click on the link. The physics is our own (`src/lib/box-physics.ts`), run on Motion's frame
- * loop: tiles can never leave the box, however hard they are thrown or dragged.
+ * links inside hang in their layout (tidy rows) until the page hits its bottom fast enough
+ * (`IMPACT_SPEED`; the scroll keeps its speed into the bottom, see `SmoothScrollProvider`). Then
+ * they are released one after the other, the lowest places of the pile first, and really fall
+ * (our own physics, `src/lib/box-physics.ts`, run on Motion's frame loop): they tumble, bump into
+ * each other and tilt. Each tile is also eased toward its place in the Figma pile
+ * (`data-rest-x` / `data-rest-y`, in Figma px from the pile's top left; the pile is
+ * `data-pile-height` tall and rests at the bottom of the box), so the pile ends as designed; a
+ * last short easing closes what is left. A slow arrival leaves them hanging.
+ * Once piled, the tiles can be dragged and thrown with a mouse (free of the guide); the first grab
+ * wakes the physics. A press without moving stays a click on the link.
  *
  * Tiles keep their place in the layout and are moved with `transform` only (the box does not
- * reflow). With reduced motion, the pile is
- * simulated at once and shown at rest. On resize, the pile is rebuilt at rest for the new box.
+ * reflow). With reduced motion, the pile is shown at once. On resize, it is rebuilt for the new box.
  */
 export function FallingTiles({
   className,
+  pileHeight,
   children,
 }: {
   className?: string
+  /** Height of the pile the tiles fall into, in the units of their `data-rest-y`. */
+  pileHeight: number
   children: React.ReactNode
 }) {
   const box = useRef<HTMLDivElement>(null)
@@ -74,16 +89,19 @@ export function FallingTiles({
     [knocked, near],
   )
 
+  // Set up once the footer is near, not on page load; knocked, it starts with the fall.
   useEffect(() => {
     const element = box.current
-    // Reduced motion: the pile is built at rest once the footer is near, not on page load.
-    if (!element || !(knocked || (reduceMotion && near))) return
-    return startPile(element, { animate: !reduceMotion })
-  }, [knocked, reduceMotion, near])
+    if (!element || !near) return
+    const started = startPile(element, { animate: !reduceMotion })
+    if (knocked) started.fall()
+    return started.cleanup
+  }, [near, reduceMotion, knocked])
 
   return (
     <div
       ref={box}
+      data-pile-height={pileHeight}
       // Mouse drag cursors, set by `startPile`: open hand on tiles, closed hand while dragging.
       className={cn(
         "relative data-dragging:[&_[data-tile]]:cursor-grabbing! data-pile:[&_[data-tile]]:cursor-grab data-dragging:[&_[data-tile]_*]:cursor-grabbing! data-pile:[&_[data-tile]_*]:cursor-grab",
@@ -95,42 +113,84 @@ export function FallingTiles({
   )
 }
 
-/** Runs the pile in `box` and returns its cleanup, which puts the tiles back in their layout. */
+type Point = { x: number; y: number }
+
+/** Deterministic noise in [0, 1) for a tile index and a channel, so each fall plays out the same. */
+function noise(index: number, channel: number) {
+  const x = Math.sin(index * 12.9898 + channel * 78.233) * 43758.5453
+  return x - Math.floor(x)
+}
+
+const smoothstep = (t: number) => t * t * (3 - 2 * t)
+
+/**
+ * Runs the pile in `box`. `cleanup` puts the tiles back in their layout; `fall` releases them.
+ */
 function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
   const elements = Array.from(box.querySelectorAll<HTMLElement>("[data-tile]"))
   let world = createWorld(0, 0)
   let tiles: Tile[] = []
   // Tile centers in the layout (box coordinates): the `transform` is the offset from them.
-  let origins: { x: number; y: number }[] = []
-  // Step at which each tile is released, and steps run since `build`.
-  let releaseAt: number[] = []
+  let origins: Point[] = []
+  // Tile centers in the pile, and the order the tiles are released in.
+  let rests: Point[] = []
+  let order: number[] = []
+  // `hung` in the layout, `falling` (physics), `settling` onto the exact pile, then `piled`: at
+  // rest and pinned, until the first grab (`live`) turns the physics on for good.
+  let phase: "hung" | "falling" | "settling" | "piled" = "hung"
+  let live = false
   let steps = 0
+  let settled = 0
+  let landing: { x: number; y: number; angle: number }[] = []
 
-  /** One tile per link, hanging at its place in the layout. */
+  /** Where the tiles are in the layout and in the pile, and the physics world holding them. */
   function build() {
-    world = createWorld(box.clientWidth, box.clientHeight)
-    world.onWake = () => run()
-    // `offset*` ignore transforms: the layout place, wherever the tile is drawn now.
-    origins = elements.map((element) => ({
-      x: element.offsetLeft + element.offsetWidth / 2,
-      y: element.offsetTop + element.offsetHeight / 2,
-    }))
-    tiles = elements.map((element, i) =>
-      addTile(world, origins[i], element.offsetWidth, element.offsetHeight),
-    )
-    // Rows by their place in the layout, bottom first: the order they are released in.
-    const rows = [...new Set(origins.map((origin) => Math.round(origin.y)))].sort((a, b) => b - a)
-    releaseAt = origins.map((origin) => rows.indexOf(Math.round(origin.y)) * ROW_STAGGER)
-    steps = 0
-  }
+    // One Figma px, in px: the footer sets `--u` as a length that depends on its width.
+    const probe = document.createElement("div")
+    probe.style.cssText = "position:absolute;visibility:hidden;width:calc(10000 * var(--u))"
+    box.append(probe)
+    const unit = probe.getBoundingClientRect().width / 10000
+    probe.remove()
+    const left = parseFloat(getComputedStyle(box).paddingLeft)
 
-  /** One physics step, releasing the rows that are due. */
-  function advance() {
+    // Sizes and places in the layout, to the sub-pixel: measured without the tiles' transforms.
+    reset()
+    const boxRect = box.getBoundingClientRect()
+    const pileTop = boxRect.height - Number(box.dataset.pileHeight) * unit
+    const rects = elements.map((element) => element.getBoundingClientRect())
+    origins = rects.map((rect) => ({
+      x: rect.left - boxRect.left + rect.width / 2,
+      y: rect.top - boxRect.top + rect.height / 2,
+    }))
+    rests = elements.map((element, i) => ({
+      x: left + Number(element.dataset.restX) * unit + rects[i].width / 2,
+      y: pileTop + Number(element.dataset.restY) * unit + rects[i].height / 2,
+    }))
+
+    // Release order: the lowest row of the pile first, since tiles land on the ones below; in a
+    // row, the tile lower in the layout first (it is out of the way of the one above it).
+    const pileRow = (i: number) => Math.round(Number(elements[i].dataset.restY) / 100)
+    const layoutRow = (i: number) => Math.round(origins[i].y / (50 * unit))
+    order = elements
+      .map((_, i) => i)
+      .sort(
+        (a, b) =>
+          pileRow(b) - pileRow(a) ||
+          layoutRow(b) - layoutRow(a) ||
+          Number(elements[a].dataset.restX) - Number(elements[b].dataset.restX),
+      )
+
+    world = createWorld(boxRect.width, boxRect.height)
+    world.onWake = () => run()
+    const piled = phase === "piled"
+    tiles = elements.map((_, i) =>
+      addTile(world, piled ? rests[i] : origins[i], rects[i].width, rects[i].height),
+    )
+    // The guide: a hanging or falling tile is eased toward its place; a piled one is free.
     tiles.forEach((tile, i) => {
-      if (tile.pinned && steps >= releaseAt[i]) tile.pinned = false
+      tile.pinned = !live || !piled
+      if (!piled) tile.target = rests[i]
     })
-    step(world)
-    steps++
   }
 
   function render() {
@@ -141,17 +201,87 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
     })
   }
 
+  /** Releases the tiles that are due, with a small random push and spin. */
+  function release() {
+    order.forEach((i, rank) => {
+      if (tiles[i].pinned && steps >= rank * RELEASE_STEPS) {
+        tiles[i].pinned = false
+        kick(
+          tiles[i],
+          { x: (noise(i, 3) - 0.5) * 2 * KICK_PUSH, y: 0 },
+          (noise(i, 10) - 0.5) * 2 * KICK_SPIN,
+        )
+      }
+    })
+  }
+
+  /** One physics step of the fall. */
+  function fallStep() {
+    release()
+    step(world)
+    steps++
+  }
+
+  /** The fall is over: ease what is left onto the exact pile, then pin the tiles there. */
+  function startSettling() {
+    phase = "settling"
+    settled = 0
+    landing = tiles.map((tile) => pose(tile))
+  }
+
+  function settleFrame(delta: number) {
+    settled += delta
+    const t = smoothstep(Math.min(settled / SETTLE_MS, 1))
+    elements.forEach((element, i) => {
+      const from = landing[i]
+      const x = from.x + (rests[i].x - from.x) * t
+      const y = from.y + (rests[i].y - from.y) * t
+      const angle = from.angle * (1 - t)
+      element.style.transform = `translate(${x - origins[i].x}px, ${y - origins[i].y}px) rotate(${angle}rad)`
+    })
+    if (t >= 1) land()
+  }
+
+  /** The tiles are in the pile: a new world holds them there, pinned until the first grab. */
+  function land() {
+    phase = "piled"
+    build()
+    render()
+    if (animate) box.dataset.pile = ""
+  }
+
+  /** Starts the fall (reduced motion: the pile at once). */
+  function fall() {
+    if (phase !== "hung") return
+    if (!animate) {
+      land()
+      return
+    }
+    phase = "falling"
+    steps = 0
+    run()
+  }
+
+  /** Turns the physics on: from the first grab the tiles are free (and stay free until a resize). */
+  function goLive() {
+    if (live) return
+    live = true
+    for (const tile of tiles) tile.pinned = false
+    wake(world)
+  }
+
+  /** Rests the pile at once, without animation (a resize while the tiles are free). */
   function settle() {
-    for (let i = 0; i < SETTLE_STEPS; i++) advance()
+    for (let i = 0; i < SETTLE_STEPS; i++) step(world)
     render()
   }
 
   // Mouse drag in progress (see `onPointerDown`).
-  let drag: { start: { x: number; y: number }; moved: boolean } | null = null
+  let drag: { start: Point; moved: boolean } | null = null
   let suppressClick = false
 
   build()
-  if (!animate) settle()
+  if (!animate) fall()
 
   let skipFirstResize = true
   const resizeObserver = new ResizeObserver(() => {
@@ -160,26 +290,37 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
       return
     }
     drop()
+    // A fall in progress ends in the pile.
+    if (phase === "falling" || phase === "settling") phase = "piled"
     build()
-    settle()
+    if (phase === "piled" && live) settle()
+    else render()
   })
   resizeObserver.observe(box)
 
+  function reset() {
+    for (const element of elements) element.style.transform = ""
+  }
+
   if (!animate) {
-    return () => {
-      resizeObserver.disconnect()
-      reset()
+    return {
+      cleanup: () => {
+        resizeObserver.disconnect()
+        reset()
+      },
+      fall,
     }
   }
 
   // Drag and throw, mouse only: on touch, a swipe over the tiles keeps scrolling the page.
-  box.dataset.pile = ""
   function toBox(event: PointerEvent) {
     const rect = box.getBoundingClientRect()
     return { x: event.clientX - rect.left, y: event.clientY - rect.top }
   }
 
   function onPointerDown(event: PointerEvent) {
+    // Only the piled tiles can be grabbed: before and during the fall a press is a plain click.
+    if (phase !== "piled") return
     if (event.pointerType !== "mouse" || event.button !== 0) return
     if (!elements.some((element) => element.contains(event.target as Node))) return
     const point = toBox(event)
@@ -187,6 +328,7 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
     const index = tileAt(world, point)
     if (index === -1) return
     event.preventDefault() // No text selection or native link drag.
+    goLive()
     startDrag(world, tiles[index], point)
     drag = { start: point, moved: false }
     box.dataset.dragging = ""
@@ -224,23 +366,36 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
   box.addEventListener("lostpointercapture", drop)
   box.addEventListener("click", onClick, true)
 
-  // The loop only runs while the pile moves and the footer is on screen: at rest (or scrolled
-  // away) no frame is requested; grabbing a tile wakes the world, which starts it again.
+  // The loop only runs while something moves and the footer is on screen: hanging or piled (or
+  // scrolled away) no frame is requested; the fall and a grab start it again.
   let pending = 0
   let running = false
   let onScreen = true
   function tick({ delta }: { delta: number }) {
-    // Idle once the pile is at rest (not while rows are still waiting to be released).
-    if (!onScreen || (isAsleep(world) && tiles.every((tile) => !tile.pinned))) {
+    if (!onScreen || phase === "hung" || (phase === "piled" && (!live || isAsleep(world)))) {
       stop()
+      return
+    }
+    if (phase === "settling") {
+      settleFrame(delta)
       return
     }
     pending = Math.min(pending + delta, STEP * 4)
     while (pending >= STEP) {
-      advance()
+      if (phase === "falling") {
+        fallStep()
+        const released = tiles.every((tile) => !tile.pinned)
+        if ((released && isAsleep(world)) || steps > MAX_FALL_STEPS) {
+          startSettling()
+          break
+        }
+      } else {
+        step(world)
+      }
       pending -= STEP
     }
-    render()
+    if (phase === "falling") render()
+    else if (phase === "piled") render()
   }
   function run() {
     if (running || !onScreen) return
@@ -258,13 +413,8 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
     if (onScreen) run()
   })
   visibility.observe(box)
-  run()
 
-  function reset() {
-    for (const element of elements) element.style.transform = ""
-  }
-
-  return () => {
+  const cleanup = () => {
     stop()
     visibility.disconnect()
     resizeObserver.disconnect()
@@ -278,4 +428,6 @@ function startPile(box: HTMLElement, { animate }: { animate: boolean }) {
     delete box.dataset.dragging
     reset()
   }
+
+  return { cleanup, fall }
 }
