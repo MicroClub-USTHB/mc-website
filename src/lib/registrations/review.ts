@@ -51,14 +51,14 @@ const SORT_FIELDS: Record<RegistrationSort, string[]> = {
 }
 
 /** Case-insensitive string order; dates sort without it, so their index stays usable. */
-const CASE_INSENSITIVE = { locale: "en", strength: 2 }
+export const CASE_INSENSITIVE = { locale: "en", strength: 2 }
 
 function escapeRegExp(value: string) {
   return value.replace(/[.*+?^${}()|[\]\\]/g, "\\$&")
 }
 
 /** Every word must appear (case-insensitive) in one of the searched fields. */
-function searchFilter(query: string) {
+export function searchFilter(query: string) {
   const words = query.split(/\s+/).filter(Boolean).slice(0, 5)
   if (words.length === 0) return {}
   return {
