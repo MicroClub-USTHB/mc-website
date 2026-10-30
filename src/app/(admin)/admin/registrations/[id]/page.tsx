@@ -5,6 +5,9 @@ import { notFound } from "next/navigation"
 import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
+import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { RegistrationTimeline } from "@/components/admin/registrations/registration-timeline"
+import { ReviewActions } from "@/components/admin/registrations/review-actions"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import { StudentIdPreview } from "@/components/admin/registrations/student-id-preview"
 import { McBadge } from "@/components/ui/mc-badge"
@@ -14,6 +17,12 @@ import { requireStaff } from "@/lib/auth/session"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
 import { getRegistration } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
+import {
+  MAX_REVIEWERS,
+  currentRecommendation,
+  currentReviews,
+  hasReviewed,
+} from "@/lib/registrations/timeline"
 
 export const metadata: Metadata = { title: "Registration" }
 
@@ -58,7 +67,7 @@ export default async function RegistrationPage({
   params,
   searchParams,
 }: PageProps<"/admin/registrations/[id]">) {
-  await requireStaff({ permissions: { registration: ["review"] } })
+  const { user } = await requireStaff({ permissions: { registration: ["review"] } })
 
   const { id } = await params
   const registration = await getRegistration(id)
@@ -71,6 +80,10 @@ export default async function RegistrationPage({
   const birthDate = new Date(registration.birthDate)
   const links = LINKS.filter((link) => registration.links?.[link.key])
   const studentIdSrc = `${adminRoutes.registrations}/${id}/student-id`
+  const { timeline } = registration
+  const reviews = currentReviews(timeline)
+  const ownReview = reviews.find((review) => review.actorId === user.id)
+  const recommendation = currentRecommendation(timeline, user.id)
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -94,6 +107,51 @@ export default async function RegistrationPage({
           </time>
         </p>
       </header>
+
+      <div className="grid gap-6 lg:grid-cols-2">
+        <Section title="Review">
+          {reviews.length > 0 ? (
+            <ul className="flex flex-col gap-2">
+              {reviews.map((review) => (
+                <li key={review.actorId} className="flex items-center gap-2">
+                  <span className="paragraph-md text-foreground">{review.actorName}</span>
+                  <StatusBadge status={review.state} />
+                </li>
+              ))}
+            </ul>
+          ) : (
+            <p className="paragraph-sm text-muted-foreground">Nobody reviewed it yet.</p>
+          )}
+          {ownReview || reviews.length < MAX_REVIEWERS ? (
+            <ReviewActions
+              registrationId={id}
+              applicant={name}
+              current={ownReview?.state ?? "pending"}
+              reasonRequired={!hasReviewed(timeline, user.id)}
+            />
+          ) : (
+            <p className="paragraph-sm text-muted-foreground">
+              Two HR members are already reviewing this application.
+            </p>
+          )}
+          <div>
+            <RecommendDialog
+              registrationId={id}
+              applicant={name}
+              recommendation={
+                recommendation && {
+                  target: recommendation.target,
+                  note: recommendation.note ?? "",
+                }
+              }
+            />
+          </div>
+        </Section>
+
+        <Section title="Timeline">
+          <RegistrationTimeline timeline={timeline} />
+        </Section>
+      </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
         <Section title="Personal information">
