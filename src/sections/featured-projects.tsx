@@ -50,9 +50,6 @@ export function FeaturedProjects() {
           >
             Hall of Projects
           </h2>
-          <p className="header-sm text-muted-foreground sm:header-md lg:py-3.25 lg:header-lg">
-            {PROJECTS.length} projects
-          </p>
         </header>
 
         <Accordion.Root className="flex flex-col gap-20 lg:gap-35">

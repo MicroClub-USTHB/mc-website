@@ -111,7 +111,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
   {
     id: "mctf",
     name: "MCTF",
-    category: "co-organised",
+    category: "external",
     cover: cover("MCTF", "MCTF event photo"),
     logo: logo("MCTF.svg", "MCTF", 79, 56),
     description:

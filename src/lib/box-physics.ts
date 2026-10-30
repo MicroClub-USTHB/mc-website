@@ -9,6 +9,9 @@
  *   never leave the box (no tunneling through walls, unlike impulse engines).
  * - Tiles push each other apart along the axis of least overlap (separating axis theorem), moving
  *   the deepest corners, so contacts also make them rotate.
+ * - A tile can have a `target` (the center it should end at): it is then eased there by a soft
+ *   spring, sideways while it falls and in all directions once it is close, and turned upright, so
+ *   a pile built by the engine (with real falls, bumps and tilts) ends at a chosen arrangement.
  *
  * Units: px and steps (one step = 1/60 s).
  */
@@ -29,6 +32,20 @@ const SIDE_SLIDE = 0.98
 const RESTITUTION = 0.1
 /** Pull of the grabbed point toward the pointer per step (0..1). */
 const DRAG_STIFFNESS = 0.35
+/** Sideways pull toward the target per px of distance (px/step²), and its drag per px/step. */
+const STEER_X = 0.02
+const STEER_DRAG = 0.28
+/** Drag of the close pull per px/step. */
+const STEER_DRAG_Y = 0.2
+/** Cap of the steering acceleration (px/step²), so a far tile does not fly. */
+const STEER_MAX = 0.6
+/** Pull of a close tile toward the target in both axes (px/step² per px). */
+const STEER_NEAR = 0.02
+/** Torque toward upright per rad (rad/step²) and its drag per rad/step; weaker far from the target. */
+const UPRIGHT = 0.03
+const UPRIGHT_DRAG = 0.25
+const UPRIGHT_DRAG_FAR = 0.04
+const UPRIGHT_FAR = 0.2
 /** Below this corner motion (px/step) for `SLEEP_STEPS` steps, the pile is at rest. */
 const SLEEP_SPEED = 0.08
 const SLEEP_STEPS = 40
@@ -48,6 +65,8 @@ export type Tile = {
   height: number
   /** Hangs in place (not simulated) until released. */
   pinned: boolean
+  /** Center the tile is eased to while it falls (see the header). */
+  target?: Point
 }
 
 type Drag = {
@@ -111,6 +130,15 @@ export function addTile(
   return tile
 }
 
+/** Gives a released tile a push (px/step) and a spin (px/step of its top corners). */
+export function kick(tile: Tile, velocity: Point, spin: number) {
+  tile.corners.forEach((c, i) => {
+    const top = i < 2 ? 1 : -1
+    c.px -= velocity.x + spin * top
+    c.py -= velocity.y
+  })
+}
+
 /** Takes a tile out of the world (and out of a drag, if it was grabbed). */
 export function removeTile(world: World, tile: Tile) {
   world.tiles = world.tiles.filter((other) => other !== tile)
@@ -168,9 +196,10 @@ export function step(world: World) {
   let motion = 0
 
   for (const tile of live) {
+    const pull = tile.target ? steer(tile, tile.target) : { x: 0, y: 0, turn: 0 }
     for (const c of tile.corners) {
-      let vx = (c.x - c.px) * AIR
-      let vy = (c.y - c.py) * AIR + world.gravity
+      let vx = (c.x - c.px) * AIR + pull.x
+      let vy = (c.y - c.py) * AIR + world.gravity + pull.y
       const speed = Math.hypot(vx, vy)
       if (speed > MAX_SPEED) {
         vx *= MAX_SPEED / speed
@@ -182,9 +211,10 @@ export function step(world: World) {
       c.y += vy
       c.contact = null
     }
+    if (pull.turn) turn(tile, pull.turn)
   }
 
-  if (world.drag) pull(world.drag)
+  if (world.drag) pullDrag(world.drag)
 
   for (let i = 0; i < ITERATIONS; i++) {
     for (let a = 0; a < world.tiles.length; a++) {
@@ -210,6 +240,45 @@ export function step(world: World) {
   world.stillSteps = motion < SLEEP_SPEED ? world.stillSteps + 1 : 0
 }
 
+/**
+ * Acceleration (px/step²) and turn (rad) toward a tile's `target`: sideways only while it is far
+ * (it falls under gravity), in both axes once it is within reach of its place, and a torque
+ * toward upright that grows as it gets there.
+ */
+function steer(tile: Tile, target: Point) {
+  const [a, b, c, d] = tile.corners
+  const x = (a.x + b.x + c.x + d.x) / 4
+  const y = (a.y + b.y + c.y + d.y) / 4
+  const vx = (a.x - a.px + b.x - b.px + c.x - c.px + d.x - d.px) / 4
+  const vy = (a.y - a.py + b.y - b.py + c.y - c.py + d.y - d.py) / 4
+  const dx = target.x - x
+  const dy = target.y - y
+  const near = Math.hypot(dx, dy) < tile.height
+  const angle = Math.atan2(b.y - a.y, b.x - a.x)
+  const before = Math.atan2(b.py - a.py, b.px - a.px)
+  const spin = angle - before
+  const upright = near ? UPRIGHT : UPRIGHT * UPRIGHT_FAR
+  return {
+    x: clamp(STEER_X * dx - STEER_DRAG * vx, -STEER_MAX, STEER_MAX),
+    y: near ? STEER_NEAR * dy - STEER_DRAG_Y * vy : 0,
+    turn: -upright * angle - (near ? UPRIGHT_DRAG : UPRIGHT_DRAG_FAR) * spin,
+  }
+}
+
+/** Rotates the corners of a tile by `angle` around its center. */
+function turn(tile: Tile, angle: number) {
+  const x = tile.corners.reduce((sum, c) => sum + c.x, 0) / 4
+  const y = tile.corners.reduce((sum, c) => sum + c.y, 0) / 4
+  const cos = Math.cos(angle)
+  const sin = Math.sin(angle)
+  for (const c of tile.corners) {
+    const dx = c.x - x
+    const dy = c.y - y
+    c.x = x + dx * cos - dy * sin
+    c.y = y + dx * sin + dy * cos
+  }
+}
+
 /** Tile coordinates (0..1) of a box point, through the tile's current position and angle. */
 function toTile(tile: Tile, point: Point) {
   const { x, y, angle } = pose(tile)
@@ -224,7 +293,7 @@ function toTile(tile: Tile, point: Point) {
 }
 
 /** Moves the grabbed point toward the pointer, spread over the corners by their weights. */
-function pull({ tile, u, v, target }: Drag) {
+function pullDrag({ tile, u, v, target }: Drag) {
   const weights = [(1 - u) * (1 - v), u * (1 - v), u * v, (1 - u) * v]
   const [a, b, c, d] = tile.corners
   const grabbed = {
@@ -327,6 +396,8 @@ function keepInside(world: World, tile: Tile) {
 /** Pushes two overlapping tiles apart along the axis of least overlap. */
 function separate(a: Tile, b: Tile) {
   if (a.pinned && b.pinned) return
+  // A tile with a target that still hangs is a ghost: the others fall through its place.
+  if ((a.pinned && a.target) || (b.pinned && b.target)) return
   let depth = Infinity
   let axis: Point = { x: 0, y: 0 }
   for (const tile of [a, b]) {
