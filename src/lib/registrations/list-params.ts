@@ -35,11 +35,11 @@ export const DEFAULT_LIST_PARAMS: RegistrationListParams = {
 }
 
 /** Longest search kept: the query becomes one regex per word. */
-const MAX_QUERY_LENGTH = 100
+export const MAX_QUERY_LENGTH = 100
 
-type SearchParams = Record<string, string | string[] | undefined>
+export type SearchParams = Record<string, string | string[] | undefined>
 
-function first(value: string | string[] | undefined) {
+export function first(value: string | string[] | undefined) {
   return Array.isArray(value) ? value[0] : value
 }
 
@@ -79,7 +79,10 @@ export function listQuery(
 }
 
 /** Order after clicking a column header: toggles the current column, starts others ascending. */
-export function nextOrder(params: RegistrationListParams, sort: RegistrationSort): SortOrder {
+export function nextOrder<Sort extends string>(
+  params: { sort: Sort; order: SortOrder },
+  sort: Sort,
+): SortOrder {
   if (params.sort !== sort) return "asc"
   return params.order === "asc" ? "desc" : "asc"
 }

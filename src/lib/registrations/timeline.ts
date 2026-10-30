@@ -48,6 +48,19 @@ export function currentRecommendation(timeline: TimelineEntry[], actorId: string
   return latest?.kind === "recommendation" ? latest : undefined
 }
 
+/** Everyone recommending the registration now, for the recommendations page. */
+export function currentRecommendations(timeline: TimelineEntry[]) {
+  const latest = new Map<string, RecommendationEntry | RecommendationRemovedEntry>()
+  for (const entry of timeline) {
+    if (entry.kind !== "review") latest.set(entry.actorId, entry)
+  }
+  return [...latest.values()].flatMap((entry) =>
+    entry.kind === "recommendation"
+      ? [{ actorId: entry.actorId, actorName: entry.actorName, target: entry.target }]
+      : [],
+  )
+}
+
 /**
  * State of a registration: `pending` until two people reviewed it, `interview` as soon as one of
  * them asks for it, otherwise their shared answer, or `conflict` when they disagree.

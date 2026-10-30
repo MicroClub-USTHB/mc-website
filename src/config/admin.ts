@@ -9,6 +9,7 @@ export const adminRoutes = {
   changePassword: "/admin/change-password",
   users: "/admin/users",
   registrations: "/admin/registrations",
+  recommendations: "/admin/recommendations",
 } as const
 
 /** Page of one registration, with the list state (`?q=...`) to return to. */
@@ -22,6 +23,15 @@ export const signedOutAdminRoutes: readonly string[] = [
   adminRoutes.forgotPassword,
   adminRoutes.resetPassword,
 ]
+
+/** Pages linked in the header; a role with a single page has no links. */
+export const roleNav: Record<StaffRole, { href: string; label: string }[]> = {
+  president: [],
+  hr: [
+    { href: adminRoutes.registrations, label: "Registrations" },
+    { href: adminRoutes.recommendations, label: "Recommendations" },
+  ],
+}
 
 /** Page each role lands on after signing in. */
 export const roleHome: Record<StaffRole, string> = {

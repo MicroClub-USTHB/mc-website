@@ -29,11 +29,12 @@ async function reviewer(): Promise<TimelineActor> {
   return { id: user.id, name: user.name }
 }
 
-/** Runs a timeline change, then refreshes the list and the page, even for a refused change. */
+/** Runs a timeline change, then refreshes the lists and the page, even for a refused change. */
 async function applyChange(change: () => Promise<TimelineResult>) {
   try {
     const result = await change()
     revalidatePath(adminRoutes.registrations, "layout")
+    revalidatePath(adminRoutes.recommendations)
     return result
   } catch (error) {
     console.error("Registration timeline: saving failed", error)

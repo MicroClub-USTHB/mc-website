@@ -13,8 +13,13 @@ import { Types } from "mongoose"
 
 import { connectToDatabase } from "@/lib/mongodb"
 import { RegistrationModel } from "@/lib/registrations/model"
+import { RECOMMENDATION_TARGETS } from "@/lib/registrations/recommendations"
 import type { ReviewState } from "@/lib/registrations/status"
-import { registrationStatus, type TimelineEntry } from "@/lib/registrations/timeline"
+import {
+  currentRecommendations,
+  registrationStatus,
+  type TimelineEntry,
+} from "@/lib/registrations/timeline"
 
 import { run } from "./run"
 
@@ -25,6 +30,7 @@ const REVIEWERS = [
   { actorId: "seed-reviewer-1", actorName: "Meriem Haddad" },
   { actorId: "seed-reviewer-2", actorName: "Sofiane Mansouri" },
 ]
+const RECOMMENDERS = [...REVIEWERS, { actorId: "seed-hr-3", actorName: "Yasmine Boudiaf" }]
 
 /** The reviews of a registration, to get every status. */
 const REVIEW_SETS: ReviewState[][] = [
@@ -174,6 +180,16 @@ run(async () => {
       state,
       reason: pick(REVIEW_REASONS),
     }))
+    for (const recommender of RECOMMENDERS) {
+      if (next() < 0.3) {
+        timeline.push({
+          kind: "recommendation",
+          ...recommender,
+          at: new Date(createdAt.getTime() + 3 * 60 * 60 * 1000),
+          target: pick(RECOMMENDATION_TARGETS).id,
+        })
+      }
+    }
     const isPdf = index % 4 === 0
     return {
       _id: new Types.ObjectId(),
@@ -219,6 +235,7 @@ run(async () => {
       skills: [...new Set(Array.from({ length: 1 + Math.floor(next() * 5) }, () => pick(SKILLS)))],
       status: registrationStatus(timeline),
       timeline,
+      recommendations: currentRecommendations(timeline),
       createdAt,
       updatedAt: createdAt,
     }

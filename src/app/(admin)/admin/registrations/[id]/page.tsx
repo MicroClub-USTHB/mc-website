@@ -15,6 +15,11 @@ import { adminRoutes } from "@/config/admin"
 import { ABOUT_QUESTIONS } from "@/const/registrations"
 import { requireStaff } from "@/lib/auth/session"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
+import {
+  RECOMMENDATIONS_ORIGIN,
+  parseRecommendationParams,
+  recommendationsQuery,
+} from "@/lib/registrations/recommendation-params"
 import { getRegistration } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
 import {
@@ -62,7 +67,7 @@ function Field({
   )
 }
 
-/** One registration in full, as submitted. The back link returns to the list as it was. */
+/** One registration in full, as submitted. The back link returns to its list as it was. */
 export default async function RegistrationPage({
   params,
   searchParams,
@@ -73,7 +78,11 @@ export default async function RegistrationPage({
   const registration = await getRegistration(id)
   if (!registration) notFound()
 
-  const back = `${adminRoutes.registrations}${listQuery(parseListParams(await searchParams))}`
+  const search = await searchParams
+  const fromRecommendations = search.from === RECOMMENDATIONS_ORIGIN
+  const back = fromRecommendations
+    ? `${adminRoutes.recommendations}${recommendationsQuery(parseRecommendationParams(search))}`
+    : `${adminRoutes.registrations}${listQuery(parseListParams(search))}`
   const name = `${registration.firstName} ${registration.lastName}`
   const status = isRegistrationStatus(registration.status) ? registration.status : "pending"
   const submittedAt = new Date(registration.createdAt)
@@ -92,7 +101,7 @@ export default async function RegistrationPage({
         className="inline-flex w-fit items-center gap-1.5 rounded-sm paragraph-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
       >
         <ArrowLeftIcon className="size-4" aria-hidden />
-        Back to registrations
+        Back to {fromRecommendations ? "recommendations" : "registrations"}
       </Link>
 
       <header className="flex flex-col gap-2">

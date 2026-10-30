@@ -2,12 +2,7 @@ import Link from "next/link"
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react"
 
 import { McButton } from "@/components/ui/mc-button"
-import { adminRoutes } from "@/config/admin"
-import {
-  REGISTRATIONS_PER_PAGE,
-  listQuery,
-  type RegistrationListParams,
-} from "@/lib/registrations/list-params"
+import { REGISTRATIONS_PER_PAGE } from "@/lib/registrations/list-params"
 import { cn } from "@/lib/utils"
 
 /** Page numbers around the current one, with `null` for the gaps (1 … 4 5 6 … 20). */
@@ -20,19 +15,18 @@ function pageItems(page: number, pageCount: number): (number | null)[] {
 }
 
 /** "Showing 21–40 of 312", then Previous, the page numbers and Next, all as links. */
-export function RegistrationsPagination({
-  params,
+export function ListPagination({
   page,
   pageCount,
   total,
+  href,
 }: {
-  params: RegistrationListParams
   page: number
   pageCount: number
   total: number
+  /** Link to a page of the list. */
+  href: (page: number) => string
 }) {
-  const href = (target: number) =>
-    `${adminRoutes.registrations}${listQuery(params, { page: target })}`
   const from = (page - 1) * REGISTRATIONS_PER_PAGE + 1
   const to = Math.min(page * REGISTRATIONS_PER_PAGE, total)
 
