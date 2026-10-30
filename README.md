@@ -33,7 +33,7 @@ The registrations and the admin area need MongoDB: copy `.env.example` to `.env.
 Staff sign in at `/admin` (Better Auth, email and password, no sign-up). Two roles, one per account:
 
 - **President**: manages the HR accounts on `/admin/users` (create, deactivate, reactivate, reset password, delete). Each new account gets a generated password by email, changed at first sign-in.
-- **HR**: reviews the registrations on `/admin/registrations`: a server-side list (search, status filter, sort, pages) and a page per registration with the student ID.
+- **HR**: reviews the registrations on `/admin/registrations`: a server-side list (search, status filter, sort, pages) and a page per registration with the student ID. Two HR members at most review an application, its status is computed from their reviews, and any HR member can recommend it to a section or department; both appear in its timeline.
 
 The president's account is created from the terminal. The yearly handover: create the new president, then deactivate the old one.
 
