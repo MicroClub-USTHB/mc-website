@@ -6,7 +6,8 @@
  */
 import { auth } from "@/lib/auth/auth"
 
-import { findPresidents, readOptions, run } from "./president"
+import { findPresidents, readOptions } from "./president"
+import { run } from "./run"
 
 run(async () => {
   const { email } = readOptions(
