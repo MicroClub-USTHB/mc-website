@@ -8,6 +8,7 @@ import type { RecommendationInput, ReviewInput } from "@/lib/registrations/revie
 import {
   MAX_REVIEWERS,
   currentRecommendation,
+  currentRecommendations,
   currentReviews,
   hasReviewed,
   registrationStatus,
@@ -39,13 +40,17 @@ async function readTimeline(id: string) {
 }
 
 /**
- * Appends an entry and the status it leads to, in one atomic update. It only applies if nothing
- * was added since `timeline` was read: two people cannot take the last place at the same time.
+ * Appends an entry and what it leads to, in one atomic update. It only applies if nothing was
+ * added since `timeline` was read: two people cannot take the last place at the same time.
  */
 async function append(id: string, timeline: TimelineEntry[], entry: TimelineEntry) {
+  const next = [...timeline, entry]
   const { modifiedCount } = await RegistrationModel.updateOne(
     { _id: id, [`timeline.${timeline.length}`]: { $exists: false } },
-    { $push: { timeline: entry }, $set: { status: registrationStatus([...timeline, entry]) } },
+    {
+      $push: { timeline: entry },
+      $set: { status: registrationStatus(next), recommendations: currentRecommendations(next) },
+    },
   )
   return modifiedCount > 0 ? SUCCESS : failure(CHANGED)
 }
