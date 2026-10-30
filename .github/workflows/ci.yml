@@ -24,3 +24,8 @@ jobs:
       - run: pnpm lint
       - run: pnpm typecheck
       - run: pnpm build
+        env:
+          # Placeholders: the build imports the auth config, which needs them but connects to nothing.
+          MONGODB_URI: mongodb://localhost:27017/microclub
+          BETTER_AUTH_SECRET: ci-placeholder-secret-not-used-to-sign-anything
+          BETTER_AUTH_URL: http://localhost:3000
