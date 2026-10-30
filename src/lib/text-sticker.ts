@@ -35,7 +35,12 @@ function loadImage(src: string) {
 export async function renderTextSticker({ outline, text, color, outlineTop }: TextSticker) {
   const family = getComputedStyle(document.body).fontFamily
   const font = `500 ${TEXT_SIZE * SCALE}px ${family}`
-  await document.fonts.load(font, text)
+  // Waits for the web font alone (the first family): the `next/font` fallback face is
+  // `local(Arial)`, which fails where Arial is not installed (Linux) and would reject the whole
+  // load. Drawn anyway if the web font fails too (offline), in the fallback font.
+  await document.fonts
+    .load(`500 ${TEXT_SIZE * SCALE}px ${family.split(",")[0]}`, text)
+    .catch(() => {})
   const image = await loadImage(outline)
 
   const canvas = document.createElement("canvas")

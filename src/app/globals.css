@@ -572,6 +572,46 @@
   }
 }
 
+/* The 404 face: 12 frames (its last one is `×_×`). */
+@keyframes microbot-frame-12 {
+  0% {
+    visibility: visible;
+  }
+  8.3333%,
+  100% {
+    visibility: hidden;
+  }
+}
+
+/*
+ * 404 page boot (terminal-style): each line types in from its start in `--n` steps while it
+ * flickers on, from `--d` on. Clip and opacity only, played once, none with reduced motion.
+ */
+@keyframes nf-type {
+  from {
+    clip-path: inset(0 100% 0 0);
+  }
+  to {
+    clip-path: inset(0);
+  }
+}
+
+@keyframes nf-flicker {
+  0% {
+    opacity: 0;
+  }
+  20% {
+    opacity: 1;
+  }
+  35% {
+    opacity: 0.25;
+  }
+  55%,
+  100% {
+    opacity: 1;
+  }
+}
+
 /* Hero scroll hint: the mouse bobs 3px. */
 @keyframes scroll-hint-bob {
   0%,
@@ -625,8 +665,12 @@
  * The page does not scroll under the splash screen (`Splash`), from the server HTML on. The
  * scrollbar's room stays (classic scrollbars), so nothing moves when it comes back.
  */
+html[data-splash-skip] [data-splash] {
+  display: none;
+}
+
 @media (prefers-reduced-motion: no-preference) {
-  html:has([data-splash]:not([data-leaving])) {
+  html:not([data-splash-skip]):has([data-splash]:not([data-leaving])) {
     overflow: hidden;
     scrollbar-gutter: stable;
   }

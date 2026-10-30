@@ -1,6 +1,15 @@
 import { CONTACT } from "@/const/contact"
 
-export type ContactTileId = "instagram" | "facebook" | "tiktok" | "discord" | "email" | "location"
+export type ContactTileId =
+  | "instagram"
+  | "facebook"
+  | "tiktok"
+  | "discord"
+  | "linkedin"
+  | "github"
+  | "medium"
+  | "email"
+  | "location"
 
 export type ContactTile = {
   id: ContactTileId
@@ -13,15 +22,13 @@ export type ContactTile = {
   external: boolean
 }
 
-export type ProfessionalLink = { label: string; href: string }
-
-/** Micro Club was founded in 1985: the copyright counts the years of progress from it. */
+/** Micro Club was founded in 1985: the footer copyright says since when. */
 export const FOUNDING_YEAR = 1985
 
 /** "CS Faculty, USTHB, BP32, Bab Ezzouar", from the club address shared with Contact Us. */
 const ADDRESS = `${CONTACT.address.streetAddress}, ${CONTACT.address.addressLocality}`
 
-/** Social icon tiles (Figma "Footer"). */
+/** Social icon tiles (Figma "footer"). */
 export const SOCIAL_TILES: ContactTile[] = [
   {
     id: "instagram",
@@ -49,7 +56,7 @@ export const SOCIAL_TILES: ContactTile[] = [
   },
 ]
 
-/** Wide contact tiles (Figma "Footer"). */
+/** Wide contact tiles (Figma "footer"). */
 export const CONTACT_TILES: ContactTile[] = [
   {
     id: "email",
@@ -67,9 +74,24 @@ export const CONTACT_TILES: ContactTile[] = [
   },
 ]
 
-/** Footer "Professional Links" column. */
-export const PROFESSIONAL_LINKS: ProfessionalLink[] = [
-  { label: "LinkedIn", href: "https://www.linkedin.com/company/micro-club-usthb-85/" },
-  { label: "Github", href: "https://github.com/MicroClub-USTHB" },
-  { label: "Medium", href: "https://medium.com/@microclub_usthb" },
+/** Professional profile icon tiles (Figma "footer"). */
+export const PROFESSIONAL_LINKS: ContactTile[] = [
+  {
+    id: "linkedin",
+    label: "Micro Club on LinkedIn",
+    href: "https://www.linkedin.com/company/micro-club-usthb-85/",
+    external: true,
+  },
+  {
+    id: "github",
+    label: "Micro Club on GitHub",
+    href: "https://github.com/MicroClub-USTHB",
+    external: true,
+  },
+  {
+    id: "medium",
+    label: "Micro Club on Medium",
+    href: "https://medium.com/@microclub_usthb",
+    external: true,
+  },
 ]

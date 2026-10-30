@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 import { DM_Sans, Plus_Jakarta_Sans } from "next/font/google"
+import { Analytics } from "@vercel/analytics/next"
 
 import { SmoothScrollProvider } from "@/providers/smooth-scroll-provider"
 import { siteConfig } from "@/config/site"
@@ -40,9 +41,16 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: LayoutProps<"/">) {
   return (
-    <html lang="en" className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}>
+    // The splash screen's script (`Splash`) marks the root before hydration (`data-splash-skip`).
+    // Only this element's own attributes are exempt from the hydration check.
+    <html
+      lang="en"
+      className={cn(dmSans.variable, plusJakartaSans.variable, "h-full antialiased")}
+      suppressHydrationWarning
+    >
       <body className="flex min-h-full flex-col">
         <SmoothScrollProvider>{children}</SmoothScrollProvider>
+        <Analytics />
       </body>
     </html>
   )

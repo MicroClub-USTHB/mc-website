@@ -39,8 +39,6 @@ export const STUDENT_ID_RULES = {
   label: "JPG, PNG, WebP or PDF, 5 MB max",
 } as const
 
-/** Longest answer accepted by each "About You & The Club" question. */
-export const ANSWER_MAX_LENGTH = 1000
 export const ANSWER_MIN_LENGTH = 10
 
 /** Questions of step 2 (Figma labels, kept as designed), keyed by their form field. */

@@ -38,12 +38,20 @@ export function Departments() {
       <JsonLd data={DEPARTMENTS_JSON_LD} />
 
       {/*
+        Pinned for 20% of a screen once its bottom reaches the bottom of the screen (a short hold,
+        like Our Sections): the content sticks to the bottom while this spacer's height scrolls by,
+        shifted up over it. Pure CSS, so it holds at any height (the accordion taller than the
+        screen, opened or not), and hands over to the `SectionStack` cover right as it ends.
+      */}
+      <div aria-hidden className="h-[20svh]" />
+
+      {/*
         From `lg`, one screen tall: the panel row takes the height the header leaves (a grid row:
         a flex item would not size its container query units), between a legible floor and its
         828px design height, and scales its cards and art to it. Laptops (`low`) put the intro
         beside the title to leave the panels more room.
       */}
-      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:grid lg:min-h-svh lg:grid-rows-[auto_minmax(30rem,1fr)] lg:px-20 lg:pt-[min(6rem,10svh)] lg:pb-[min(2.5rem,5svh)]">
+      <div className="sticky bottom-0 mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:grid lg:min-h-svh lg:grid-rows-[auto_minmax(30rem,1fr)] lg:px-20 lg:pt-[min(6rem,10svh)] lg:pb-[min(2.5rem,5svh)]">
         <header className="flex flex-col gap-2 low:flex-row low:items-end low:justify-between low:gap-12">
           <h2
             id="departments-title"

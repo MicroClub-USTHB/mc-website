@@ -28,10 +28,12 @@ type Layer = {
   flipY?: boolean
 }
 
-/** CSS transform of a Figma layer: rotation, then a vertical flip in its own axes. */
+/**
+ * CSS transform of a Figma layer: rotation, then a vertical flip in its own axes. CSS functions,
+ * not a `matrix()` computed here: `Math.cos` may differ in the last digit between Node and the
+ * browser, and the style would not match on hydration.
+ */
 function layerStyle({ x, y, width, height, rotate = 0, flipY }: Layer): React.CSSProperties {
-  const angle = (rotate * Math.PI) / 180
-  const [cos, sin] = [Math.cos(angle), Math.sin(angle)]
   return {
     left: x,
     top: y,
@@ -39,7 +41,7 @@ function layerStyle({ x, y, width, height, rotate = 0, flipY }: Layer): React.CS
     height,
     transformOrigin: "0 0",
     transform: flipY
-      ? `matrix(${cos}, ${sin}, ${sin}, ${-cos}, 0, 0)`
+      ? `rotate(${rotate}deg) scaleY(-1)`
       : rotate
         ? `rotate(${rotate}deg)`
         : undefined,
