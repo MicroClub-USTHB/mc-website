@@ -1,6 +1,6 @@
 "use client"
 
-import { useRef } from "react"
+import { useEffect, useRef, useState } from "react"
 import Image from "next/image"
 import Link from "next/link"
 import { motion } from "motion/react"
@@ -21,24 +21,52 @@ const LOGO_CELL = cn(
   "group-data-[logo=compact]:w-(--menu-size)",
 )
 
+/** ms: the logo folds before the bar slides aside, and unfolds once it has slid back. */
+const FOLD_DELAY = 300
+
+/**
+ * The bar, positioned from the width of its wrapper (a container, so without the scrollbar).
+ * Docked, it sits in the middle of the left margin, the space outside the section titles (`gutter`
+ * is the sections' side padding, `edge` what the screen has beyond the site width). The toggle is
+ * wider than that margin around 1440px, so it shrinks to fit, down to its 48px minimum: below `lg`
+ * the margin is too narrow for it, and it stops 4px from the screen edge.
+ */
+const BAR = cn(
+  "[--menu-gutter:1rem] sm:[--menu-gutter:1.5rem] lg:[--menu-gutter:5rem]",
+  "[--menu-edge:max(0px,(100cqw-90rem)/2)]",
+  "[--menu-margin:calc(var(--menu-edge)+var(--menu-gutter))]",
+  "[--menu-docked:clamp(3rem,calc(var(--menu-margin)-0.5rem),var(--menu-size))]",
+  "top-(--menu-top) left-[calc(var(--menu-edge)+var(--menu-left))]",
+  "origin-left transition-[left,scale] duration-500 ease-out-quart motion-reduce:transition-none",
+  "data-docked:left-[max(0.25rem,calc((var(--menu-margin)-var(--menu-docked))/2))]",
+  "data-docked:scale-[tan(atan2(var(--menu-docked),var(--menu-size)))] data-docked:delay-300",
+  "group pointer-events-auto absolute flex ring-1 ring-border",
+)
+
 /**
  * Fixed bar: menu toggle + compact logo. While the menu is open, a "MICRO CLUB" wordmark covers
- * the logo, clipped by the same viewport edge as the panel wipe.
+ * the logo, clipped by the same viewport edge as the panel wipe. When a section title reaches it
+ * (`docked`), the logo folds into the toggle, then the toggle slides out of the title's way.
  */
 export function MenuBar({ homeLabel }: { homeLabel: string }) {
-  const { open, dark, toggle, navigateTo, attached, toggleRef } = useMenu()
+  const { open, dark, toggle, navigateTo, attached, docked, toggleRef } = useMenu()
   const darkToggleRef = useRef<HTMLSpanElement>(null)
   const darkToggleClip = useWipeClip(darkToggleRef)
+  const [folded, setFolded] = useState(false)
+  const logoHidden = attached || folded
+
+  useEffect(() => {
+    const timer = setTimeout(() => setFolded(docked), docked ? 0 : FOLD_DELAY)
+    return () => clearTimeout(timer)
+  }, [docked])
 
   return (
-    <div className="pointer-events-none fixed inset-x-0 top-0 z-50 mx-auto max-w-site">
+    <div className="@container pointer-events-none fixed inset-x-0 top-0 z-50">
       <div
         data-open={open || undefined}
-        data-logo={attached ? "hidden" : "compact"}
-        className={cn(
-          "top-(--menu-top) left-(--menu-left)",
-          "group pointer-events-auto absolute flex ring-1 ring-border",
-        )}
+        data-docked={docked || undefined}
+        data-logo={logoHidden ? "hidden" : "compact"}
+        className={BAR}
       >
         <button
           ref={toggleRef}
@@ -70,8 +98,8 @@ export function MenuBar({ homeLabel }: { homeLabel: string }) {
         <Link
           href="/"
           aria-label={homeLabel}
-          aria-hidden={attached || undefined}
-          tabIndex={attached ? -1 : undefined}
+          aria-hidden={logoHidden || undefined}
+          tabIndex={logoHidden ? -1 : undefined}
           onClick={(event) => {
             event.preventDefault()
             navigateTo(0)

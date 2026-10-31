@@ -29,13 +29,14 @@ export function PageWordmark({ label }: { label: string }) {
       {/*
         Folding away: this window slides left behind the toggle while the wordmark slides right
         within it, by the same distance, so the wordmark stays put and is wiped from its right
-        edge. Two opposite transforms: run by the compositor, no repaint.
+        edge. Two opposite transforms: run by the compositor, no repaint. Hidden once folded: its
+        edge stays where the toggle ends, and the bar does not always cover it (`docked`).
       */}
       <div
         className={cn(
           "absolute top-[calc(var(--menu-top)-1px)] left-[calc(var(--menu-left)-1px)] translate-x-(--menu-size) overflow-hidden p-px",
-          "pointer-events-auto transition-transform duration-800 ease-out-expo",
-          !attached && "pointer-events-none -translate-x-[calc(var(--menu-size)*2+1px)]",
+          "pointer-events-auto transition-[translate,visibility] duration-800 ease-out-expo",
+          !attached && "pointer-events-none invisible -translate-x-[calc(var(--menu-size)*2+1px)]",
         )}
       >
         <Link
