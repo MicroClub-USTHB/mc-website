@@ -10,6 +10,7 @@ import { MessageInput } from "@/components/microbot/message-input"
 import { MicroBotLauncher } from "@/components/microbot/microbot-launcher"
 import { SuggestionChip } from "@/components/microbot/suggestion-chip"
 import { ThinkingStatus } from "@/components/microbot/thinking-status"
+import { useOverEventHub } from "@/components/microbot/use-over-event-hub"
 import { askMicroBot } from "@/actions/ask-microbot"
 import { MICROBOT_ERRORS, MICROBOT_NAME, type MicroBotMessage } from "@/const/microbot"
 import { EASE_OUT_EXPO } from "@/lib/easing"
@@ -50,6 +51,12 @@ type MicroBotWidgetProps = {
  * and the page behind is pinned, so it does not scroll (like the Event Hub card). The panel
  * follows the visual viewport, so the on-screen keyboard shrinks it instead of uncovering the page. Larger
  * screens keep it as a non-modal panel next to the page.
+ *
+ * While the Event Hub is under it, the widget slides to the middle of the space between the event
+ * names and the screen edge (only where that list shows). The list stays within the site width, so
+ * that space grows with the screen: `%` follows it without the scrollbar, and `clamp` stops at the
+ * usual position on wide screens. `right`, not a transform: only `%` of the containing block leaves
+ * the scrollbar out. The whole widget moves, so an open panel stays above the launcher.
  */
 export function MicroBotWidget({
   greeting,
@@ -72,6 +79,7 @@ export function MicroBotWidget({
   const lenis = useLenis()
   const phone = useSyncExternalStore(subscribePhone, isPhone, () => false)
   const modal = open && phone
+  const overEventHub = useOverEventHub(launcherRef)
 
   const close = useCallback(() => setOpen(false), [])
 
@@ -203,8 +211,9 @@ export function MicroBotWidget({
     <aside
       aria-label={MICROBOT_NAME}
       className={cn(
-        "pointer-events-none fixed right-4 bottom-4 z-30 flex flex-col items-end gap-7.5 sm:right-6 sm:bottom-6 lg:right-20 lg:bottom-16",
+        "pointer-events-none fixed right-4 bottom-4 z-30 flex flex-col items-end gap-7.5 transition-[right] duration-500 ease-out-quart motion-reduce:transition-none sm:right-6 sm:bottom-6 lg:right-20 lg:bottom-16",
         open && "z-60",
+        overEventHub && "event-list:right-[clamp(0.625rem,calc((100%-90rem)/4+0.625rem),5rem)]",
       )}
     >
       <AnimatePresence>

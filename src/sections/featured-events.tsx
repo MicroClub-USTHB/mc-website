@@ -79,17 +79,18 @@ export function FeaturedEvents() {
               </div>
               <EventChain events={FEATURED_EVENTS} />
               {/* Figma positions on the 1440px frame, kept within the site width on larger screens. */}
-              <div className="pointer-events-none absolute inset-0 mx-auto hidden max-w-site any-pointer-fine:md:[@media(min-height:30rem)]:block">
+              <div className="pointer-events-none absolute inset-0 mx-auto hidden max-w-site event-list:block">
                 <EventCategoryLabel
                   events={FEATURED_EVENTS}
                   className="absolute left-1/2 -translate-x-1/2 whitespace-nowrap lg:top-10 2xl:top-28"
                 />
+                {/* The right margin holds the Micro Bot launcher during this section (`MicroBotWidget`). */}
                 <EventList
                   events={FEATURED_EVENTS}
-                  className="absolute right-0 bottom-0 isolate before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(closest-side,var(--background)_55%,transparent)] lg:px-20 lg:py-5"
+                  className="absolute right-0 bottom-0 isolate pr-20 before:absolute before:-inset-x-10 before:-inset-y-8 before:-z-10 before:bg-[radial-gradient(closest-side,var(--background)_55%,transparent)] lg:px-20 lg:py-5"
                 />
               </div>
-              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-background via-background/85 to-transparent pt-20 any-pointer-fine:md:[@media(min-height:30rem)]:hidden">
+              <div className="pointer-events-none absolute inset-x-0 bottom-0 z-20 bg-linear-to-t from-background via-background/85 to-transparent pt-20 event-list:hidden">
                 <SpotlightPanel
                   events={FEATURED_EVENTS}
                   className="mx-auto max-w-site px-4 pb-[max(1.5rem,env(safe-area-inset-bottom))] sm:px-6 lg:px-20"
