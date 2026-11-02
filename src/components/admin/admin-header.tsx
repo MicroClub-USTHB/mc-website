@@ -1,16 +1,20 @@
 import Image from "next/image"
 import Link from "next/link"
 
+import { AdminNav } from "@/components/admin/admin-nav"
 import { SignOutButton } from "@/components/admin/sign-out-button"
 import { McBadge } from "@/components/ui/mc-badge"
+import { roleNav } from "@/config/admin"
+import { isStaffRole } from "@/lib/auth/permissions"
 import { getSession, homeFor } from "@/lib/auth/session"
 
 const ROLE_LABEL: Record<string, string> = { president: "President", hr: "HR" }
 
-/** Navy bar with the logo, and the signed-in user with a sign-out button. */
+/** Navy bar with the logo and the signed-in user, above the links to their role's pages. */
 export async function AdminHeader() {
   const session = await getSession()
   const user = session?.user
+  const links = user && !user.mustChangePassword && isStaffRole(user.role) ? roleNav[user.role] : []
 
   return (
     <header className="bg-primary text-primary-foreground">
@@ -32,6 +36,7 @@ export async function AdminHeader() {
           </div>
         )}
       </div>
+      {links.length > 0 && <AdminNav links={links} />}
     </header>
   )
 }

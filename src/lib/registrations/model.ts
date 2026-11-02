@@ -23,6 +23,16 @@ const timelineEntry = new Schema(
   { _id: false },
 )
 
+/** One current recommendation, see `currentRecommendations`. */
+const recommendation = new Schema(
+  {
+    actorId: { type: String, required: true },
+    actorName: { type: String, required: true },
+    target: { type: String, required: true },
+  },
+  { _id: false },
+)
+
 const registrationDocument = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
@@ -62,6 +72,8 @@ const registrationDocument = new Schema(
     /** Computed from `timeline` on every change, stored for the list to filter and sort. */
     status: { type: String, enum: REGISTRATION_STATUSES, default: "pending" },
     timeline: { type: [timelineEntry], default: [] },
+    /** Computed from `timeline` on every change, stored for the recommendations page to filter. */
+    recommendations: { type: [recommendation], default: [] },
   },
   { timestamps: true },
 )
@@ -69,6 +81,9 @@ const registrationDocument = new Schema(
 // The admin list: newest first by default, often filtered by status.
 registrationDocument.index({ createdAt: -1 })
 registrationDocument.index({ status: 1, createdAt: -1 })
+// The recommendations page, filtered by where and by whom.
+registrationDocument.index({ "recommendations.target": 1 })
+registrationDocument.index({ "recommendations.actorId": 1 })
 
 export type RegistrationDocument = InferSchemaType<typeof registrationDocument>
 

@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { InboxIcon, SearchXIcon } from "lucide-react"
 
-import { RegistrationsPagination } from "@/components/admin/registrations/registrations-pagination"
+import { ListPagination } from "@/components/admin/registrations/list-pagination"
 import { RegistrationsTable } from "@/components/admin/registrations/registrations-table"
 import { RegistrationsToolbar } from "@/components/admin/registrations/registrations-toolbar"
 import { McDataTableCard, McDataTableEmpty, McDataTableHeader } from "@/components/ui/mc-data-table"
@@ -49,11 +49,13 @@ export default async function RegistrationsPage({
         {page.rows.length > 0 ? (
           <>
             <RegistrationsTable params={params} rows={page.rows} />
-            <RegistrationsPagination
-              params={params}
+            <ListPagination
               page={page.page}
               pageCount={page.pageCount}
               total={page.total}
+              href={(target) =>
+                `${adminRoutes.registrations}${listQuery(params, { page: target })}`
+              }
             />
           </>
         ) : filtered ? (

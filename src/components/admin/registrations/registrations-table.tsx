@@ -1,13 +1,12 @@
 import { format } from "date-fns"
 import Link from "next/link"
-import { ArrowDownIcon, ArrowUpDownIcon, ArrowUpIcon } from "lucide-react"
 
+import { SortHeader } from "@/components/admin/registrations/sort-header"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import {
   McTable,
   McTableBody,
   McTableCell,
-  McTableHead,
   McTableHeader,
   McTableRow,
 } from "@/components/ui/mc-data-table"
@@ -29,34 +28,6 @@ const COLUMNS: { sort: RegistrationSort; label: string }[] = [
   { sort: "submitted", label: "Submitted" },
 ]
 
-/** Column header linking to the table sorted by it: ascending first, then toggling. */
-function SortHeader({
-  params,
-  sort,
-  label,
-}: {
-  params: RegistrationListParams
-  sort: RegistrationSort
-  label: string
-}) {
-  const active = params.sort === sort
-  const Icon = !active ? ArrowUpDownIcon : params.order === "asc" ? ArrowUpIcon : ArrowDownIcon
-  return (
-    <McTableHead
-      aria-sort={active ? (params.order === "asc" ? "ascending" : "descending") : undefined}
-    >
-      <Link
-        href={`${adminRoutes.registrations}${listQuery(params, { sort, order: nextOrder(params, sort), page: 1 })}`}
-        className="inline-flex items-center gap-1 rounded-sm outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring aria-[current=true]:text-foreground"
-        aria-current={active || undefined}
-      >
-        {label}
-        <Icon className={active ? "size-3.5" : "size-3.5 opacity-40"} aria-hidden />
-      </Link>
-    </McTableHead>
-  )
-}
-
 /** One page of registrations; the applicant's name opens their registration. */
 export function RegistrationsTable({
   params,
@@ -72,7 +43,16 @@ export function RegistrationsTable({
       <McTableHeader>
         <McTableRow>
           {COLUMNS.map((column) => (
-            <SortHeader key={column.sort} params={params} {...column} />
+            <SortHeader
+              key={column.sort}
+              label={column.label}
+              order={params.sort === column.sort ? params.order : null}
+              href={`${adminRoutes.registrations}${listQuery(params, {
+                sort: column.sort,
+                order: nextOrder(params, column.sort),
+                page: 1,
+              })}`}
+            />
           ))}
         </McTableRow>
       </McTableHeader>
