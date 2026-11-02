@@ -10,7 +10,10 @@ export function AdminNav({ links }: { links: { href: string; label: string }[] }
   const pathname = usePathname()
 
   return (
-    <nav aria-label="Admin pages" className="border-t border-primary-foreground/15">
+    <nav
+      aria-label="Admin pages"
+      className="border-t border-primary-foreground/15 dark:border-border"
+    >
       <ul className="mx-auto flex max-w-site gap-1 overflow-x-auto px-4 py-2 sm:px-8">
         {links.map((link) => {
           const active = pathname === link.href || pathname.startsWith(`${link.href}/`)
@@ -21,9 +24,10 @@ export function AdminNav({ links }: { links: { href: string; label: string }[] }
                 aria-current={active ? "page" : undefined}
                 className={cn(
                   "block rounded-md px-3 py-1.5 paragraph-sm font-medium whitespace-nowrap transition-colors outline-none focus-visible:ring-4 focus-visible:ring-ring",
+                  // Dark theme: on the header's dark card bar (see `AdminHeader`).
                   active
-                    ? "bg-primary-foreground text-primary"
-                    : "text-primary-foreground hover:bg-primary-foreground/15",
+                    ? "bg-primary-foreground text-primary dark:bg-accent dark:text-accent-foreground"
+                    : "text-primary-foreground hover:bg-primary-foreground/15 dark:text-foreground dark:hover:bg-accent",
                 )}
               >
                 {link.label}
