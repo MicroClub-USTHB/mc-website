@@ -7,7 +7,7 @@ import { animate, useMotionValue, type MotionValue } from "motion/react"
 
 import { useTitleAtBar } from "@/components/site-menu/use-title-at-bar"
 import { isBarePage } from "@/config/site"
-import { isDominantSectionDark } from "@/lib/backdrop"
+import { isDominantSectionDark } from "@/components/site-menu/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
 /** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */

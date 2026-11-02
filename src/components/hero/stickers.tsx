@@ -6,7 +6,7 @@ import { useReducedMotion } from "motion/react"
 
 import StickerPeel from "@/components/shared/sticker-peel"
 import { HERO_CANVAS } from "@/const/hero"
-import { cssToken, renderTextSticker, TEXT_STICKER_FRAME } from "@/lib/text-sticker"
+import { cssToken, renderTextSticker, TEXT_STICKER_FRAME } from "@/components/hero/text-sticker"
 import glassesCoffee from "@/assets/hero/stickers/glasses-coffee.webp"
 import learningOutline from "@/assets/hero/stickers/learning-outline.svg"
 import microbot from "@/assets/hero/stickers/microbot.webp"
