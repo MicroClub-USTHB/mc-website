@@ -11,7 +11,7 @@ import {
   type ContactErrors,
   type ContactValues,
 } from "@/lib/contact-validation"
-import { isRateLimited } from "@/lib/rate-limit"
+import { clientIp, isRateLimited } from "@/lib/rate-limit"
 
 export type ContactState = {
   status: "idle" | "success" | "error"
@@ -46,8 +46,8 @@ export async function sendContactMessage(
   if (Object.keys(errors).length > 0) return { status: "error", errors, values }
 
   const requestHeaders = await headers()
-  const ip = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  if (isRateLimited(`contact:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs)) {
+  const ip = clientIp(requestHeaders)
+  if (await isRateLimited(`contact:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs)) {
     return {
       status: "error",
       message: "Too many messages sent. Please try again in a few minutes.",

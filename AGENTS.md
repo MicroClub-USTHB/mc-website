@@ -50,6 +50,7 @@ Guidelines for AI coding agents working on the official Micro Club website.
 ## Local services
 
 - `pnpm db:up` starts MongoDB from the root `docker-compose.yml` as a single-node replica set, like production: Better Auth writes in transactions (`pnpm db:down` stops it); `MONGODB_URI=mongodb://localhost:27017/microclub?replicaSet=rs0` in `.env.local`. Mongoose and Better Auth share one client (`getMongoClient()` in `src/lib/mongodb.ts`).
+- Rate limits are counted in MongoDB, shared by every server instance: the Server Actions call `isRateLimited()` from `src/lib/rate-limit.ts` (`rate_limits` collection, keyed by `clientIp()`), Better Auth uses `rateLimit.storage: "database"` (`rateLimit` collection, on in production only). Both read the client IP from `x-real-ip`, then `x-forwarded-for`.
 - `pnpm db:seed-registrations` fills the local database with fake registrations (emails `@seed.test`, replaced on each run; refuses a non-local `MONGODB_URI`). Their student IDs do not exist, so their page shows "File unavailable".
 - Emails go through `sendEmail()` in `src/lib/email.ts` (Resend, `RESEND_API_KEY`) with the shared branded layout (`renderEmail`). Without a key, development prints them to the server console.
 - Student IDs are uploaded by the browser straight to Cloudinary with a signature from `src/actions/sign-student-id-upload.ts` (`authenticated` assets, no public URL), then `src/actions/submit-registration.ts` reads the upload back and saves the registration. Needs the `CLOUDINARY_*` variables.

@@ -6,7 +6,7 @@ import { headers } from "next/headers"
 
 import { MICROBOT_ERRORS, MICROBOT_MAX_LENGTH, type MicroBotEvent } from "@/const/microbot"
 import { streamAnswer } from "@/lib/microbot-api"
-import { isRateLimited } from "@/lib/rate-limit"
+import { clientIp, isRateLimited } from "@/lib/rate-limit"
 
 /** Questions per visitor: plenty for a conversation, too few to drain the shared LLM quota. */
 const RATE_LIMIT = { limit: 10, windowMs: 60 * 1000 }
@@ -31,8 +31,8 @@ export async function askMicroBot(
   if (!message || message.length > MICROBOT_MAX_LENGTH) return single(MICROBOT_ERRORS.failed)
 
   const requestHeaders = await headers()
-  const ip = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  if (isRateLimited(`microbot:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs)) {
+  const ip = clientIp(requestHeaders)
+  if (await isRateLimited(`microbot:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs)) {
     return single(MICROBOT_ERRORS.busy)
   }
 
