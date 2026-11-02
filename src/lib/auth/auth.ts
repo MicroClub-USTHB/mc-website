@@ -10,6 +10,7 @@ import { after } from "next/server"
 import { passwordChangedEmail, resetPasswordEmail, sendAuthEmail } from "@/lib/auth/emails"
 import { ac, roles } from "@/lib/auth/permissions"
 import { getMongoClient } from "@/lib/mongodb"
+import { ensureRateLimitIndexes } from "@/lib/rate-limit"
 
 const DAY = 60 * 60 * 24
 
@@ -28,6 +29,13 @@ const HR_TARGET_PATHS = new Set([
  */
 function sendLater(to: string, email: Parameters<typeof sendAuthEmail>[1]) {
   after(() => sendAuthEmail(to, email).catch((error) => console.error("Auth email failed", error)))
+}
+
+/** Limits of the endpoints open to signed-out visitors (attempts per `window`, in seconds). */
+const RATE_LIMIT_RULES = {
+  "/sign-in/email": { window: 60, max: 5 },
+  "/request-password-reset": { window: 10 * 60, max: 3 },
+  "/reset-password": { window: 10 * 60, max: 5 },
 }
 
 const client = getMongoClient()
@@ -65,14 +73,20 @@ export const auth = betterAuth({
     updateAge: DAY,
   },
   rateLimit: {
-    // In memory, per server instance: moving it to MongoDB is tracked in issue #37.
-    customRules: {
-      "/sign-in/email": { window: 60, max: 5 },
-      "/request-password-reset": { window: 10 * 60, max: 3 },
-    },
+    // In MongoDB (`rateLimit` collection), shared by every server instance: in memory, each
+    // instance would keep its own count. On in production only, as by default.
+    storage: "database",
+    customRules: RATE_LIMIT_RULES,
+  },
+  advanced: {
+    // The client IP the limits are counted by: the one the host's proxy sets (Vercel), read the
+    // same way by `clientIp()` in `src/lib/rate-limit.ts` for the Server Actions.
+    ipAddress: { ipAddressHeaders: ["x-real-ip", "x-forwarded-for"] },
   },
   hooks: {
     before: createAuthMiddleware(async (ctx) => {
+      // The `rateLimit` collection needs its unique key before the first limited request counts.
+      if (ctx.path in RATE_LIMIT_RULES) await ensureRateLimitIndexes()
       if (!HR_TARGET_PATHS.has(ctx.path)) return
       const userId: unknown = ctx.body?.userId
       if (typeof userId !== "string") return
