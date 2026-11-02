@@ -29,7 +29,7 @@ export function Contact() {
   return (
     <SectionContainer id="contact" aria-labelledby="contact-title" bleed>
       <JsonLd data={CONTACT_JSON_LD} />
-      <div className="mx-auto flex max-w-site flex-col gap-12 px-4 py-16 sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-20 lg:py-21.25">
+      <div className="mx-auto flex max-w-site flex-col gap-12 px-4 pt-below-menu pb-16 [--title-top:4rem] sm:px-6 lg:flex-row lg:items-end lg:justify-between lg:gap-10 lg:px-20 lg:py-21.25">
         <div className="flex w-full flex-col gap-7 lg:w-110">
           <h2
             id="contact-title"

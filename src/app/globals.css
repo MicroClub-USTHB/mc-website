@@ -479,6 +479,19 @@
   }
 }
 
+/*
+ * Top padding of a section with a title: `--title-top` (6rem by default). Below `lg` the menu bar
+ * has no margin to slide into beside the titles, so they rest below it instead: the bar's bottom
+ * edge plus a gap, when that is lower.
+ */
+@utility pt-below-menu {
+  padding-top: var(--title-top, 6rem);
+
+  @media (width < 64rem) {
+    padding-top: max(var(--title-top, 6rem), calc(var(--menu-top) + var(--menu-size) + 1.5rem));
+  }
+}
+
 @utility header-xl {
   font-size: 72px;
   line-height: 90px;

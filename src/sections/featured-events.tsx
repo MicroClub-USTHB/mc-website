@@ -67,7 +67,7 @@ export function FeaturedEvents() {
         <ActiveEventProvider>
           <EventDialogProvider events={FEATURED_EVENTS}>
             <ChainControlProvider>
-              <div className="pointer-events-none relative z-10 mx-auto max-w-site px-4 pt-24 sm:px-6 lg:px-20 [@media(max-height:32.5rem)]:pt-20">
+              <div className="pointer-events-none relative z-10 mx-auto max-w-site px-4 pt-below-menu sm:px-6 lg:px-20 [@media(max-height:32.5rem)]:pt-20">
                 <header>
                   <h2
                     id="featured-events-title"
