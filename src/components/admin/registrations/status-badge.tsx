@@ -6,6 +6,8 @@ const STYLES: Record<
   { variant: "secondary" | "destructive"; className?: string }
 > = {
   pending: { variant: "secondary" },
+  interview: { variant: "secondary", className: "bg-info-foreground text-info" },
+  conflict: { variant: "secondary", className: "bg-warning-foreground text-warning" },
   accepted: { variant: "secondary", className: "bg-success-foreground text-success" },
   rejected: { variant: "destructive" },
 }

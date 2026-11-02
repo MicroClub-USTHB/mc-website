@@ -10,6 +10,7 @@ import {
 } from "@/lib/registrations/list-params"
 import { RegistrationModel } from "@/lib/registrations/model"
 import { REGISTRATION_STATUSES, type RegistrationStatus } from "@/lib/registrations/status"
+import type { TimelineEntry } from "@/lib/registrations/timeline"
 
 /** One row of the admin registrations table. */
 export type RegistrationRow = {
@@ -133,5 +134,9 @@ export async function countRegistrationsByStatus() {
 export async function getRegistration(id: string) {
   if (!isValidObjectId(id)) return null
   await connectToDatabase()
-  return RegistrationModel.findById(id).lean()
+  const registration = await RegistrationModel.findById(id).lean()
+  // Registrations submitted before the timeline existed have no such field.
+  return (
+    registration && { ...registration, timeline: (registration.timeline ?? []) as TimelineEntry[] }
+  )
 }

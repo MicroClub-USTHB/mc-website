@@ -2,7 +2,26 @@ import "server-only"
 
 import mongoose, { Schema, type InferSchemaType } from "mongoose"
 
-import { REGISTRATION_STATUSES } from "@/lib/registrations/status"
+import { REGISTRATION_STATUSES, REVIEW_STATES } from "@/lib/registrations/status"
+
+/** One action of an HR member on a registration, see `TimelineEntry`. */
+const timelineEntry = new Schema(
+  {
+    kind: {
+      type: String,
+      enum: ["review", "recommendation", "recommendation-removed"],
+      required: true,
+    },
+    actorId: { type: String, required: true },
+    actorName: { type: String, required: true },
+    at: { type: Date, required: true },
+    state: { type: String, enum: REVIEW_STATES },
+    reason: { type: String },
+    target: { type: String },
+    note: { type: String },
+  },
+  { _id: false },
+)
 
 const registrationDocument = new Schema(
   {
@@ -40,7 +59,9 @@ const registrationDocument = new Schema(
       github: { type: String, default: "" },
     },
     skills: { type: [String], required: true },
+    /** Computed from `timeline` on every change, stored for the list to filter and sort. */
     status: { type: String, enum: REGISTRATION_STATUSES, default: "pending" },
+    timeline: { type: [timelineEntry], default: [] },
   },
   { timestamps: true },
 )

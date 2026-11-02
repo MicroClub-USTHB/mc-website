@@ -13,10 +13,40 @@ import { Types } from "mongoose"
 
 import { connectToDatabase } from "@/lib/mongodb"
 import { RegistrationModel } from "@/lib/registrations/model"
+import type { ReviewState } from "@/lib/registrations/status"
+import { registrationStatus, type TimelineEntry } from "@/lib/registrations/timeline"
 
 import { run } from "./run"
 
 const SEED_EMAIL = /@seed\.test$/
+
+/** Fake HR members: their reviews count, but nobody can sign in as them. */
+const REVIEWERS = [
+  { actorId: "seed-reviewer-1", actorName: "Meriem Haddad" },
+  { actorId: "seed-reviewer-2", actorName: "Sofiane Mansouri" },
+]
+
+/** The reviews of a registration, to get every status. */
+const REVIEW_SETS: ReviewState[][] = [
+  [],
+  [],
+  [],
+  ["accepted"],
+  ["rejected"],
+  ["accepted", "accepted"],
+  ["rejected", "rejected"],
+  ["accepted", "interview"],
+  ["rejected", "interview"],
+  ["interview", "interview"],
+  ["accepted", "rejected"],
+]
+
+const REVIEW_REASONS = [
+  "Clear motivation and solid answers.",
+  "Answers too short to judge.",
+  "Strong profile, worth meeting in person.",
+  "Interesting background, some doubts about availability.",
+]
 
 const FIRST_NAMES = [
   "Sara",
@@ -136,8 +166,14 @@ run(async () => {
   const documents = Array.from({ length: count }, (_, index) => {
     const firstName = pick(FIRST_NAMES)
     const lastName = pick(LAST_NAMES)
-    const roll = next()
     const createdAt = new Date(now - Math.floor(next() * 21 * 24 * 60 * 60 * 1000))
+    const timeline = pick(REVIEW_SETS).map((state, position): TimelineEntry => ({
+      kind: "review",
+      ...REVIEWERS[position],
+      at: new Date(createdAt.getTime() + (position + 1) * 60 * 60 * 1000),
+      state,
+      reason: pick(REVIEW_REASONS),
+    }))
     const isPdf = index % 4 === 0
     return {
       _id: new Types.ObjectId(),
@@ -181,7 +217,8 @@ run(async () => {
         github: next() < 0.5 ? `https://github.com/${firstName.toLowerCase()}${index}` : "",
       },
       skills: [...new Set(Array.from({ length: 1 + Math.floor(next() * 5) }, () => pick(SKILLS)))],
-      status: roll < 0.7 ? "pending" : roll < 0.9 ? "accepted" : "rejected",
+      status: registrationStatus(timeline),
+      timeline,
       createdAt,
       updatedAt: createdAt,
     }
