@@ -68,6 +68,7 @@ Guidelines for AI coding agents working on the official Micro Club website.
 
 - Section components are named after their content, **without** a `Section` suffix (`Hero`, `FeaturedEvents`, `Contact`). Files are kebab-case.
 - Pages drawn without the in-page wordmark, the footer and the chatbot (Figma shows only the toggle and the compact logo) live in their own route group with their own layout (`src/app/(registrations)/`), and are listed in `isBarePage()` in `src/config/site.ts` for the wordmark. A page that can be closed returns its 404 from that layout (`notFound()` in a layout is rendered by the root `not-found.tsx`, with no menu bar).
+- A section title's block starts with `pt-below-menu` instead of a fixed top padding (`--title-top` for another value than 6rem): below `lg` it keeps the title below the fixed menu bar, which only slides aside from `lg`.
 - Wrap every landing page section in `SectionContainer` with an id from `homeSections` in `src/config/site.ts`.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
