@@ -51,7 +51,7 @@ export function Departments() {
         828px design height, and scales its cards and art to it. Laptops (`low`) put the intro
         beside the title to leave the panels more room.
       */}
-      <div className="sticky bottom-0 mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:grid lg:min-h-svh lg:grid-rows-[auto_minmax(30rem,1fr)] lg:px-20 lg:pt-[min(6rem,10svh)] lg:pb-[min(2.5rem,5svh)]">
+      <div className="sticky bottom-0 mx-auto max-w-site px-4 pt-below-menu pb-20 sm:px-6 lg:grid lg:min-h-svh lg:grid-rows-[auto_minmax(30rem,1fr)] lg:px-20 lg:pt-[min(6rem,10svh)] lg:pb-[min(2.5rem,5svh)]">
         <header className="flex flex-col gap-2 low:flex-row low:items-end low:justify-between low:gap-12">
           <h2
             id="departments-title"

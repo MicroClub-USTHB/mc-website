@@ -36,7 +36,7 @@ export function Community() {
   return (
     <SectionContainer id="community" aria-labelledby="community-title" bleed>
       <JsonLd data={COMMUNITY_JSON_LD} />
-      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20 lg:pb-52">
+      <div className="mx-auto max-w-site px-4 pt-below-menu pb-20 sm:px-6 lg:px-20 lg:pb-52">
         <header className="flex flex-col items-start">
           <h2
             id="community-title"

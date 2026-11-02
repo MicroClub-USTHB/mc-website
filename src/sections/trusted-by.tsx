@@ -53,7 +53,7 @@ export function TrustedBy() {
     >
       <JsonLd data={TRUSTED_BY_JSON_LD} />
       <HoveredPartnerProvider>
-        <div className="@container mx-auto max-w-site px-4 pt-24 pb-24 sm:px-6 lg:px-20">
+        <div className="@container mx-auto max-w-site px-4 pt-below-menu pb-24 sm:px-6 lg:px-20">
           <h2
             id="trusted-by-title"
             className="flex min-w-0 items-center header-md whitespace-nowrap text-primary uppercase sm:header-lg lg:header-xl short:header-md"
