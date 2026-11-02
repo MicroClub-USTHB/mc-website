@@ -1,8 +1,8 @@
 import { useRef, useTransition } from "react"
 import { useRouter } from "next/navigation"
 
-import { createStudentIdUploadSignature } from "@/actions/sign-student-id-upload"
-import { submitRegistration } from "@/actions/submit-registration"
+import { createStudentIdUploadSignature } from "@/actions/public/sign-student-id-upload"
+import { submitRegistration } from "@/actions/public/submit-registration"
 import { fieldId, focusField } from "@/components/registrations/state/registration-focus"
 import type { RegistrationStore } from "@/components/registrations/state/registration-store"
 import { REGISTRATION_HONEYPOT_FIELD, STEP_FIELDS } from "@/lib/registrations/schema"

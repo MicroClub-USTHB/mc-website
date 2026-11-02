@@ -15,7 +15,7 @@ import {
   reactivateHrUser,
   resetHrUserPassword,
   type HrUserActionResult,
-} from "@/actions/manage-hr-users"
+} from "@/actions/admin/manage-hr-users"
 import type { HrUserRow } from "@/components/admin/users-table"
 import {
   McAlertDialog,

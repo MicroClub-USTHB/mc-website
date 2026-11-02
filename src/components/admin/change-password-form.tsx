@@ -2,7 +2,7 @@
 
 import { useActionState } from "react"
 
-import { changePassword, type ChangePasswordState } from "@/actions/change-password"
+import { changePassword, type ChangePasswordState } from "@/actions/admin/change-password"
 import { FormMessage } from "@/components/admin/form-message"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"

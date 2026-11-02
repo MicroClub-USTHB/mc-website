@@ -3,7 +3,7 @@
 import { UserPlusIcon } from "lucide-react"
 import { useState, useTransition, type FormEvent } from "react"
 
-import { createHrUser } from "@/actions/manage-hr-users"
+import { createHrUser } from "@/actions/admin/manage-hr-users"
 import { FormMessage } from "@/components/admin/form-message"
 import { McButton } from "@/components/ui/mc-button"
 import {

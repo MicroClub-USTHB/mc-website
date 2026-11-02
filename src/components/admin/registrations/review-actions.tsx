@@ -2,7 +2,7 @@
 
 import { useState, useTransition, type FormEvent } from "react"
 
-import { reviewRegistration } from "@/actions/review-registration"
+import { reviewRegistration } from "@/actions/admin/review-registration"
 import { FormMessage } from "@/components/admin/form-message"
 import { McButton } from "@/components/ui/mc-button"
 import {

@@ -3,7 +3,7 @@
 import { StarIcon } from "lucide-react"
 import { useState, useTransition, type FormEvent } from "react"
 
-import { recommendRegistration, removeRecommendation } from "@/actions/review-registration"
+import { recommendRegistration, removeRecommendation } from "@/actions/admin/review-registration"
 import { FormMessage } from "@/components/admin/form-message"
 import { McButton } from "@/components/ui/mc-button"
 import {
