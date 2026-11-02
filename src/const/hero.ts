@@ -50,7 +50,9 @@ export const HERO_ITEMS: HeroCanvasItem[] = [
   { id: "sticky-note", x: 1306.71, y: 247, rotate: 19.63 },
   { id: "voice-note", x: 1829, y: 566 },
   { id: "activities", x: 114, y: 727 },
-  { id: "photobooth", x: 1788, y: 816 },
+  // Drawn 1.8× the Figma size: moved left and up from (1788, 816), between the headline, the voice
+  // note and the AR card.
+  { id: "photobooth", x: 1530, y: 660 },
   // The Figma button sits at (2130, 944): the "+1 LVL" space above it is part of the element.
   { id: "level-up", x: 2130, y: 858.44 },
   { id: "ar-card", x: 2029.32, y: 1107, rotate: 7.79 },
