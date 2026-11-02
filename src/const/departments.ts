@@ -92,8 +92,8 @@ export const DEPARTMENTS: Department[] = [
   },
   {
     id: "ops",
-    tab: "Ops",
-    name: "OPS",
+    tab: "Logistics",
+    name: "Logistics",
     tagline: "Make it happen.",
     description:
       "The team that makes everything possible, our masters behind the scenes. The Operations department handles the planning, logistics, coordination, and ensures workshops, events and activities run smoothly from start to finish.",
