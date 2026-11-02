@@ -1,7 +1,7 @@
 "use client"
 
 import { useEffect, useRef, useState } from "react"
-import { ChevronDownIcon } from "lucide-react"
+import { ChevronDownIcon, XIcon } from "lucide-react"
 
 import type { DepartmentId } from "@/const/departments"
 import { cn } from "@/lib/utils"
@@ -38,7 +38,22 @@ const transition = "motion-safe:duration-700 motion-safe:ease-out-expo"
 const art = {
   base: cn(
     "[&_[data-el=out]]:opacity-0 [&_[data-el]]:[transform-origin:0_0]",
-    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart)]",
+    "motion-safe:[&_[data-el]]:[transition:transform_700ms_var(--ease-out-expo),opacity_500ms_var(--ease-out-quart),translate_500ms_var(--ease-out-quart)]",
+  ),
+  /**
+   * Hover (pointer devices): the shapes drift a little, each a different way (`translate`, which
+   * adds to their layout `transform` without touching it), back when the pointer leaves. Stronger
+   * on a closed strip ("open me"), lighter on the open card ("click again to close").
+   */
+  hoverClosed: cn(
+    "group-hover/panel:[&_[data-el]:nth-child(3n+1)]:[translate:0_-14px]",
+    "group-hover/panel:[&_[data-el]:nth-child(3n+2)]:[translate:9px_-6px]",
+    "group-hover/panel:[&_[data-el]:nth-child(3n)]:[translate:-9px_7px]",
+  ),
+  hoverOpen: cn(
+    "group-hover/panel:[&_[data-el]:nth-child(3n+1)]:[translate:0_-6px]",
+    "group-hover/panel:[&_[data-el]:nth-child(3n+2)]:[translate:4px_-3px]",
+    "group-hover/panel:[&_[data-el]:nth-child(3n)]:[translate:-4px_3px]",
   ),
   open: "[&_[data-el=out]]:[transform:var(--open,none)]",
   closed: cn(
@@ -224,9 +239,6 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
               onClick={isOpen ? (event) => closeOnClick(event) : undefined}
               className={cn(
                 "group/panel relative isolate flex flex-col overflow-hidden border border-border bg-background",
-                // Hover on a closed strip (devices with a pointer): framed and its tab lit, colors
-                // only, so the strips and their art never move.
-                "transition-[border-color] duration-300 ease-out-quart",
                 // The accordion bar lays out the strip art (see `barTransform` in
                 // `scripts/department-art.mjs`), in the 135px strip's units: `--bu` is one in
                 // art units (the art spans the panel, 610 units), `--bl` the label's width,
@@ -236,7 +248,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 "max-lg:[--bw:8rem] sm:max-lg:[--bw:10rem]",
                 "max-lg:[--bl:var(--js-bl,tan(atan2(var(--bw)*135,var(--bh))))] max-lg:[--bu:var(--js-bu,tan(atan2(var(--bh)*610,var(--pw,100cqw)*135)))]",
                 "max-lg:[--bax:var(--js-bax,clamp(0.4,tan(atan2((var(--pw,100cqw)-var(--bw))*135,var(--bh)*785)),1))] max-lg:[--bfit:var(--js-bfit,clamp(0.55,var(--bax)*1.25,1))]",
-                "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width,border-color]",
+                "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width]",
                 transition,
                 art.base,
                 isOpen
@@ -244,7 +256,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                       "cursor-pointer max-lg:[--hh:3.5rem] lg:w-[calc(37.875rem*var(--k))]",
                       art.open,
                     )
-                  : cn("hover:border-primary", art.closed),
+                  : art.closed,
               )}
             >
               {/* First in the DOM (accordion header), the footer tab of the row from `lg`. */}
@@ -266,12 +278,10 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   {/* The tab: the bar's label at its start, the header once open. */}
                   <span
                     className={cn(
-                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width,background-color,color] sm:paragraph-xl",
-                      "max-lg:border-r lg:w-full lg:justify-center lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
+                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width] sm:paragraph-xl",
+                      "max-lg:border-r lg:relative lg:w-full lg:justify-center lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
                       transition,
-                      isOpen
-                        ? "w-full border-b max-lg:border-r-0 lg:border-b-0"
-                        : "group-hover/panel:bg-primary group-hover/panel:text-primary-foreground",
+                      isOpen && "w-full border-b max-lg:border-r-0 lg:border-b-0",
                     )}
                   >
                     {panel.tab}
@@ -283,6 +293,13 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                         !isOpen && "opacity-0",
                       )}
                     />
+                    {/* From `lg`, the open card's tab shows it closes again when hovered. */}
+                    {isOpen && (
+                      <XIcon
+                        aria-hidden
+                        className="absolute right-3 hidden size-5 opacity-0 transition-opacity duration-300 ease-out-quart group-hover/panel:opacity-100 motion-reduce:transition-none lg:block"
+                      />
+                    )}
                   </span>
                 </button>
               </h3>
@@ -297,7 +314,13 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   isOpen && "grid-rows-[1fr]",
                 )}
               >
-                <div className="flex min-h-0 flex-col overflow-hidden lg:block">
+                {/* Holds the illustration: `group-hover` styles only reach inside the panel. */}
+                <div
+                  className={cn(
+                    "flex min-h-0 flex-col overflow-hidden lg:block",
+                    isOpen ? art.hoverOpen : art.hoverClosed,
+                  )}
+                >
                   {/*
                     Card width from the start: the text never reflows while the panel widens.
                     Zoomed with the row, it keeps the design's line breaks at any height.
