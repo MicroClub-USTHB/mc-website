@@ -9,6 +9,6 @@
  * - both: "Opening soon" until `opensAt`, open until `closesAt`, then closed.
  */
 export const REGISTRATIONS_WINDOW: { opensAt: string | null; closesAt: string | null } = {
-  opensAt: null,
-  closesAt: null,
+  opensAt: "2026-11-05T12:00:00+01:00",
+  closesAt: "2026-11-07T22:00:00+01:00",
 }

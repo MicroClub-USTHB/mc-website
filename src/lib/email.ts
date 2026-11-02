@@ -1,6 +1,9 @@
+import "server-only"
+
+import { Resend } from "resend"
+
 import { siteConfig } from "@/config/site"
 import { EMAIL_LOGO_BASE64 } from "@/lib/email-logo"
-import type { ContactValues } from "@/lib/contact-validation"
 
 /** mcoli-ui light tokens (src/app/globals.css) as hex: emails cannot use CSS variables. */
 const COLOR = {
@@ -26,7 +29,7 @@ const LOGO_ATTACHMENT = {
   contentId: LOGO_CID,
 }
 
-function escapeHtml(value: string) {
+export function escapeHtml(value: string) {
   return value
     .replaceAll("&", "&amp;")
     .replaceAll("<", "&lt;")
@@ -35,7 +38,8 @@ function escapeHtml(value: string) {
     .replaceAll("'", "&#39;")
 }
 
-function field(label: string, content: string) {
+/** A labeled value in a field box. `content` is HTML: escape user input before passing it. */
+export function emailField(label: string, content: string) {
   return `
         <tr><td style="padding:0 32px 16px">
           <div style="font-family:${BODY_FONT};font-size:14px;line-height:20px;font-weight:500;color:${COLOR.muted};padding-bottom:6px">${label}</div>
@@ -43,28 +47,42 @@ function field(label: string, content: string) {
         </td></tr>`
 }
 
-function button(label: string, href: string) {
+/** A muted paragraph row. `content` is HTML: escape user input before passing it. */
+export function emailParagraph(content: string) {
   return `
-        <tr><td style="padding:8px 32px 32px">
-          <a href="${escapeHtml(href)}" style="display:block;font-family:${BODY_FONT};font-size:16px;line-height:24px;font-weight:500;text-align:center;text-decoration:none;color:${COLOR.primaryForeground};background:${COLOR.primary};border-radius:8px;padding:10px 18px">${label}</a>
+        <tr><td style="padding:0 32px 16px">
+          <p style="margin:0;font-family:${BODY_FONT};font-size:14px;line-height:20px;color:${COLOR.muted}">${content}</p>
         </td></tr>`
 }
 
-/** Email layout shared by both messages: branded header, title, intro, submitted fields, footer. */
-function renderEmail({
+export function emailLink(label: string, href: string) {
+  return `<a href="${escapeHtml(href)}" style="color:${COLOR.primary};text-decoration:none">${label}</a>`
+}
+
+function button(label: string, href: string) {
+  return `
+        <tr><td style="padding:8px 32px 32px">
+          <a href="${escapeHtml(href)}" style="display:block;font-family:${BODY_FONT};font-size:16px;line-height:24px;font-weight:500;text-align:center;text-decoration:none;color:${COLOR.primaryForeground};background:${COLOR.primary};border-radius:8px;padding:10px 18px">${escapeHtml(label)}</a>
+        </td></tr>`
+}
+
+/**
+ * Branded email layout shared by every message: logo header, title, intro, `rows` (built with
+ * `emailField` / `emailParagraph`), an optional button and the footer.
+ */
+export function renderEmail({
   preheader,
   title,
   intro,
-  values,
+  rows = "",
   action,
 }: {
   preheader: string
   title: string
   intro: string
-  values: ContactValues
+  rows?: string
   action?: { label: string; href: string }
 }) {
-  const email = escapeHtml(values.email)
   return `<!doctype html>
 <html lang="en">
   <head>
@@ -87,10 +105,8 @@ function renderEmail({
         <tr><td style="padding:0 32px 24px">
           <p style="margin:0;font-family:${BODY_FONT};font-size:16px;line-height:24px;color:${COLOR.muted}">${escapeHtml(intro)}</p>
         </td></tr>
-        ${field("Full name", escapeHtml(values.name))}
-        ${field("Email", `<a href="mailto:${email}" style="color:${COLOR.primary};text-decoration:none">${email}</a>`)}
-        ${field("Message", escapeHtml(values.message).replaceAll("\n", "<br>"))}
-        ${action ? button(escapeHtml(action.label), action.href) : `<tr><td style="padding-bottom:16px"></td></tr>`}
+        ${rows}
+        ${action ? button(action.label, action.href) : `<tr><td style="padding-bottom:16px"></td></tr>`}
         </table>
         <p style="margin:20px 0 0;font-family:${BODY_FONT};font-size:12px;line-height:18px;color:${COLOR.muted};text-align:center">
           ${siteConfig.name} · <a href="${siteConfig.url}" style="color:${COLOR.muted}">${siteConfig.url.replace("https://", "")}</a>
@@ -101,45 +117,36 @@ function renderEmail({
 </html>`
 }
 
-function renderText(intro: string, values: ContactValues) {
-  return `${intro}\n\nFull name: ${values.name}\nEmail: ${values.email}\n\nMessage:\n${values.message}\n\n${siteConfig.name} - ${siteConfig.url}\n`
+export type EmailMessage = {
+  from: string
+  to: string
+  replyTo?: string
+  subject: string
+  /** Built with `renderEmail`: the logo it references is attached here. */
+  html: string
+  text: string
 }
 
-/** Email received by the club inbox. Replying answers the sender. */
-export function buildClubEmail(values: ContactValues) {
-  const intro = `New message from the ${siteConfig.name} website contact form.`
-  const subject = `New contact message from ${values.name.replace(/[\r\n]+/g, " ")}`
-  return {
-    subject,
-    html: renderEmail({
-      preheader: `${values.name}: ${values.message.slice(0, 90)}`,
-      title: "New contact message",
-      intro,
-      values,
-      action: {
-        label: `Reply to ${values.name}`,
-        href: `mailto:${values.email}?subject=${encodeURIComponent("Re: your message to Micro Club")}`,
-      },
-    }),
-    text: renderText(intro, values),
-    attachments: [LOGO_ATTACHMENT],
+/**
+ * Sends an email through Resend (`RESEND_API_KEY`, see `.env.example`), throwing when it fails.
+ * In development without a key, the email is printed to the server console instead, so flows that
+ * send emails (contact form, admin accounts) can be tested without Resend.
+ */
+export async function sendEmail(message: EmailMessage) {
+  const apiKey = process.env.RESEND_API_KEY
+  if (!apiKey) {
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `\n--- Email (RESEND_API_KEY is not set, not sent) ---\nFrom: ${message.from}\nTo: ${message.to}\nSubject: ${message.subject}\n\n${message.text}\n---\n`,
+      )
+      return
+    }
+    throw new Error("RESEND_API_KEY is missing")
   }
-}
 
-/** Confirmation sent to the person who filled the form, with a copy of what they submitted. */
-export function buildConfirmationEmail(values: ContactValues) {
-  const intro =
-    "Thank you for contacting us! We received your message and our team will reach out as soon as possible. Here is a copy of what you sent."
-  return {
-    subject: `We received your message - ${siteConfig.name}`,
-    html: renderEmail({
-      preheader: "We received your message and will reach out as soon as possible.",
-      title: "Your message has been sent",
-      intro,
-      values,
-      action: { label: "Visit our website", href: siteConfig.url },
-    }),
-    text: renderText(intro, values),
+  const { error } = await new Resend(apiKey).emails.send({
+    ...message,
     attachments: [LOGO_ATTACHMENT],
-  }
+  })
+  if (error) throw new Error(`${error.name}: ${error.message}`)
 }

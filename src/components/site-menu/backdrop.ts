@@ -52,14 +52,17 @@ export function isBackdropDark(x: number, y: number, ignore: Element | null) {
 }
 
 /**
- * Whether the section filling most of the viewport is dark. Picks the section with the largest
+ * Whether the section filling most of the viewport is dark. Picks the visible section with the largest
  * visible height, then judges the backdrop at the middle of its visible part along the vertical
  * line `x`, so the theme flips once a section takes over half the screen, not once the previous
  * one is fully gone.
  */
 export function isDominantSectionDark(x: number, ignore: Element | null) {
   let best: { y: number; visible: number } | null = null
-  for (const section of document.querySelectorAll("main > section, footer")) {
+  // Every landing section, also the ones a `SectionStack` wraps (not children of `main`).
+  for (const section of document.querySelectorAll("main section[id], footer")) {
+    // A section fully covered by the next one of its stack is hidden (`StickyUnder`).
+    if (getComputedStyle(section).visibility === "hidden") continue
     const { top, bottom } = section.getBoundingClientRect()
     const from = Math.max(top, 0)
     const to = Math.min(bottom, window.innerHeight)

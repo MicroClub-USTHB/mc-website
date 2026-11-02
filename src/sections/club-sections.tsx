@@ -49,7 +49,7 @@ export function ClubSections() {
         illustrations shrink to fit. The top padding clears the fixed menu toggle, the bottom one
         follows the screen height.
       */}
-      <div className="sticky top-0 mx-auto flex h-svh max-h-screen max-w-site flex-col px-4 pt-24 pb-[min(5.25rem,8svh)] sm:px-6 lg:px-20 lg:pt-20 short:py-[min(2.5rem,6svh)]">
+      <div className="sticky top-0 mx-auto flex h-svh max-h-screen max-w-site flex-col px-4 pt-below-menu pb-[min(5.25rem,8svh)] sm:px-6 lg:px-20 lg:pt-20 short:py-[min(2.5rem,6svh)]">
         <ClubSectionsShowcase
           heading={
             <h2

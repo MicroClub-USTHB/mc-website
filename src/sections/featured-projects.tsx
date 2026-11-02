@@ -42,7 +42,7 @@ export function FeaturedProjects() {
     <SectionContainer id="featured-projects" aria-labelledby="featured-projects-title" bleed>
       <JsonLd data={PROJECTS_JSON_LD} />
 
-      <div className="mx-auto max-w-site px-4 pt-24 pb-20 sm:px-6 lg:px-20">
+      <div className="mx-auto max-w-site px-4 pt-below-menu pb-20 sm:px-6 lg:px-20">
         <header className="flex flex-col gap-2 lg:flex-row lg:items-end lg:gap-26">
           <h2
             id="featured-projects-title"

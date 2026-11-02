@@ -67,6 +67,11 @@ export type Tile = {
   pinned: boolean
   /** Center the tile is eased to while it falls (see the header). */
   target?: Point
+  /**
+   * Weight in contacts: when two tiles overlap, each moves by the other's share of their summed
+   * mass, so a light tile landing on a heavy one does not tip it over. Equal by default.
+   */
+  mass: number
 }
 
 type Drag = {
@@ -101,6 +106,8 @@ type TileOptions = {
   angle?: number
   /** Starting velocity (px/step). */
   velocity?: Point
+  /** Weight in contacts (see `Tile`), 1 by default. */
+  mass?: number
 }
 
 /** Adds a tile centered on `center`: upright and pinned, unless `options` say otherwise. */
@@ -109,7 +116,7 @@ export function addTile(
   center: Point,
   width: number,
   height: number,
-  { released = false, angle = 0, velocity = { x: 0, y: 0 } }: TileOptions = {},
+  { released = false, angle = 0, velocity = { x: 0, y: 0 }, mass = 1 }: TileOptions = {},
 ): Tile {
   const cos = Math.cos(angle)
   const sin = Math.sin(angle)
@@ -125,6 +132,7 @@ export function addTile(
     width,
     height,
     pinned: !released,
+    mass,
   }
   world.tiles.push(tile)
   return tile
@@ -418,7 +426,8 @@ function separate(a: Tile, b: Tile) {
     }
   }
 
-  const share = a.pinned ? 0 : b.pinned ? 1 : 0.5
+  // Part of the overlap `a` takes: all of it against a pinned tile, else the other's mass share.
+  const share = a.pinned ? 0 : b.pinned ? 1 : b.mass / (a.mass + b.mass)
   // `b`'s corners deepest into `a` move along the axis, `a`'s deepest into `b` against it.
   push(b, axis, depth * (1 - share), -1)
   push(a, { x: -axis.x, y: -axis.y }, depth * share, -1)

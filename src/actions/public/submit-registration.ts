@@ -5,7 +5,7 @@ import { headers } from "next/headers"
 import { PHONE_COUNTRIES, STUDENT_ID_RULES } from "@/const/registrations"
 import { deleteStudentId, getStudentIdUpload, type UploadedStudentId } from "@/lib/cloudinary"
 import { connectToDatabase } from "@/lib/mongodb"
-import { isRateLimited } from "@/lib/rate-limit"
+import { clientIp, isRateLimited } from "@/lib/rate-limit"
 import { RegistrationModel } from "@/lib/registrations/model"
 import { areRegistrationsOpen } from "@/lib/registrations/window"
 import {
@@ -107,8 +107,8 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
   if (!birthDate || !country) return { status: "error" }
 
   const requestHeaders = await headers()
-  const ip = requestHeaders.get("x-forwarded-for")?.split(",")[0]?.trim() ?? "unknown"
-  if (isRateLimited(`registration:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs))
+  const ip = clientIp(requestHeaders)
+  if (await isRateLimited(`registration:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs))
     return { status: "rate-limited" }
 
   const discard = () =>

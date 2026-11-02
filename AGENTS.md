@@ -23,11 +23,12 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - Tailwind CSS v4, **mcoli-ui** (Micro Club component library and design system, shadcn registry on Base UI), lucide-react
 - Lenis (smooth scroll) and Motion (animations)
 - MongoDB (Mongoose) and Cloudinary for the registrations, Zod for validation shared by browser and server
+- Better Auth (MongoDB adapter, admin plugin) for the staff admin area, Resend for emails
 - pnpm
 
 ## Project structure
 
-- `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer.
+- `src/app/`: routes only. Public pages live in the `(site)` route group, whose layout renders the hamburger menu and footer. The staff admin area lives in `(admin)/admin/` (own header, `noindex`), the Better Auth endpoints in `api/auth/[...all]/`.
 - `src/components/icons/`: lucide-animated icons (see Icons below).
 - `src/components/ui/`: mcoli-ui components only (installed through the shadcn CLI); avoid hand edits. Do not add stock shadcn/ui components.
 - `src/components/layout/`: site chrome (`SiteMenu`, `SiteFooter`). `site-menu.tsx` is a Server Component composing the header from the client islands in `src/components/site-menu/`, which share state through `menu-context.tsx`.
@@ -38,22 +39,37 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - `src/providers/`: global client providers (`SmoothScrollProvider`, `FeedbackModalProvider`).
 - `src/components/feedback-modal/`: the success, error and warning modals, one file each so each can be redesigned alone. Open them from any client component with `useFeedbackModal()` (`showSuccess`, `showError`, `showWarning`).
 - `src/components/registrations/`: the multi-step registration form (`/registrations`, route in `src/app/(registrations)/registrations/`). `state/` holds the store (form state outside React, saved as a draft in `sessionStorage`), the context, the submit hook and the unsaved-changes guard; `steps/` and `fields/` the step bodies and the field components; the stepper, actions, review dialog and `registration-flow.tsx` sit at the root. Fields subscribe to their own part of the state with `useRegistrationField`, so typing in one field does not render the others.
-- `src/lib/registrations/`: registration code shared or server-side: `schema.ts` (Zod, shared with the browser: the Server Action stays the source of truth), `model.ts` (Mongoose, `server-only`), `upload-student-id.ts` (browser upload to Cloudinary). Infrastructure used by more than one feature stays flat in `src/lib/` (`mongodb.ts`, `cloudinary.ts`, `rate-limit.ts`).
-- `src/actions/`: Server Actions (`"use server"`), kept thin: validate input, rate limit, then call a `server-only` module in `src/lib/` (e.g. `src/lib/microbot-api.ts`, `src/lib/cloudinary.ts`), the only place that reads its secrets from `process.env`. Never expose a secret with `NEXT_PUBLIC_`; document every variable in `.env.example`.
-- `src/config/`: site metadata, section anchors, menu links.
+- `src/components/admin/`: the admin area (sign-in and password forms, users table, row actions; `registrations/` for the HR registrations list and page, with the review buttons, the recommendation dialog and the timeline, and the recommendations list). Forms that must be rate limited (sign in, forgot and reset password) call `authClient` (`src/lib/auth/client.ts`) over HTTP; the rest go through Server Actions.
+- `src/lib/auth/`: Better Auth. `auth.ts` (config, `server-only`), `permissions.ts` (roles and permissions, shared with the browser), `session.ts` (`getSession`, `requireStaff`), `emails.ts`, `password.ts`, `schema.ts` (Zod), `client.ts`.
+- `src/lib/registrations/`: registration code shared or server-side: `schema.ts` (Zod, shared with the browser: the Server Action stays the source of truth), `model.ts` (Mongoose, `server-only`), `upload-student-id.ts` (browser upload to Cloudinary), `status.ts` (registration and review states), `list-params.ts` (state of the admin list in the URL, shared), `review.ts` (admin list and page queries, `server-only`), `timeline.ts` (the append-only timeline of reviews and recommendations, and the rules computing a registration's status from it, shared), `timeline-store.ts` (its writes, `server-only`), `review-schema.ts` (Zod, shared), `recommendations.ts` (the sections and departments to recommend to), `recommendation-params.ts` (state of the recommendations list in the URL, shared), `recommendation-list.ts` (its queries, `server-only`). The contact form's code lives in `src/lib/contact/` (`schema.ts`, shared with the browser, and `email.ts`). Infrastructure used by more than one feature stays flat in `src/lib/` (`mongodb.ts`, `cloudinary.ts`, `rate-limit.ts`, `email.ts`).
+- `src/actions/`: Server Actions (`"use server"`), in `admin/` (staff only, guarded by `requireStaff()`) or `public/` (site visitors, rate limited), kept thin: validate input, rate limit, then call a `server-only` module in `src/lib/` (e.g. `src/lib/microbot-api.ts`, `src/lib/cloudinary.ts`), the only place that reads its secrets from `process.env`. Never expose a secret with `NEXT_PUBLIC_`; document every variable in `.env.example`.
+- `src/config/`: site metadata, section anchors, menu links, admin routes (`admin.ts`).
 - `src/const/`: static content constants, one file per section named like the section file (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
 - Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
 
 ## Local services
 
-- `pnpm db:up` starts MongoDB from the root `docker-compose.yml` (`pnpm db:down` stops it); `MONGODB_URI=mongodb://localhost:27017/microclub` in `.env.local`.
-- Student IDs are uploaded by the browser straight to Cloudinary with a signature from `src/actions/sign-student-id-upload.ts` (`authenticated` assets, no public URL), then `src/actions/submit-registration.ts` reads the upload back and saves the registration. Needs the `CLOUDINARY_*` variables.
+- `pnpm db:up` starts MongoDB from the root `docker-compose.yml` as a single-node replica set, like production: Better Auth writes in transactions (`pnpm db:down` stops it); `MONGODB_URI=mongodb://localhost:27017/microclub?replicaSet=rs0` in `.env.local`. Mongoose and Better Auth share one client (`getMongoClient()` in `src/lib/mongodb.ts`).
+- Rate limits are counted in MongoDB, shared by every server instance: the Server Actions call `isRateLimited()` from `src/lib/rate-limit.ts` (`rate_limits` collection, keyed by `clientIp()`), Better Auth uses `rateLimit.storage: "database"` (`rateLimit` collection, on in production only). Both read the client IP from `x-real-ip`, then `x-forwarded-for`.
+- `pnpm db:seed-registrations` fills the local database with fake registrations (emails `@seed.test`, replaced on each run; refuses a non-local `MONGODB_URI`). Their student IDs do not exist, so their page shows "File unavailable".
+- Emails go through `sendEmail()` in `src/lib/email.ts` (Resend, `RESEND_API_KEY`) with the shared branded layout (`renderEmail`). Without a key, development prints them to the server console.
+- Student IDs are uploaded by the browser straight to Cloudinary with a signature from `src/actions/public/sign-student-id-upload.ts` (`authenticated` assets, no public URL), then `src/actions/public/submit-registration.ts` reads the upload back and saves the registration. Needs the `CLOUDINARY_*` variables.
 - Registrations open and close with `REGISTRATIONS_WINDOW` in `src/config/registrations.ts` (`opensAt` / `closesAt`, ISO dates or `null`), read through `registrationsPhase()` in `src/lib/registrations/window.ts`. Outside the window `/registrations` is a 404 and the actions refuse submissions; the menu bar shows "Opening soon" or "Register now" with a countdown (`RegistrationsButton` in `RegistrationsCorner`), or nothing when closed.
+
+## Admin area and auth
+
+- Staff only, email and password, sign-up disabled. Two roles, one per account: `president` manages the HR accounts (`/admin/users`) and nothing else; `hr` reviews the registrations (`/admin/registrations`). `/admin` sends each role to its page. Roles and permissions live in `src/lib/auth/permissions.ts`: check permissions (`registration: ["review"]`), not role names.
+- Guard every admin page and Server Action with `requireStaff({ permissions })` from `src/lib/auth/session.ts`. `src/proxy.ts` only checks that a session cookie exists.
+- HR accounts are created from `/admin/users` with a generated password, emailed, and `mustChangePassword`, which locks the admin area until the user picks their own. Presidents are created and deactivated from the terminal only (`pnpm auth:create-president`, `pnpm auth:deactivate-president`): no role has `user:set-role`, and a `hooks.before` in `auth.ts` keeps a signed-in president from acting on non-HR accounts.
+- Deactivating uses the admin plugin's ban: it blocks sign-in and ends every session.
+- The registrations list is server-rendered from the URL (`?q=&status=&sort=&order=&page=`, see `list-params.ts`): search, filter, sort and page are links or GET forms, no client state. Links to a registration carry the list query, so its back link returns to the same view.
+- Student IDs are served only by `/admin/registrations/[id]/student-id`, which checks the permission and streams the file from Cloudinary (`downloadStudentId`): never send a Cloudinary URL to the browser.
 
 ## Conventions
 
 - Section components are named after their content, **without** a `Section` suffix (`Hero`, `FeaturedEvents`, `Contact`). Files are kebab-case.
 - Pages drawn without the in-page wordmark, the footer and the chatbot (Figma shows only the toggle and the compact logo) live in their own route group with their own layout (`src/app/(registrations)/`), and are listed in `isBarePage()` in `src/config/site.ts` for the wordmark. A page that can be closed returns its 404 from that layout (`notFound()` in a layout is rendered by the root `not-found.tsx`, with no menu bar).
+- A section title's block starts with `pt-below-menu` instead of a fixed top padding (`--title-top` for another value than 6rem): below `lg` it keeps the title below the fixed menu bar, which only slides aside from `lg`.
 - Wrap every landing page section in `SectionContainer` with an id from `homeSections` in `src/config/site.ts`.
 - Keep the landing page order in sync between `homeSections` and `src/app/(site)/page.tsx`.
 - Style only with mcoli-ui tokens from `src/app/globals.css`: semantic colors (`bg-background`, `text-primary`, ...), `font-sans` / `font-heading`, `header-*` / `paragraph-*`. No hardcoded colors or fonts.
@@ -65,7 +81,8 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
-- Before committing, run `pnpm lint`, `pnpm typecheck` and `pnpm format`.
+- Pure rules (statuses, URL params, validation) have unit tests next to them (`*.test.ts`, Vitest, `pnpm test`, also run by CI): add or update one when changing such a rule.
+- Before committing, run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm format`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

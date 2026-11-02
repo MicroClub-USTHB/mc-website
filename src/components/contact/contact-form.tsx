@@ -3,7 +3,7 @@
 import { useActionState, useState, type FormEvent } from "react"
 import { MailIcon, UserRoundIcon } from "lucide-react"
 
-import { sendContactMessage, type ContactState } from "@/actions/send-contact-message"
+import { sendContactMessage, type ContactState } from "@/actions/public/send-contact-message"
 import { SendIcon } from "@/components/icons/send"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
@@ -14,7 +14,7 @@ import {
   readContactValues,
   validateContact,
   type ContactErrors,
-} from "@/lib/contact-validation"
+} from "@/lib/contact/schema"
 
 const INITIAL_STATE: ContactState = { status: "idle" }
 

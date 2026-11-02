@@ -9,6 +9,8 @@
 @custom-variant compact (@media (orientation: portrait) and (max-height: 37.5rem));
 /* Desktop screens shorter than a full design frame (laptops): compact headers. */
 @custom-variant low (@media (width >= 64rem) and (max-height: 56rem));
+/* Where the Event Hub shows its event list: mouse or trackpad, and room for the whole list. */
+@custom-variant event-list (@media (any-pointer: fine) and (width >= 48rem) and (height >= 30rem));
 
 /* Trusted By logo tile width: registered as a length, so it is computed where it is declared
    (from the content box, in `cqw`) and inherited as is, also by the full-bleed marquee row. */
@@ -474,6 +476,19 @@
   h5,
   h6 {
     @apply font-heading;
+  }
+}
+
+/*
+ * Top padding of a section with a title: `--title-top` (6rem by default). Below `lg` the menu bar
+ * has no margin to slide into beside the titles, so they rest below it instead: the bar's bottom
+ * edge plus a gap, when that is lower.
+ */
+@utility pt-below-menu {
+  padding-top: var(--title-top, 6rem);
+
+  @media (width < 64rem) {
+    padding-top: max(var(--title-top, 6rem), calc(var(--menu-top) + var(--menu-size) + 1.5rem));
   }
 }
 

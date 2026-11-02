@@ -1,5 +1,5 @@
 import { JsonLd } from "@/components/shared/json-ld"
-import { ContactTile, PILE_HEIGHT } from "@/components/site-footer/contact-tile"
+import { ContactTile } from "@/components/site-footer/contact-tile"
 import { FallingTiles } from "@/components/site-footer/falling-tiles"
 import { footerLinks, siteConfig } from "@/config/site"
 import { CONTACT } from "@/const/contact"
@@ -25,10 +25,11 @@ const linkClassName =
   "paragraph-lg text-accent-foreground outline-none bg-linear-to-r from-current to-current bg-size-[0%_1px] bg-right-bottom bg-no-repeat transition-[background-size] duration-300 ease-out-quart hover:bg-size-[100%_1px] hover:bg-left-bottom focus-visible:bg-size-[100%_1px] focus-visible:bg-left-bottom motion-reduce:transition-none"
 
 /**
- * Footer (Figma): the contact, social and professional tiles piled up at the bottom left, a
- * vertical line, and the navigation links with the copyright on the right. The tiles are laid out
- * in four tidy rows (social icons, professional icons, email, address) that fall into the pile of
- * the design when the page hits its bottom, then can be dragged and thrown (see `FallingTiles`).
+ * Footer (Figma): the contact, social and professional tiles at the bottom left, a vertical line,
+ * and the navigation links with the copyright on the right. The tiles are laid out in four tidy
+ * rows (social icons, professional icons, email, address) for the server HTML; on the client they
+ * hang scattered at random, fall with physics when the page hits its bottom and stay where they
+ * land, then can be dragged and thrown (see `FallingTiles`).
  *
  * Figma only draws the 1440px frame, so the rest is ours. Units: `--u` is one Figma px of the
  * pile, `--f` one Figma px of the frame's vertical spacing. The design is shown smaller than drawn
@@ -37,7 +38,7 @@ const linkClassName =
  *   plus 26px, as in Figma, and the pile shrinks to fit it; the right one keeps the text at its
  *   design size, down to 768px wide. Landscape phones and tablets fall in here by their width.
  * - Below `md` (phones): one column, the links first and the pile last, scaled to fit between the
- *   page gutters.
+ *   page gutters, with room above the tiles for them to hang scattered before they fall.
  * The footer is the size container `--u` is measured against.
  *
  * Server Component: links and text are in the server-rendered HTML; only the physics is client.
@@ -49,10 +50,7 @@ export function SiteFooter() {
     <footer className="@container overflow-hidden bg-background text-foreground">
       <JsonLd data={FOOTER_JSON_LD} />
       <div className="mx-auto flex max-w-site flex-col [--pad:1rem] [--u:min(0.7px,calc((100cqw-2*var(--pad))/745))] sm:[--pad:1.5rem] md:flex-row md:[--f:0.8px] md:[--pad:calc(8*var(--u))] md:[--u:min(0.7px,calc((58.333cqw+2px)/753))]">
-        <FallingTiles
-          pileHeight={PILE_HEIGHT}
-          className="mt-12 flex flex-col items-start gap-[calc(12*var(--u))] pt-(--hang) pl-(--pad) [--hang:calc(100*var(--u))] max-md:order-last md:mt-0 md:h-auto md:w-[calc(58.333%+26px)] md:shrink-0 md:[--hang:calc(162*var(--f))]"
-        >
+        <FallingTiles className="mt-12 flex flex-col items-start gap-[calc(12*var(--u))] pt-(--hang) pl-(--pad) [--hang:calc(100*var(--u))] max-md:order-last max-md:min-h-[calc(820*var(--u))] md:mt-0 md:h-auto md:w-[calc(58.333%+26px)] md:shrink-0 md:[--hang:calc(162*var(--f))]">
           <ul aria-label="Social media" className="flex gap-[calc(12*var(--u))]">
             {SOCIAL_TILES.map((tile) => (
               <li key={tile.id}>

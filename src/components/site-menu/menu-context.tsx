@@ -5,8 +5,9 @@ import { usePathname, useRouter } from "next/navigation"
 import { useLenis } from "lenis/react"
 import { animate, useMotionValue, type MotionValue } from "motion/react"
 
+import { useTitleAtBar } from "@/components/site-menu/use-title-at-bar"
 import { isBarePage } from "@/config/site"
-import { isDominantSectionDark } from "@/lib/backdrop"
+import { isDominantSectionDark } from "@/components/site-menu/backdrop"
 import { EASE_IN_OUT_QUART, EASE_OUT_QUART } from "@/lib/easing"
 
 /** Menu reveal timings, like wondermake.xyz: wipe in from the left, wipe back out to it. */
@@ -25,6 +26,8 @@ type MenuContextValue = {
   dark: boolean
   /** Whether the in-page wordmark is still level with the fixed toggle. */
   attached: boolean
+  /** Whether the bar is folded and moved into the left margin, out of a section title's way. */
+  docked: boolean
   /** 0 = closed, 1 = open. Drives the panel wipe and the menu wordmark with the same edge. */
   reveal: MotionValue<number>
   toggleRef: RefObject<HTMLButtonElement | null>
@@ -60,6 +63,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
   const [attached, setAttached] = useState(true)
   const [dark, setDark] = useState(false)
   const reveal = useMotionValue(0)
+  const titleAtBar = useTitleAtBar(toggleRef, pathname)
 
   // The "MICRO CLUB" wordmark belongs to the hero, which stays put while About scrolls over it
   // (`SectionStack`): it stays attached to the toggle until About's top edge reaches the bar's
@@ -137,6 +141,7 @@ export function MenuProvider({ children }: { children: React.ReactNode }) {
     dark,
     // Bare pages have no in-page wordmark, so the compact logo is always out.
     attached: attached && !isBarePage(pathname),
+    docked: titleAtBar && !isBarePage(pathname),
     reveal,
     toggleRef,
     wordmarkRef,

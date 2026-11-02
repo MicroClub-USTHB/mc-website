@@ -138,7 +138,7 @@ export const FEATURED_EVENTS: FeaturedEvent[] = [
     cover: cover("Hackiwha", "Hackiwha event photo"),
     logo: logo("Hackiwha.svg", "Hackiwha", 161, 27),
     description:
-      "Hackiwha is an internal hackathon organized by Micro Club now in its 2nd edition. Over 3 days, teams innovate and develop digital solutions for a given problem statement.",
+      "Hackiwha is an internal hackathon organized by Micro Club now in its 3rd edition. Over 3 days, teams innovate and develop digital solutions for a given problem statement.",
     link: [
       { label: "Relive Hackiwha Recap Reel", href: "https://www.instagram.com/reel/DKfiQTZoEwR/" },
     ],
