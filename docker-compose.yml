@@ -1,19 +1,29 @@
-# Local MongoDB for the registrations form: `pnpm db:up`, then use
-# MONGODB_URI=mongodb://localhost:27017/microclub (see .env.example).
+# Local MongoDB for the registrations and the admin accounts: `pnpm db:up`, then use
+# MONGODB_URI=mongodb://localhost:27017/microclub?replicaSet=rs0 (see .env.example).
+# A single-node replica set, like production (Atlas): Better Auth writes users in transactions,
+# which a standalone server does not support. The healthcheck initiates it on first start.
 services:
   mongodb:
     image: mongo:8
     container_name: microclub-mongodb
     restart: unless-stopped
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     ports:
       - "27017:27017"
     volumes:
       - mongodb-data:/data/db
     healthcheck:
-      test: ["CMD", "mongosh", "--quiet", "--eval", "db.adminCommand('ping').ok"]
-      interval: 10s
+      test:
+        [
+          "CMD",
+          "mongosh",
+          "--quiet",
+          "--eval",
+          "try { rs.status().ok } catch { rs.initiate({ _id: 'rs0', members: [{ _id: 0, host: 'localhost:27017' }] }).ok }",
+        ]
+      interval: 5s
       timeout: 5s
-      retries: 5
+      retries: 10
 
 volumes:
   mongodb-data:

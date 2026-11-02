@@ -1,9 +1,9 @@
 "use server"
 
 import { headers } from "next/headers"
-import { Resend } from "resend"
 
 import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact-email"
+import { sendEmail } from "@/lib/email"
 import {
   HONEYPOT_FIELD,
   readContactValues,
@@ -32,7 +32,7 @@ const SEND_ERROR = "We could not send your message. Please try again later."
  * 2. emails a confirmation with a copy of the message to the sender.
  *
  * Spam: a filled honeypot gets a fake success (bots learn nothing), and each IP can send 3 messages
- * per 10 minutes. Needs `CONTACT_RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL`
+ * per 10 minutes. Needs `RESEND_API_KEY`, `CONTACT_TO_EMAIL` and `CONTACT_FROM_EMAIL`
  * (see `.env.example`). The club email decides success; the confirmation only logs.
  */
 export async function sendContactMessage(
@@ -55,39 +55,22 @@ export async function sendContactMessage(
     }
   }
 
-  const apiKey = process.env.CONTACT_RESEND_API_KEY
   const to = process.env.CONTACT_TO_EMAIL
   const from = process.env.CONTACT_FROM_EMAIL
-  if (!apiKey || !to || !from) {
-    console.error(
-      "Contact form: CONTACT_RESEND_API_KEY, CONTACT_TO_EMAIL or CONTACT_FROM_EMAIL is missing",
-    )
+  if (!to || !from) {
+    console.error("Contact form: CONTACT_TO_EMAIL or CONTACT_FROM_EMAIL is missing")
     return { status: "error", message: SEND_ERROR, values }
   }
 
-  const resend = new Resend(apiKey)
-
   try {
-    const { error } = await resend.emails.send({
-      from,
-      to,
-      replyTo: values.email,
-      ...buildClubEmail(values),
-    })
-    if (error) throw new Error(`${error.name}: ${error.message}`)
+    await sendEmail({ from, to, replyTo: values.email, ...buildClubEmail(values) })
   } catch (error) {
     console.error("Contact form: sending to the club failed", error)
     return { status: "error", message: SEND_ERROR, values }
   }
 
   try {
-    const { error } = await resend.emails.send({
-      from,
-      to: values.email,
-      replyTo: to,
-      ...buildConfirmationEmail(values),
-    })
-    if (error) throw new Error(`${error.name}: ${error.message}`)
+    await sendEmail({ from, to: values.email, replyTo: to, ...buildConfirmationEmail(values) })
   } catch (error) {
     console.error("Contact form: sending the confirmation failed", error)
   }

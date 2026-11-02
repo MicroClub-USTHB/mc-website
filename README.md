@@ -11,6 +11,8 @@ Official Micro Club website. It replaces the current site at [microclub.info](ht
 - [Lenis](https://lenis.darkroom.engineering) for smooth scrolling
 - [Motion](https://motion.dev) for animations
 - [lucide-react](https://lucide.dev) icons
+- [MongoDB](https://www.mongodb.com) (Mongoose), [Cloudinary](https://cloudinary.com) and [Zod](https://zod.dev) for the registrations
+- [Better Auth](https://www.better-auth.com) for the staff admin area, [Resend](https://resend.com) for emails
 - [pnpm](https://pnpm.io) package manager
 
 ## Getting started
@@ -24,16 +26,37 @@ pnpm dev
 
 Open [http://localhost:3000](http://localhost:3000).
 
+The registrations and the admin area need MongoDB: copy `.env.example` to `.env.local`, fill it in, and start a local replica set with `pnpm db:up` (Docker).
+
+## Admin area
+
+Staff sign in at `/admin` (Better Auth, email and password, no sign-up). Two roles, one per account:
+
+- **President**: manages the HR accounts on `/admin/users` (create, deactivate, reactivate, reset password, delete). Each new account gets a generated password by email, changed at first sign-in.
+- **HR**: reviews the registrations on `/admin`.
+
+The president's account is created from the terminal. The yearly handover: create the new president, then deactivate the old one.
+
+```bash
+pnpm auth:create-president --name "Full Name" --email president@example.com
+pnpm auth:deactivate-president --email old.president@example.com
+```
+
+The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_FROM_EMAIL`) at production to act there. Without a Resend key, the generated password is printed in the terminal.
+
 ## Scripts
 
-| Command          | Description                        |
-| ---------------- | ---------------------------------- |
-| `pnpm dev`       | Start the dev server               |
-| `pnpm build`     | Build for production               |
-| `pnpm start`     | Serve the production build         |
-| `pnpm lint`      | Run ESLint                         |
-| `pnpm typecheck` | Generate route types and run `tsc` |
-| `pnpm format`    | Format the codebase with Prettier  |
+| Command                          | Description                                         |
+| -------------------------------- | --------------------------------------------------- |
+| `pnpm dev`                       | Start the dev server                                |
+| `pnpm build`                     | Build for production                                |
+| `pnpm start`                     | Serve the production build                          |
+| `pnpm lint`                      | Run ESLint                                          |
+| `pnpm typecheck`                 | Generate route types and run `tsc`                  |
+| `pnpm format`                    | Format the codebase with Prettier                   |
+| `pnpm db:up` / `pnpm db:down`    | Start / stop the local MongoDB replica set (Docker) |
+| `pnpm auth:create-president`     | Create a president account (see Admin area)         |
+| `pnpm auth:deactivate-president` | Deactivate a president account                      |
 
 ## Project structure
 
@@ -45,21 +68,26 @@ src/
 │   ├── robots.ts / sitemap.ts
 │   ├── not-found.tsx         # Global 404 page
 │   ├── global-error.tsx      # Fallback when the root layout fails
-│   └── (site)/               # Public site route group
-│       ├── layout.tsx        # Hamburger menu + footer
-│       ├── error.tsx         # Error boundary for site pages
-│       └── page.tsx          # Landing page (composes the sections in order)
+│   ├── (site)/               # Public site route group
+│   │   ├── layout.tsx        # Hamburger menu + footer
+│   │   ├── error.tsx         # Error boundary for site pages
+│   │   └── page.tsx          # Landing page (composes the sections in order)
+│   ├── (admin)/admin/        # Staff admin area: sign-in, password pages, users
+│   └── api/auth/[...all]/    # Better Auth endpoints
+├── proxy.ts                  # Sends signed-out visitors of /admin to sign in
 ├── components/
 │   ├── ui/                   # mcoli-ui components (generated, do not edit by hand)
 │   ├── layout/               # SiteMenu (header + hamburger menu), SiteFooter
 │   ├── site-menu/            # Menu sub-components (bar, panel, links, context)
+│   ├── admin/                # Admin area components (forms, users table)
 │   ├── shared/               # Reusable building blocks (SectionContainer, JsonLd)
 │   └── <section>/            # Sub-components of one section (e.g. statistics/metric-card.tsx)
 ├── sections/                 # One file per landing page section (hero.tsx, statistics.tsx, ...)
 ├── providers/                # SmoothScrollProvider (Lenis + Motion)
-├── config/site.ts            # Site metadata, section anchors, menu links
+├── config/                   # Site metadata, section anchors, menu links, admin routes
 ├── const/                    # Static content per section (e.g. statistics.ts)
-└── lib/utils.ts              # `cn` helper
+├── lib/auth/                 # Better Auth config, roles and permissions, session guards, emails
+└── lib/                      # `cn` helper, email, MongoDB and other server modules
 ```
 
 ## Landing page sections
