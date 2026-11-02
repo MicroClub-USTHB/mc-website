@@ -20,6 +20,7 @@
   "dependencies": {
     "@base-ui/react": "^1.8.0",
     "@better-auth/mongo-adapter": "^1.7.12",
+    "@hookform/resolvers": "^7.0.1",
     "@tanstack/react-table": "^9.3.1",
     "@vercel/analytics": "^2.0.1",
     "better-auth": "^1.7.12",
@@ -36,6 +37,7 @@
     "react": "19.2.8",
     "react-day-picker": "^10.0.2",
     "react-dom": "19.2.8",
+    "react-hook-form": "^7.91.0",
     "resend": "^6.32.1",
     "server-only": "^0.0.1",
     "shadcn": "^4.21.1",
