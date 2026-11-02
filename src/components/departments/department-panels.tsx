@@ -223,7 +223,10 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
               // Clicking anywhere on the open card closes it (its tab already does).
               onClick={isOpen ? (event) => closeOnClick(event) : undefined}
               className={cn(
-                "relative isolate flex flex-col overflow-hidden border border-border bg-background",
+                "group/panel relative isolate flex flex-col overflow-hidden border border-border bg-background",
+                // Hover on a closed strip (devices with a pointer): framed and its tab lit, colors
+                // only, so the strips and their art never move.
+                "transition-[border-color] duration-300 ease-out-quart",
                 // The accordion bar lays out the strip art (see `barTransform` in
                 // `scripts/department-art.mjs`), in the 135px strip's units: `--bu` is one in
                 // art units (the art spans the panel, 610 units), `--bl` the label's width,
@@ -233,7 +236,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                 "max-lg:[--bw:8rem] sm:max-lg:[--bw:10rem]",
                 "max-lg:[--bl:var(--js-bl,tan(atan2(var(--bw)*135,var(--bh))))] max-lg:[--bu:var(--js-bu,tan(atan2(var(--bh)*610,var(--pw,100cqw)*135)))]",
                 "max-lg:[--bax:var(--js-bax,clamp(0.4,tan(atan2((var(--pw,100cqw)-var(--bw))*135,var(--bh)*785)),1))] max-lg:[--bfit:var(--js-bfit,clamp(0.55,var(--bax)*1.25,1))]",
-                "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width]",
+                "lg:w-(--strip) lg:shrink-0 lg:motion-safe:transition-[width,border-color]",
                 transition,
                 art.base,
                 isOpen
@@ -241,7 +244,7 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                       "cursor-pointer max-lg:[--hh:3.5rem] lg:w-[calc(37.875rem*var(--k))]",
                       art.open,
                     )
-                  : art.closed,
+                  : cn("hover:border-primary", art.closed),
               )}
             >
               {/* First in the DOM (accordion header), the footer tab of the row from `lg`. */}
@@ -263,10 +266,12 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   {/* The tab: the bar's label at its start, the header once open. */}
                   <span
                     className={cn(
-                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width] sm:paragraph-xl",
+                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width,background-color,color] sm:paragraph-xl",
                       "max-lg:border-r lg:w-full lg:justify-center lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
                       transition,
-                      isOpen && "w-full border-b max-lg:border-r-0 lg:border-b-0",
+                      isOpen
+                        ? "w-full border-b max-lg:border-r-0 lg:border-b-0"
+                        : "group-hover/panel:bg-primary group-hover/panel:text-primary-foreground",
                     )}
                   >
                     {panel.tab}
