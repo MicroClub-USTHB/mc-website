@@ -1,6 +1,9 @@
 import type { Metadata } from "next"
+import { cookies } from "next/headers"
 
 import { AdminHeader } from "@/components/admin/admin-header"
+import { AdminTheme } from "@/components/admin/admin-theme"
+import { ADMIN_THEME_COOKIE } from "@/config/admin"
 import { FeedbackModalProvider } from "@/providers/feedback-modal-provider"
 
 export const metadata: Metadata = {
@@ -8,12 +11,19 @@ export const metadata: Metadata = {
   robots: { index: false, follow: false },
 }
 
-/** Staff admin area: its own header, without the site menu, footer and chatbot. */
-export default function AdminLayout({ children }: LayoutProps<"/admin">) {
+/**
+ * Staff admin area: its own header, without the site menu, footer and chatbot, in the theme each
+ * staff member picked (light by default, see `AdminTheme`).
+ */
+export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
+  const theme = (await cookies()).get(ADMIN_THEME_COOKIE)?.value === "dark" ? "dark" : "light"
+
   return (
-    <FeedbackModalProvider>
-      <AdminHeader />
-      <main className="flex flex-1 flex-col bg-background">{children}</main>
-    </FeedbackModalProvider>
+    <AdminTheme initialTheme={theme}>
+      <FeedbackModalProvider>
+        <AdminHeader />
+        <main className="flex flex-1 flex-col bg-background">{children}</main>
+      </FeedbackModalProvider>
+    </AdminTheme>
   )
 }
