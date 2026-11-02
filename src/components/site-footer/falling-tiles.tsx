@@ -36,10 +36,14 @@ const MAX_FALL_STEPS = 60 * 8
 /** Speed (px/s) the page must hit its bottom with to knock the tiles down. */
 const IMPACT_SPEED = 50
 /** Height bands (fractions of the box) the tiles hang in: the icons above the wide tiles. */
-const HANG_BANDS = { icon: [0.02, 0.46], wide: [0.5, 0.94] } as const
+const HANG_BANDS = { icon: [0, 0.58], wide: [0.6, 0.97] } as const
+/** Width of the centered area the icons hang in (fraction of the box), wider when they need it. */
+const ICON_AREA = 0.8
+/** How far (fraction of the free width) the wide tiles may hang off the center. */
+const WIDE_SHIFT = 0.3
 /** Most tilt (rad) of a hanging tile. */
 const HANG_TILT = { icon: 0.26, wide: 0.04 } as const
-/** Random draws kept per tile: candidate places, tried in turn until one is free. */
+/** Random draws kept per tile: one per candidate arrangement, the best one is kept. */
 const DRAWS = 120
 
 /** One random draw (0..1 each) of a hanging tile: its place in its band and its tilt. */
@@ -53,8 +57,9 @@ type Draw = { x: number; y: number; tilt: number }
  * `SmoothScrollProvider`). Then they are released one after the other, the lowest first, and
  * really fall (our own physics, `src/lib/box-physics.ts`, run on Motion's frame loop): they tumble,
  * bump into each other and stay where they land. A slow arrival leaves them hanging.
- * Once landed, the tiles can be dragged and thrown with a mouse; the first grab wakes the physics.
- * A press without moving stays a click on the link.
+ * From the moment they fall, the tiles can be dragged and thrown with a mouse: while falling, without
+ * waiting for them to settle, and once landed (the first grab frees them all). Hanging, a press is
+ * a plain click; a press without moving always stays a click on the link.
  *
  * Tiles keep their place in the layout and are moved with `transform` only (the box does not
  * reflow). With reduced motion, they are shown landed at once. On resize, they are placed again
@@ -134,49 +139,109 @@ const reach = ({ width, height }: Size) => Math.max(width, height) / 2
 const TILT_SPAN = Math.cos(HANG_TILT.icon) + Math.sin(HANG_TILT.icon)
 
 /**
- * Hanging places in a `width` × `height` box. The wide tiles (email, address) each get their own
- * slice of the lower band, in page order, so they never overlap; each icon takes the first of its
- * random draws that keeps it clear of the icons already placed (its last draw when none is), in
- * the upper band. Same draws, same places: a resize keeps the arrangement in proportion.
+ * Hanging places in a `width` × `height` box.
+ *
+ * - The wide tiles (email, address) each get their own slice of the lower band, in page order, so
+ *   they never overlap, near the center (`WIDE_SHIFT`).
+ * - The icons are spread over the upper band in the centered `ICON_AREA`, without lines or
+ *   shapes: each candidate arrangement gives every icon its own column and its own row (a Latin
+ *   hypercube: no two icons share an x or a y), jittered within them. Of the candidates, the one
+ *   kept has no overlap, then the widest gaps and the fewest three icons in a line.
+ *
+ * Same draws, same places: a resize keeps the arrangement in proportion.
  */
 function scatter(sizes: Size[], draws: Draw[][], width: number, height: number): Pose[] {
   const isWide = (size: Size) => size.width > size.height * 1.5
   const wideTiles = sizes.flatMap((size, i) => (isWide(size) ? [i] : []))
+  const icons = sizes.flatMap((size, i) => (isWide(size) ? [] : [i]))
   const places: Pose[] = []
-  const icons: number[] = []
-
-  /** A place for `size` from `draw`, within the band from `top` to `bottom` (px). */
-  const placeIn = (size: Size, draw: Draw, top: number, bottom: number, tilt: number): Pose => {
-    const halfW = Math.min(size.width / 2, width / 2)
-    const minY = top + size.height / 2
-    const maxY = Math.max(bottom - size.height / 2, minY)
-    return {
-      x: halfW + draw.x * Math.max(width - 2 * halfW, 0),
-      y: minY + draw.y * (maxY - minY),
-      angle: (draw.tilt - 0.5) * 2 * tilt,
-    }
-  }
 
   const [wideTop, wideBottom] = HANG_BANDS.wide.map((fraction) => fraction * height)
   const slice = (wideBottom - wideTop) / Math.max(wideTiles.length, 1)
   wideTiles.forEach((i, rank) => {
+    const { width: w, height: h } = sizes[i]
+    const draw = draws[i][0]
+    const free = Math.max(width - w, 0)
     const top = wideTop + rank * slice
-    places[i] = placeIn(sizes[i], draws[i][0], top, top + slice, HANG_TILT.wide)
+    places[i] = {
+      x: width / 2 + (draw.x - 0.5) * WIDE_SHIFT * free,
+      y: top + h / 2 + draw.y * Math.max(slice - h, 0),
+      angle: (draw.tilt - 0.5) * 2 * HANG_TILT.wide,
+    }
   })
 
+  if (icons.length === 0) return places
+  const side = Math.max(...icons.map((i) => reach(sizes[i]) * 2))
+  const span = side * TILT_SPAN
+  // The centered area, widened when the icons would not fit side by side in it.
+  // Kept clear of the edges and of the wide tiles by a tilted icon's box (`span`), not its side.
+  const areaWidth = Math.min(width - span, Math.max(width * ICON_AREA, icons.length * span) - span)
+  const areaLeft = (width - areaWidth) / 2
   const [iconTop, iconBottom] = HANG_BANDS.icon.map((fraction) => fraction * height)
-  sizes.forEach((size, i) => {
-    if (isWide(size)) return
-    // Clear when their boxes, grown for the tilt, do not overlap on one of the axes.
-    const clear = (place: Pose) =>
-      icons.every((j) => {
-        const span = (reach(size) + reach(sizes[j])) * TILT_SPAN
-        return Math.abs(place.x - places[j].x) > span || Math.abs(place.y - places[j].y) > span
-      })
-    const options = draws[i].map((draw) => placeIn(size, draw, iconTop, iconBottom, HANG_TILT.icon))
-    places[i] = options.find(clear) ?? options[options.length - 1]
-    icons.push(i)
-  })
+  const areaTop = iconTop + span / 2
+  const areaHeight = Math.max(iconBottom - iconTop - span, 0)
+  const count = icons.length
+
+  /** Candidate `a`: columns and rows from the order of the icons' draws, jittered inside them. */
+  const candidate = (a: number) => {
+    const rank = (key: (draw: Draw) => number) => {
+      const order = [...icons].sort((p, q) => key(draws[p][a]) - key(draws[q][a]))
+      return (i: number) => order.indexOf(i)
+    }
+    const column = rank((draw) => draw.x)
+    const row = rank((draw) => draw.y)
+    return icons.map((i) => {
+      const jitter = draws[i][(a + 1) % DRAWS]
+      return {
+        x: areaLeft + ((column(i) + 0.3 + jitter.x * 0.4) / count) * areaWidth,
+        y: areaTop + ((row(i) + 0.3 + jitter.y * 0.4) / count) * areaHeight,
+        angle: (draws[i][a].tilt - 0.5) * 2 * HANG_TILT.icon,
+      }
+    })
+  }
+
+  /** Overlaps (boxes grown for the tilt), smallest gap, and near-straight triples. */
+  const judge = (points: Pose[]) => {
+    let overlaps = 0
+    let gap = Infinity
+    for (let p = 0; p < points.length; p++) {
+      for (let q = p + 1; q < points.length; q++) {
+        const dx = Math.abs(points[p].x - points[q].x)
+        const dy = Math.abs(points[p].y - points[q].y)
+        if (dx < span && dy < span) overlaps++
+        gap = Math.min(gap, Math.hypot(dx, dy))
+      }
+    }
+    let lines = 0
+    for (let p = 0; p < points.length; p++) {
+      for (let q = p + 1; q < points.length; q++) {
+        for (let r = q + 1; r < points.length; r++) {
+          const [A, B, C] = [points[p], points[q], points[r]]
+          const area = Math.abs((B.x - A.x) * (C.y - A.y) - (C.x - A.x) * (B.y - A.y)) / 2
+          const longest = Math.max(
+            Math.hypot(B.x - A.x, B.y - A.y),
+            Math.hypot(C.x - A.x, C.y - A.y),
+            Math.hypot(C.x - B.x, C.y - B.y),
+          )
+          if (area / (longest * longest) < 0.04) lines++
+        }
+      }
+    }
+    return { overlaps, score: gap / span - lines * 0.25 }
+  }
+
+  let best = { points: candidate(0), ...judge(candidate(0)) }
+  for (let a = 1; a < DRAWS; a++) {
+    const points = candidate(a)
+    const verdict = judge(points)
+    if (
+      verdict.overlaps < best.overlaps ||
+      (verdict.overlaps === best.overlaps && verdict.score > best.score)
+    ) {
+      best = { points, ...verdict }
+    }
+  }
+  icons.forEach((i, k) => (places[i] = best.points[k]))
   return places
 }
 
@@ -270,7 +335,6 @@ function startPile(box: HTMLElement, draws: Draw[][], { animate }: { animate: bo
     for (const tile of tiles) tile.pinned = !live
     remember()
     render()
-    if (animate) box.dataset.pile = ""
   }
 
   /** Lets the released tiles come to rest at once, without animation. */
@@ -283,6 +347,8 @@ function startPile(box: HTMLElement, draws: Draw[][], { animate }: { animate: bo
     if (phase !== "hung") return
     phase = "falling"
     steps = 0
+    // Grab cursors from the fall on: the tiles can be dragged while they fall and once landed.
+    if (animate) box.dataset.pile = ""
     if (!animate) {
       for (const tile of tiles) tile.pinned = false
       settle()
@@ -354,8 +420,8 @@ function startPile(box: HTMLElement, draws: Draw[][], { animate }: { animate: bo
   }
 
   function onPointerDown(event: PointerEvent) {
-    // Only the landed tiles can be grabbed: before and during the fall a press is a plain click.
-    if (phase !== "landed") return
+    // Hanging, a press is a plain click: the tiles can be grabbed from the moment they fall.
+    if (phase === "hung") return
     if (event.pointerType !== "mouse" || event.button !== 0) return
     if (!elements.some((element) => element.contains(event.target as Node))) return
     const point = toBox(event)
@@ -363,8 +429,11 @@ function startPile(box: HTMLElement, draws: Draw[][], { animate }: { animate: bo
     const index = tileAt(world, point)
     if (index === -1) return
     event.preventDefault() // No text selection or native link drag.
-    goLive()
+    // Landed, the first grab frees them all; falling, the grabbed tile is freed if not yet released.
+    if (phase === "landed") goLive()
+    else tiles[index].pinned = false
     startDrag(world, tiles[index], point)
+    run()
     drag = { start: point, moved: false }
     box.dataset.dragging = ""
     // Captured by the tile, so the click (if any) still lands on its link.
@@ -407,7 +476,9 @@ function startPile(box: HTMLElement, draws: Draw[][], { animate }: { animate: bo
   let running = false
   let onScreen = true
   function tick({ delta }: { delta: number }) {
-    if (!onScreen || phase === "hung" || (phase === "landed" && (!live || isAsleep(world)))) {
+    // Nothing moves: every tile pinned, or the free ones at rest and none held.
+    const still = !world.drag && (tiles.every((tile) => tile.pinned) || isAsleep(world))
+    if (!onScreen || (phase !== "falling" && still)) {
       if (phase === "landed" && live) remember()
       stop()
       return
