@@ -1,6 +1,6 @@
 import { siteConfig } from "@/config/site"
 import { emailField, emailLink, escapeHtml, renderEmail } from "@/lib/email"
-import type { ContactValues } from "@/lib/contact-validation"
+import type { ContactValues } from "@/lib/contact/schema"
 
 /** The submitted fields, shown in both messages. */
 function contactRows(values: ContactValues) {

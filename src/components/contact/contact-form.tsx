@@ -14,7 +14,7 @@ import {
   readContactValues,
   validateContact,
   type ContactErrors,
-} from "@/lib/contact-validation"
+} from "@/lib/contact/schema"
 
 const INITIAL_STATE: ContactState = { status: "idle" }
 

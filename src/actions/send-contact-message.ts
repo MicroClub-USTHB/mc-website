@@ -2,7 +2,7 @@
 
 import { headers } from "next/headers"
 
-import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact-email"
+import { buildClubEmail, buildConfirmationEmail } from "@/lib/contact/email"
 import { sendEmail } from "@/lib/email"
 import {
   HONEYPOT_FIELD,
@@ -10,7 +10,7 @@ import {
   validateContact,
   type ContactErrors,
   type ContactValues,
-} from "@/lib/contact-validation"
+} from "@/lib/contact/schema"
 import { clientIp, isRateLimited } from "@/lib/rate-limit"
 
 export type ContactState = {
