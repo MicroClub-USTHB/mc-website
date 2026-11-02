@@ -2,6 +2,8 @@ import "server-only"
 
 import mongoose, { Schema, type InferSchemaType } from "mongoose"
 
+import { REGISTRATION_STATUSES } from "@/lib/registrations/status"
+
 const registrationDocument = new Schema(
   {
     firstName: { type: String, required: true, trim: true },
@@ -38,10 +40,14 @@ const registrationDocument = new Schema(
       github: { type: String, default: "" },
     },
     skills: { type: [String], required: true },
-    status: { type: String, enum: ["pending", "accepted", "rejected"], default: "pending" },
+    status: { type: String, enum: REGISTRATION_STATUSES, default: "pending" },
   },
   { timestamps: true },
 )
+
+// The admin list: newest first by default, often filtered by status.
+registrationDocument.index({ createdAt: -1 })
+registrationDocument.index({ status: 1, createdAt: -1 })
 
 export type RegistrationDocument = InferSchemaType<typeof registrationDocument>
 

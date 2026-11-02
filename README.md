@@ -33,7 +33,7 @@ The registrations and the admin area need MongoDB: copy `.env.example` to `.env.
 Staff sign in at `/admin` (Better Auth, email and password, no sign-up). Two roles, one per account:
 
 - **President**: manages the HR accounts on `/admin/users` (create, deactivate, reactivate, reset password, delete). Each new account gets a generated password by email, changed at first sign-in.
-- **HR**: reviews the registrations on `/admin`.
+- **HR**: reviews the registrations on `/admin/registrations`: a server-side list (search, status filter, sort, pages) and a page per registration with the student ID.
 
 The president's account is created from the terminal. The yearly handover: create the new president, then deactivate the old one.
 
@@ -55,6 +55,7 @@ The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_
 | `pnpm typecheck`                 | Generate route types and run `tsc`                  |
 | `pnpm format`                    | Format the codebase with Prettier                   |
 | `pnpm db:up` / `pnpm db:down`    | Start / stop the local MongoDB replica set (Docker) |
+| `pnpm db:seed-registrations`     | Fill the local database with fake registrations     |
 | `pnpm auth:create-president`     | Create a president account (see Admin area)         |
 | `pnpm auth:deactivate-president` | Deactivate a president account                      |
 

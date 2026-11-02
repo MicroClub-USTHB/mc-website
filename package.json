@@ -12,6 +12,7 @@
     "format:check": "prettier --check .",
     "db:up": "docker compose up -d mongodb",
     "db:down": "docker compose down",
+    "db:seed-registrations": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-registrations.ts",
     "auth:create-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/create-president.ts",
     "auth:deactivate-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/deactivate-president.ts"
   },
