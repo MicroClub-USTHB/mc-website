@@ -28,8 +28,9 @@ const FOLD_DELAY = 300
  * The bar, positioned from the width of its wrapper (a container, so without the scrollbar).
  * Docked, it sits in the middle of the left margin, the space outside the section titles (`gutter`
  * is the sections' side padding, `edge` what the screen has beyond the site width). The toggle is
- * wider than that margin around 1440px, so it shrinks to fit, down to its 48px minimum: below `lg`
- * the margin is too narrow for it, and it stops 4px from the screen edge.
+ * wider than that margin around 1440px, so it shrinks to fit, down to its 48px minimum. It only
+ * docks from `lg`: below, the margin is too narrow for it and the titles rest below the bar
+ * (`pt-below-menu`).
  */
 const BAR = cn(
   "[--menu-gutter:1rem] sm:[--menu-gutter:1.5rem] lg:[--menu-gutter:5rem]",

@@ -6,13 +6,19 @@ import { homeSections } from "@/config/site"
 const LEAD = 48
 
 /**
+ * Screens where the bar slides aside: below `lg` there is no margin beside the titles for it, and
+ * they rest below the bar instead (`pt-below-menu`).
+ */
+const DOCKING = "(min-width: 64rem)"
+
+/**
  * Whether a section title is at the fixed menu bar. Sections of a `SectionStack` overlap, and a
  * covered section keeps its title in place under the sections scrolling over it, so titles only
  * count from the section on top down: that section is the last one in page order crossing the
  * bar's top edge, and the next one may bring its title in before it gets there. Two
  * IntersectionObservers report the crossings, a 1px line for the sections and the bar's height for
  * the titles, so scrolling does no layout reads. Rebuilt on resize, as the bar follows the screen
- * size, and on navigation (the sections are only on the landing page).
+ * size, and on navigation (the sections are only on the landing page). Off below `lg`.
  */
 export function useTitleAtBar(
   barRef: React.RefObject<HTMLElement | null>,
@@ -30,6 +36,11 @@ export function useTitleAtBar(
     let observers: IntersectionObserver[] = []
     const observe = () => {
       observers.forEach((observer) => observer.disconnect())
+      observers = []
+      if (!window.matchMedia(DOCKING).matches) {
+        setAtBar(false)
+        return
+      }
       const { top, bottom } = bar.getBoundingClientRect()
       const height = window.innerHeight
       const crossing = new Set<Element>()
