@@ -9,7 +9,7 @@ import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
 import { adminRoutes } from "@/config/admin"
 import { authClient } from "@/lib/auth/client"
-import { fieldErrors, passwordPairSchema } from "@/lib/auth/schema"
+import { fieldErrors, PASSWORD_LIMITS, passwordPairSchema } from "@/lib/auth/schema"
 
 type Field = "newPassword" | "confirmPassword"
 
@@ -61,7 +61,7 @@ export function ResetPasswordForm({ token }: { token: string }) {
         name="newPassword"
         type="password"
         autoComplete="new-password"
-        description="At least 12 characters."
+        description={`At least ${PASSWORD_LIMITS.min} characters.`}
         error={errors.newPassword}
         required
       />

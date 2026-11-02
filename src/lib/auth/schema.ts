@@ -1,7 +1,7 @@
 import { z } from "zod"
 
 /** Same bounds as the Better Auth config (`minPasswordLength`, default max length). */
-export const PASSWORD_LIMITS = { min: 12, max: 128 } as const
+export const PASSWORD_LIMITS = { min: 8, max: 128 } as const
 
 export const newPasswordSchema = z
   .string()

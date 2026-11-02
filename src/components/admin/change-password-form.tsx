@@ -6,6 +6,7 @@ import { changePassword, type ChangePasswordState } from "@/actions/admin/change
 import { FormMessage } from "@/components/admin/form-message"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
+import { PASSWORD_LIMITS } from "@/lib/auth/schema"
 
 const INITIAL_STATE: ChangePasswordState = {}
 
@@ -29,7 +30,7 @@ export function ChangePasswordForm() {
         name="newPassword"
         type="password"
         autoComplete="new-password"
-        description="At least 12 characters."
+        description={`At least ${PASSWORD_LIMITS.min} characters.`}
         error={errors.newPassword}
         required
       />

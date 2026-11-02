@@ -9,6 +9,7 @@ import { after } from "next/server"
 
 import { passwordChangedEmail, resetPasswordEmail, sendAuthEmail } from "@/lib/auth/emails"
 import { ac, roles } from "@/lib/auth/permissions"
+import { PASSWORD_LIMITS } from "@/lib/auth/schema"
 import { getMongoClient } from "@/lib/mongodb"
 import { ensureRateLimitIndexes } from "@/lib/rate-limit"
 
@@ -57,7 +58,8 @@ export const auth = betterAuth({
   emailAndPassword: {
     enabled: true,
     disableSignUp: true,
-    minPasswordLength: 12,
+    minPasswordLength: PASSWORD_LIMITS.min,
+    maxPasswordLength: PASSWORD_LIMITS.max,
     resetPasswordTokenExpiresIn: 60 * 60,
     revokeSessionsOnPasswordReset: true,
     sendResetPassword: async ({ user, url }) => {
