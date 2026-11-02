@@ -13,6 +13,12 @@ import paper from "@/assets/hero/photobooth/paper.webp"
 import photoOne from "@/assets/hero/photobooth/photo-1.webp"
 import photoTwo from "@/assets/hero/photobooth/photo-2.webp"
 
+/**
+ * Drawn at 1.8× the Figma size (`zoom`, so it takes that room in the canvas too): the sizes below
+ * stay the Figma ones, the images' `sizes` are the drawn ones.
+ */
+const ZOOM = 1.8
+
 /** Strip position (px from the top of the printer) of the three Figma variants. */
 const STRIP_OFFSETS = [-173, -109, 6.08]
 
@@ -27,7 +33,7 @@ function Booth({ className }: { className?: string }) {
     <Image
       src={booth}
       alt=""
-      sizes="241px"
+      sizes={`${241 * ZOOM}px`}
       draggable={false}
       className={cn("absolute top-0 left-0 h-[53px] w-[241px] max-w-none", className)}
     />
@@ -47,6 +53,7 @@ export function Photobooth() {
       type="button"
       onClick={() => setStep((current) => (current + 1) % STRIP_OFFSETS.length)}
       aria-label={`Print the photo strip, step ${step + 1} of ${STRIP_OFFSETS.length}`}
+      style={{ zoom: ZOOM }}
       className="group/booth flex w-[241px] cursor-pointer flex-col items-center gap-4 outline-none"
     >
       <span
@@ -68,13 +75,20 @@ export function Photobooth() {
           transition={{ duration: 0.6, ease: EASE_OUT_QUART }}
           className="absolute top-0 left-[calc(50%+0.94px)] flex -translate-x-1/2 flex-col items-center gap-[12.764px] bg-primary-foreground px-[12.764px] pt-[25.528px] pb-[6.382px] drop-shadow-[0_1.915px_5.106px_rgb(0_0_0/0.05)]"
         >
-          <Image src={paper} alt="" fill sizes="115px" draggable={false} className="object-cover" />
+          <Image
+            src={paper}
+            alt=""
+            fill
+            sizes={`${115 * ZOOM}px`}
+            draggable={false}
+            className="object-cover"
+          />
           {PHOTOS.map((photo) => (
             <Image
               key={photo.alt}
               src={photo.src}
               alt={photo.alt}
-              sizes="90px"
+              sizes={`${90 * ZOOM}px`}
               draggable={false}
               className="relative h-[102.111px] w-[89.347px] max-w-none object-cover"
             />

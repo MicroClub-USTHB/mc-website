@@ -7,8 +7,9 @@ import { cn } from "@/lib/utils"
 
 /**
  * One activity row (Figma "MC Community"): number and title. The active row is highlighted and
- * shows its description; the others are cut to a fixed height that only reveals the top of the
- * title. The title button stretches over the whole row (`after:inset-0`).
+ * shows its description; the others keep a fixed height, the title with some room under it (three
+ * rows: they take more of the screen than the original four). The title button stretches over
+ * the whole row (`after:inset-0`).
  *
  * Its open height is the height of its content (`--open-h`), measured by a ResizeObserver only
  * when that content resizes, so the row can transition between two lengths in CSS.
@@ -50,7 +51,7 @@ export function ActivityItem({
       className={cn(
         "relative grid grid-cols-[3rem_1fr] items-start overflow-hidden border-b border-border sm:grid-cols-[8rem_1fr] lg:grid-cols-[12.5rem_1fr]",
         "transition-[height] duration-400 ease-out-quart motion-reduce:transition-none",
-        active ? "h-(--open-h,auto)" : "h-10 sm:h-11 lg:h-13.25",
+        active ? "h-(--open-h,auto)" : "h-14 sm:h-16 lg:h-20",
       )}
     >
       <span
