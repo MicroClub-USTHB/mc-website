@@ -81,7 +81,8 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - Animations: import from `motion/react` (never `framer-motion`). In Server Components use `import * as motion from "motion/react-client"`. Do not add CSS `scroll-behavior: smooth`; Lenis handles scrolling. Use `useLenis()` for programmatic scroll.
 - Server Components by default; add `"use client"` only where interactivity requires it.
 - Base UI composition uses the `render` prop (not Radix `asChild`), e.g. `<Button nativeButton={false} render={<Link href="/" />}>`.
-- Before committing, run `pnpm lint`, `pnpm typecheck` and `pnpm format`.
+- Pure rules (statuses, URL params, validation) have unit tests next to them (`*.test.ts`, Vitest, `pnpm test`, also run by CI): add or update one when changing such a rule.
+- Before committing, run `pnpm lint`, `pnpm typecheck`, `pnpm test` and `pnpm format`.
 
 <!-- BEGIN:nextjs-agent-rules -->
 

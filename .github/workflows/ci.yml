@@ -23,6 +23,7 @@ jobs:
       - run: pnpm format:check
       - run: pnpm lint
       - run: pnpm typecheck
+      - run: pnpm test
       - run: pnpm build
         env:
           # Placeholders: the build imports the auth config, which needs them but connects to nothing.

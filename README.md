@@ -52,6 +52,7 @@ The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_
 | `pnpm build`                     | Build for production                                |
 | `pnpm start`                     | Serve the production build                          |
 | `pnpm lint`                      | Run ESLint                                          |
+| `pnpm test`                      | Run the unit tests (Vitest)                         |
 | `pnpm typecheck`                 | Generate route types and run `tsc`                  |
 | `pnpm format`                    | Format the codebase with Prettier                   |
 | `pnpm db:up` / `pnpm db:down`    | Start / stop the local MongoDB replica set (Docker) |
