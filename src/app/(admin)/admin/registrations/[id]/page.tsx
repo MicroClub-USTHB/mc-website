@@ -92,7 +92,7 @@ export default async function RegistrationPage({
   const { timeline } = registration
   const reviews = currentReviews(timeline)
   const ownReview = reviews.find((review) => review.actorId === user.id)
-  const recommendation = currentRecommendation(timeline, user.id)
+  const recommendation = currentRecommendation(timeline)
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -151,6 +151,7 @@ export default async function RegistrationPage({
                 recommendation && {
                   target: recommendation.target,
                   note: recommendation.note ?? "",
+                  by: recommendation.actorId === user.id ? "you" : recommendation.actorName,
                 }
               }
             />

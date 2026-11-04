@@ -42,11 +42,17 @@ function describe(entry: TimelineEntry, previous: TimelineEntry[]) {
     return { verb: "reviewed", badge: label, tone, icon, text: entry.reason }
   }
   if (entry.kind === "recommendation-removed") {
-    return { verb: "removed their recommendation", tone: "secondary" as const, icon: StarOffIcon }
+    return { verb: "removed the recommendation", tone: "secondary" as const, icon: StarOffIcon }
   }
-  const changed = currentRecommendation(previous, entry.actorId) !== undefined
+  // One recommendation per application: a new one changes or replaces the one before it.
+  const before = currentRecommendation(previous)
+  const verb = !before
+    ? "recommended to"
+    : before.actorId === entry.actorId
+      ? "changed their recommendation to"
+      : `replaced ${before.actorName}'s recommendation with`
   return {
-    verb: changed ? "changed their recommendation to" : "recommended to",
+    verb,
     badge: recommendationTargetName(entry.target),
     tone: "default" as const,
     icon: StarIcon,

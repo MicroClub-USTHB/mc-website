@@ -91,8 +91,13 @@ export async function recordRecommendation(
   const timeline = await readTimeline(id)
   if (!timeline) return failure(NOT_FOUND)
 
-  const recommendation = currentRecommendation(timeline, actor.id)
-  if (recommendation?.target === target && (recommendation.note ?? "") === note) return SUCCESS
+  // Any HR member's recommendation replaces the current one; the same one again changes nothing.
+  const recommendation = currentRecommendation(timeline)
+  const same =
+    recommendation?.actorId === actor.id &&
+    recommendation.target === target &&
+    (recommendation.note ?? "") === note
+  if (same) return SUCCESS
 
   return append(id, timeline, {
     kind: "recommendation",
@@ -104,10 +109,11 @@ export async function recordRecommendation(
   })
 }
 
-export async function removeRecommendationOf(id: string, actor: TimelineActor) {
+/** Clears the registration's recommendation, whoever made it (it stays in the timeline). */
+export async function removeRecommendation(id: string, actor: TimelineActor) {
   const timeline = await readTimeline(id)
   if (!timeline) return failure(NOT_FOUND)
-  if (!currentRecommendation(timeline, actor.id)) return SUCCESS
+  if (!currentRecommendation(timeline)) return SUCCESS
 
   return append(id, timeline, {
     kind: "recommendation-removed",

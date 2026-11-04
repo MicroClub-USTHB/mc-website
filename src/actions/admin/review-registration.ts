@@ -14,7 +14,7 @@ import {
 import {
   recordRecommendation,
   recordReview,
-  removeRecommendationOf,
+  removeRecommendation as clearRecommendation,
   type TimelineActor,
   type TimelineResult,
 } from "@/lib/registrations/timeline-store"
@@ -62,5 +62,5 @@ export async function removeRecommendation(id: string) {
   const actor = await reviewer()
   const parsedId = registrationIdSchema.safeParse(id)
   if (!parsedId.success) return INVALID
-  return applyChange(() => removeRecommendationOf(parsedId.data, actor))
+  return applyChange(() => clearRecommendation(parsedId.data, actor))
 }
