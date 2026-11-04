@@ -9,6 +9,7 @@ import {
   hoverArt,
   playArtToggle,
   prepareArtIntro,
+  prepareLiteIntro,
 } from "@/components/departments/department-art-motion"
 import type { DepartmentId } from "@/const/departments"
 
@@ -54,6 +55,17 @@ function fitLayers(root: HTMLElement) {
       transformOrigin: `${-left}px ${-top}px`,
     })
   }
+}
+
+/**
+ * WebKit (Safari, and every browser on iOS) and touch devices get the lite motion: whole layers
+ * move, never the shapes inside them, and panels open with their layers' travel alone. They
+ * repaint a vector layer, filters included, on each frame its insides move.
+ */
+function prefersLiteMotion() {
+  const agent = navigator.userAgent
+  const webKit = /AppleWebKit/.test(agent) && !/Chrome|Chromium|Edg|Android/.test(agent)
+  return webKit || window.matchMedia("(pointer: coarse)").matches
 }
 
 /** Device pixels per CSS pixel of the bitmaps, capped: sharp on phones, without their 3x memory. */
@@ -163,6 +175,7 @@ export function DepartmentArtLayers({
     const reducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches
     const canHover =
       !reducedMotion && window.matchMedia("(hover: hover) and (pointer: fine)").matches
+    const lite = prefersLiteMotion()
 
     // The strip's turn to play its intro, booked as it comes into view (in the row's order).
     const panel = element.closest<HTMLElement>("[data-panel]") ?? element
@@ -181,7 +194,12 @@ export function DepartmentArtLayers({
 
     // The panel opening or closing (`data-open`, see `department-panels.tsx`): its shapes play.
     const openWatcher = new MutationObserver(() => {
-      if (canHover) hoverArt(element, id, false)
+      if (canHover) hoverArt(element, id, false, lite)
+      if (lite) {
+        // Its fill would hold the layers' opacity over the panel's own fades.
+        intro?.cancel()
+        return
+      }
       opening?.cancel()
       opening = playArtToggle(element, id, panel.dataset.open !== undefined)
     })
@@ -198,7 +216,7 @@ export function DepartmentArtLayers({
             cascadeLayers(element, id)
             if (!reducedMotion) openWatcher.observe(panel, { attributeFilter: ["data-open"] })
             if (!reducedMotion) {
-              intro = prepareArtIntro(element, id)
+              intro = lite ? prepareLiteIntro(element) : prepareArtIntro(element, id)
               const start = await turn
               await new Promise((resolve) => {
                 timer = window.setTimeout(resolve, start - performance.now())
@@ -212,11 +230,15 @@ export function DepartmentArtLayers({
               panel.addEventListener(
                 "pointerenter",
                 () => {
-                  if (panel.dataset.open === undefined) hoverArt(element, id, true)
+                  if (panel.dataset.open === undefined) hoverArt(element, id, true, lite)
                 },
                 options,
               )
-              panel.addEventListener("pointerleave", () => hoverArt(element, id, false), options)
+              panel.addEventListener(
+                "pointerleave",
+                () => hoverArt(element, id, false, lite),
+                options,
+              )
             }
             if (controller.signal.aborted) return
             if (window.matchMedia("(pointer: coarse)").matches) {

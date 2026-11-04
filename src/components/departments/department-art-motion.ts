@@ -706,32 +706,43 @@ const design: Choreography = {
 /** Network links: thin filled paths (some layers hold a glow with them). */
 const isLink = (piece: Piece) => has(piece, "path")
 
-/** A link's axis: the centres of its two ends (it is a thin filled shape). */
-function axisOf(link: SVGPathElement) {
+const axes = new WeakMap<SVGPathElement, [Point, Point]>()
+
+/**
+ * A link's axis: the centres of its two ends (it is a thin, straight filled shape), in its own
+ * units, so measured once. Its direction is the line fitted through a few outline points, its
+ * ends where that line leaves the shape's box. `getPointAtLength` walks the path from its start
+ * on every call, and the dashed links hold hundreds of subpaths: few samples.
+ */
+function axisOf(link: SVGPathElement): [Point, Point] {
+  const cached = axes.get(link)
+  if (cached) return cached
   const length = link.getTotalLength()
-  const points = Array.from({ length: 96 }, (_, i) => link.getPointAtLength((length * i) / 96))
-  let [a, b] = [points[0], points[0]]
-  let span = 0
-  for (const p of points) {
-    for (const q of points) {
-      const distance = Math.hypot(p.x - q.x, p.y - q.y)
-      if (distance > span) [a, b, span] = [p, q, distance]
-    }
+  const points = Array.from({ length: 8 }, (_, i) => link.getPointAtLength((length * i) / 8))
+  const box = link.getBBox()
+  const center = { x: box.x + box.width / 2, y: box.y + box.height / 2 }
+  let [xx, yy, xy] = [0, 0, 0]
+  for (const { x, y } of points) {
+    const [dx, dy] = [x - center.x, y - center.y]
+    xx += dx * dx
+    yy += dy * dy
+    xy += dx * dy
   }
-  // The farthest points are opposite corners: each end's centre is the mean of the outline
-  // points across that end. The outline runs along it twice and across it twice.
-  const thickness = Math.max(1, (length - 2 * span) / 2)
-  const [ux, uy] = [(b.x - a.x) / span, (b.y - a.y) / span]
-  const end = (at: number) => {
-    const across = points.filter(
-      (p) => Math.abs((p.x - a.x) * ux + (p.y - a.y) * uy - at) <= thickness * 1.5,
-    )
-    return {
-      x: across.reduce((sum, p) => sum + p.x, 0) / across.length,
-      y: across.reduce((sum, p) => sum + p.y, 0) / across.length,
-    }
-  }
-  return [end(0), end(span)]
+  const angle = Math.atan2(2 * xy, xx - yy) / 2
+  const [ux, uy] = [Math.cos(angle), Math.sin(angle)]
+  const half = Math.max(
+    0,
+    Math.min(
+      Math.abs(ux) > 1e-6 ? box.width / 2 / Math.abs(ux) : Infinity,
+      Math.abs(uy) > 1e-6 ? box.height / 2 / Math.abs(uy) : Infinity,
+    ),
+  )
+  const axis: [Point, Point] = [
+    { x: center.x - ux * half, y: center.y - uy * half },
+    { x: center.x + ux * half, y: center.y + uy * half },
+  ]
+  axes.set(link, axis)
+  return axis
 }
 
 /** A group around one link, made once, to stretch it in the link's own units. */
@@ -1379,6 +1390,32 @@ export function prepareArtIntro(root: HTMLElement, id: DepartmentId): ArtMotion 
 }
 
 /**
+ * The intro for WebKit and touch devices: the layers themselves fade in and slide into place
+ * along the strip, one after the other. Safari and phones repaint a vector layer (filters
+ * included) on every frame its inner groups move, but move a whole layer (`opacity` and
+ * `translate`, which leaves its placing `transform` alone) on the GPU without repainting it.
+ */
+export function prepareLiteIntro(root: HTMLElement): ArtMotion {
+  const { animate, later, motion } = timeline()
+  const { pieces, along, vertical } = sceneOf(root, "svg[data-el=move], svg[data-el=out]", true, {
+    animate,
+    later,
+  })
+  for (const { layer } of pieces) {
+    animate(
+      layer,
+      [
+        { opacity: 0, translate: vertical ? "0 -40px" : "-40px 0" },
+        { opacity: 1, offset: 0.4 },
+        { opacity: 1, translate: "0 0" },
+      ],
+      { delay: 60 + along(layer) * 700, duration: 900, easing: EXPO },
+    )
+  }
+  return motion
+}
+
+/**
  * Plays on the shapes of a panel that starts opening or closing, along with their travel to the
  * card or back to the strip. Vector layers only: the bitmaps of touch devices (see
  * `rasterizeLayers`) just travel.
@@ -1513,10 +1550,18 @@ const HOVERS: Record<DepartmentId, (scene: Scene) => Map<Piece, Nudge>> = {
 /** How far the hover moves go: the nudges above, scaled. */
 const HOVER_REACH = 3.5
 
-const hovers = new WeakMap<SVGGElement, Animation>()
+const hovers = new WeakMap<Element, Animation>()
 
-/** A strip's hover groups, and the transforms of the nudged ones, for the panel size measured. */
-type HoverPlan = { size: string; groups: SVGGElement[]; rests: Map<SVGGElement, string> }
+/**
+ * A strip's hover targets, and where each nudged one rests, for the panel size measured: the
+ * pieces' hover groups (`transform`), or in `lite` mode the layers themselves (`translate`).
+ */
+type HoverPlan = {
+  size: string
+  property: "transform" | "translate"
+  targets: Element[]
+  rests: Map<Element, string>
+}
 
 const hoverPlans = new WeakMap<HTMLElement, HoverPlan>()
 
@@ -1524,7 +1569,7 @@ const hoverPlans = new WeakMap<HTMLElement, HoverPlan>()
  * Measures the nudges once per panel size: they are in the layers' units, so they only change
  * when the strip is laid out again (a resize, another breakpoint), not as the page scrolls.
  */
-function hoverPlan(root: HTMLElement, id: DepartmentId): HoverPlan {
+function hoverPlan(root: HTMLElement, id: DepartmentId, lite: boolean): HoverPlan {
   const { width, height } = (root.closest("[data-panel]") ?? root).getBoundingClientRect()
   const size = `${width}x${height}`
   const cached = hoverPlans.get(root)
@@ -1536,8 +1581,18 @@ function hoverPlan(root: HTMLElement, id: DepartmentId): HoverPlan {
   const order = new Map(scene.pieces.map((piece) => [piece, scene.along(piece.layer)]))
   scene.pieces.sort((a, b) => order.get(a)! - order.get(b)!)
   const k = HOVER_REACH
-  const rests = new Map<SVGGElement, string>()
+  const rests = new Map<Element, string>()
+  // Screen px per px of the art's box, which the layers' `translate` moves in.
+  const zoom = root.getBoundingClientRect().width / root.offsetWidth || 1
   for (const [piece, { x = 0, y = 0, turn = 0, scale = 1 }] of HOVERS[id](scene)) {
+    if (lite) {
+      // Only the move: turns and scales would pivot about the art's corner, not the piece.
+      if (!x && !y) continue
+      const from = scene.place(piece.layer, { x: 0, y: 0 })
+      const to = scene.place(piece.layer, { x: x * k, y: y * k })
+      rests.set(piece.layer, `${(to.x - from.x) / zoom}px ${(to.y - from.y) / zoom}px`)
+      continue
+    }
     const group = piece.group.parentElement
     if (!(group instanceof SVGGElement)) continue
     pivot(group)
@@ -1546,10 +1601,10 @@ function hoverPlan(root: HTMLElement, id: DepartmentId): HoverPlan {
       `translate(${x * k}px,${y * k}px) rotate(${turn * k}deg) scale(${1 + (scale - 1) * k})`,
     )
   }
-  const groups = [
-    ...root.querySelectorAll<SVGGElement>('svg[data-el] > g[data-motion="hover"]'),
-  ].filter((group) => rests.has(group))
-  const plan = { size, groups, rests }
+  const targets = [
+    ...root.querySelectorAll(lite ? "svg[data-el]" : 'svg[data-el] > g[data-motion="hover"]'),
+  ].filter((target) => rests.has(target))
+  const plan: HoverPlan = { size, property: lite ? "translate" : "transform", targets, rests }
   hoverPlans.set(root, plan)
   return plan
 }
@@ -1557,31 +1612,34 @@ function hoverPlan(root: HTMLElement, id: DepartmentId): HoverPlan {
 /**
  * Nudges a closed strip's pieces as the pointer comes onto it (`hovered`), and settles them back
  * as it leaves. Each move starts where the last one left the piece, so quick passes stay smooth.
+ * `lite` moves whole layers, which the compositor moves without repainting them (see
+ * `prepareLiteIntro`).
  */
-export function hoverArt(root: HTMLElement, id: DepartmentId, hovered: boolean) {
-  const plan = hovered ? hoverPlan(root, id) : hoverPlans.get(root)
+export function hoverArt(root: HTMLElement, id: DepartmentId, hovered: boolean, lite = false) {
+  const plan = hovered ? hoverPlan(root, id, lite) : hoverPlans.get(root)
   if (!plan) return
-  plan.groups.forEach((group, index) => {
-    const running = hovers.get(group)
+  const { property } = plan
+  plan.targets.forEach((target, index) => {
+    const running = hovers.get(target)
     if (!hovered && !running) return
-    // Only a moving or resting piece needs its current transform read back (a style flush).
-    const from = running ? getComputedStyle(group).transform : "none"
-    const to = hovered ? plan.rests.get(group)! : "none"
+    // Only a moving or resting piece needs its current place read back (a style flush).
+    const from = running ? getComputedStyle(target)[property] : "none"
+    const to = hovered ? plan.rests.get(target)! : "none"
     running?.cancel()
-    hovers.delete(group)
+    hovers.delete(target)
     if (from === "none" && to === "none") return
-    const animation = group.animate([{ transform: from }, { transform: to }], {
+    const animation = target.animate([{ [property]: from }, { [property]: to }], {
       delay: hovered ? (index % 6) * 15 : 0,
       duration: hovered ? 420 : 380,
       easing: hovered ? BACK : QUART,
       fill: "both",
     })
-    hovers.set(group, animation)
+    hovers.set(target, animation)
     if (!hovered) {
       animation.finished
         .then(() => {
           animation.cancel()
-          hovers.delete(group)
+          hovers.delete(target)
         })
         .catch(() => {})
     }
