@@ -34,8 +34,9 @@ const TARGET_ITEMS = RECOMMENDATION_TARGETS.map((target) => ({
 }))
 
 /**
- * Recommends an applicant to one section or department, with an optional note. Once recommended,
- * the same dialog edits or removes the signed-in HR member's recommendation.
+ * Recommends an applicant to one section or department, with an optional note. An application has
+ * one recommendation, the latest: once recommended, the same dialog shows who made it and lets any
+ * HR member replace it (it becomes theirs) or remove it; the earlier ones stay in the timeline.
  */
 export function RecommendDialog({
   registrationId,
@@ -44,8 +45,8 @@ export function RecommendDialog({
 }: {
   registrationId: string
   applicant: string
-  /** The signed-in HR member's current recommendation. */
-  recommendation?: { target: string; note: string }
+  /** The application's recommendation, and who made it ("you" for the signed-in member). */
+  recommendation?: { target: string; note: string; by: string }
 }) {
   const [open, setOpen] = useState(false)
   const [target, setTarget] = useState<string | null>(recommendation?.target ?? null)
@@ -103,7 +104,9 @@ export function RecommendDialog({
         <McDialogHeader>
           <McDialogTitle>Recommend {applicant}</McDialogTitle>
           <McDialogDescription>
-            Choose where they would fit best. Mention anything else in the note.
+            {recommendation
+              ? `Recommended by ${recommendation.by}. A new recommendation replaces it; the previous one stays in the timeline.`
+              : "Choose where they would fit best. Mention anything else in the note."}
           </McDialogDescription>
         </McDialogHeader>
         <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
@@ -119,9 +122,12 @@ export function RecommendDialog({
             <McSelectTrigger className="w-full" aria-label="Section or department">
               <McSelectValue placeholder="Choose one" />
             </McSelectTrigger>
+            {/* A visible scrollbar: the 11 sections and departments do not all fit. */}
             <McSelectContent
               className="h-auto max-h-80 w-(--anchor-width)"
               alignItemWithTrigger={false}
+              scrollbar
+              data-lenis-prevent
             >
               {TARGET_ITEMS.map((item) => (
                 <McSelectItem key={item.value} value={item.value}>

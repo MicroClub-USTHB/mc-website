@@ -5,6 +5,7 @@ import {
   currentRecommendation,
   currentRecommendations,
   currentReviews,
+  decisions,
   hasReviewed,
   registrationStatus,
   type TimelineEntry,
@@ -83,14 +84,58 @@ describe("recommendations", () => {
     unrecommend("b"),
   ]
 
-  it("keeps each person's latest recommendation", () => {
-    expect(currentRecommendation(timeline, "a")).toMatchObject({ target: "robotics" })
-    expect(currentRecommendation(timeline, "b")).toBeUndefined()
+  it("keeps one recommendation, the latest, whoever made it", () => {
+    expect(currentRecommendation([recommend("a", "dev"), recommend("b", "design")])).toMatchObject({
+      actorId: "b",
+      target: "design",
+    })
+    expect(
+      currentRecommendation([recommend("a", "dev"), recommend("a", "robotics")]),
+    ).toMatchObject({
+      actorId: "a",
+      target: "robotics",
+    })
   })
 
-  it("lists only the recommendations still standing", () => {
-    expect(currentRecommendations(timeline)).toEqual([
-      { actorId: "a", actorName: "a", target: "robotics" },
+  it("is cleared by a removal, until the next recommendation", () => {
+    expect(currentRecommendation(timeline)).toBeUndefined()
+    expect(currentRecommendation([...timeline, recommend("c", "dev")])).toMatchObject({
+      actorId: "c",
+    })
+  })
+
+  it("ignores reviews", () => {
+    expect(currentRecommendation([recommend("a", "dev"), review("b", "accepted")])).toMatchObject({
+      target: "dev",
+    })
+  })
+
+  it("stores one recommendation at most", () => {
+    expect(currentRecommendations(timeline)).toEqual([])
+    expect(currentRecommendations([recommend("a", "dev"), recommend("b", "design")])).toEqual([
+      { actorId: "b", actorName: "b", target: "design" },
+    ])
+  })
+})
+
+describe("decisions", () => {
+  it("lists the reviewers holding a place, latest decision first", () => {
+    const later = (actorId: string, state: ReviewState, minutes: number): TimelineEntry => ({
+      kind: "review",
+      actorId,
+      actorName: actorId,
+      at: new Date(at.getTime() + minutes * 60_000),
+      state,
+    })
+    const timeline = [
+      later("a", "accepted", 0),
+      later("b", "rejected", 5),
+      later("c", "interview", 10),
+      later("c", "pending", 15),
+    ]
+    expect(decisions(timeline)).toEqual([
+      { name: "b", state: "rejected" },
+      { name: "a", state: "accepted" },
     ])
   })
 })

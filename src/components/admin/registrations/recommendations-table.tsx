@@ -1,12 +1,14 @@
 import { format } from "date-fns"
 import Link from "next/link"
 
+import { Reviewers } from "@/components/admin/registrations/reviewers"
 import { SortHeader } from "@/components/admin/registrations/sort-header"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import {
   McTable,
   McTableBody,
   McTableCell,
+  McTableHead,
   McTableHeader,
   McTableRow,
 } from "@/components/ui/mc-data-table"
@@ -21,15 +23,20 @@ import {
 } from "@/lib/registrations/recommendation-params"
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
 
-const COLUMNS: { sort: RecommendationSort; label: string }[] = [
+/** Columns: the sortable ones, and after Status who reviewed the application (unsorted). */
+const COLUMNS: ({ sort: RecommendationSort; label: string } | { sort: null; label: string })[] = [
   { sort: "applicant", label: "Applicant" },
   { sort: "by", label: "Recommended by" },
   { sort: "to", label: "Recommended to" },
   { sort: "status", label: "Status" },
+  { sort: null, label: "Reviewed by" },
   { sort: "submitted", label: "Submitted" },
 ]
 
-/** One page of recommendations; the applicant's name opens their registration. */
+/**
+ * One page of recommendations; the applicant's name opens their registration. "Reviewed by" names
+ * the HR members who decided on it and what they decided (see `Reviewers`).
+ */
 export function RecommendationsTable({
   params,
   rows,
@@ -43,18 +50,22 @@ export function RecommendationsTable({
     <McTable>
       <McTableHeader>
         <McTableRow>
-          {COLUMNS.map((column) => (
-            <SortHeader
-              key={column.sort}
-              label={column.label}
-              order={params.sort === column.sort ? params.order : null}
-              href={`${adminRoutes.recommendations}${recommendationsQuery(params, {
-                sort: column.sort,
-                order: nextOrder(params, column.sort),
-                page: 1,
-              })}`}
-            />
-          ))}
+          {COLUMNS.map((column) =>
+            column.sort === null ? (
+              <McTableHead key={column.label}>{column.label}</McTableHead>
+            ) : (
+              <SortHeader
+                key={column.sort}
+                label={column.label}
+                order={params.sort === column.sort ? params.order : null}
+                href={`${adminRoutes.recommendations}${recommendationsQuery(params, {
+                  sort: column.sort,
+                  order: nextOrder(params, column.sort),
+                  page: 1,
+                })}`}
+              />
+            ),
+          )}
         </McTableRow>
       </McTableHeader>
       <McTableBody>
@@ -75,6 +86,9 @@ export function RecommendationsTable({
             <McTableCell>{recommendationTargetName(row.recommendedTo)}</McTableCell>
             <McTableCell>
               <StatusBadge status={row.status} />
+            </McTableCell>
+            <McTableCell>
+              <Reviewers reviewers={row.reviewers} />
             </McTableCell>
             <McTableCell className="whitespace-nowrap">
               <time dateTime={row.submittedAt}>

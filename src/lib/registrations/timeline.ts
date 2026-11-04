@@ -37,28 +37,47 @@ export function currentReviews(timeline: TimelineEntry[]) {
   return [...latest.values()].filter((review) => review.state !== "pending")
 }
 
+/**
+ * Who decided on a registration, for the admin tables: each reviewer holding a place and their
+ * decision, the latest decision first.
+ */
+export function decisions(timeline: TimelineEntry[]) {
+  return currentReviews(timeline)
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .map((review) => ({ name: review.actorName, state: review.state }))
+}
+
 /** Whether this person ever reviewed the registration: only their first review needs a reason. */
 export function hasReviewed(timeline: TimelineEntry[], actorId: string) {
   return timeline.some((entry) => entry.kind === "review" && entry.actorId === actorId)
 }
 
-/** The recommendation this person has on the registration now, if any. */
-export function currentRecommendation(timeline: TimelineEntry[], actorId: string) {
-  const latest = timeline.findLast((entry) => entry.actorId === actorId && entry.kind !== "review")
+/**
+ * The registration's recommendation now: one per application, the latest made by any HR member
+ * (a newer one replaces it, a removal clears it). The earlier ones stay in the timeline only.
+ */
+export function currentRecommendation(timeline: TimelineEntry[]) {
+  const latest = timeline.findLast(
+    (entry): entry is RecommendationEntry | RecommendationRemovedEntry => entry.kind !== "review",
+  )
   return latest?.kind === "recommendation" ? latest : undefined
 }
 
-/** Everyone recommending the registration now, for the recommendations page. */
+/**
+ * The current recommendation as stored on the registration for the recommendations page (a list,
+ * of one at most, so the page filters on it like on any array).
+ */
 export function currentRecommendations(timeline: TimelineEntry[]) {
-  const latest = new Map<string, RecommendationEntry | RecommendationRemovedEntry>()
-  for (const entry of timeline) {
-    if (entry.kind !== "review") latest.set(entry.actorId, entry)
-  }
-  return [...latest.values()].flatMap((entry) =>
-    entry.kind === "recommendation"
-      ? [{ actorId: entry.actorId, actorName: entry.actorName, target: entry.target }]
-      : [],
-  )
+  const recommendation = currentRecommendation(timeline)
+  return recommendation
+    ? [
+        {
+          actorId: recommendation.actorId,
+          actorName: recommendation.actorName,
+          target: recommendation.target,
+        },
+      ]
+    : []
 }
 
 /**
