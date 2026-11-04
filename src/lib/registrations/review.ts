@@ -9,8 +9,13 @@ import {
   type RegistrationSort,
 } from "@/lib/registrations/list-params"
 import { RegistrationModel } from "@/lib/registrations/model"
-import { REGISTRATION_STATUSES, type RegistrationStatus } from "@/lib/registrations/status"
-import type { TimelineEntry } from "@/lib/registrations/timeline"
+import {
+  REGISTRATION_STATUSES,
+  type RegistrationStatus,
+  type ReviewState,
+} from "@/lib/registrations/status"
+import { recommendationTargetName } from "@/lib/registrations/recommendations"
+import { decisions, type TimelineEntry } from "@/lib/registrations/timeline"
 
 /** One row of the admin registrations table. */
 export type RegistrationRow = {
@@ -24,6 +29,10 @@ export type RegistrationRow = {
   status: RegistrationStatus
   /** ISO date. */
   submittedAt: string
+  /** The HR members holding a review place (two at most), their latest decision first. */
+  reviewers: { name: string; state: ReviewState }[]
+  /** The application's recommendation (the latest one), by whom and where to. */
+  recommendation: { name: string; target: string } | null
 }
 
 export type RegistrationPage = {
@@ -35,7 +44,12 @@ export type RegistrationPage = {
   pageCount: number
 }
 
-const ROW_FIELDS = "firstName lastName email fieldOfStudy yearOfStudy university status createdAt"
+/** Columns of a row, and of the timeline only what tells who reviewed it (not the reasons). */
+const ROW_FIELDS = [
+  "firstName lastName email fieldOfStudy yearOfStudy university status createdAt",
+  "timeline.kind timeline.actorId timeline.actorName timeline.state timeline.at",
+  "recommendations.actorName recommendations.target",
+].join(" ")
 
 /** Fields searched by every word of the query. */
 const SEARCH_FIELDS = ["firstName", "lastName", "email", "discord"] as const
@@ -104,6 +118,13 @@ export async function listRegistrations(params: RegistrationListParams): Promise
       university: document.university,
       status: document.status as RegistrationStatus,
       submittedAt: new Date(document.createdAt).toISOString(),
+      reviewers: decisions((document.timeline ?? []) as TimelineEntry[]),
+      recommendation: document.recommendations?.[0]
+        ? {
+            name: document.recommendations[0].actorName,
+            target: recommendationTargetName(document.recommendations[0].target),
+          }
+        : null,
     })),
     total,
     page,

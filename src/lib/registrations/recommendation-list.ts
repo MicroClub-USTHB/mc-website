@@ -10,7 +10,8 @@ import type {
   RecommendationSort,
 } from "@/lib/registrations/recommendation-params"
 import { CASE_INSENSITIVE, searchFilter } from "@/lib/registrations/review"
-import type { RegistrationStatus } from "@/lib/registrations/status"
+import type { RegistrationStatus, ReviewState } from "@/lib/registrations/status"
+import { decisions, type TimelineEntry } from "@/lib/registrations/timeline"
 
 /** One row of the recommendations table: a registration has one per person recommending it. */
 export type RecommendationRow = {
@@ -23,6 +24,8 @@ export type RecommendationRow = {
   /** Id of a `RECOMMENDATION_TARGETS` entry. */
   recommendedTo: string
   status: RegistrationStatus
+  /** The HR members holding a review place (two at most), their latest decision first. */
+  reviewers: { name: string; state: ReviewState }[]
   /** ISO date. */
   submittedAt: string
 }
@@ -88,6 +91,7 @@ export async function listRecommendations(
     status: RegistrationStatus
     createdAt: Date
     recommendations: { actorId: string; actorName: string; target: string }
+    timeline?: TimelineEntry[]
   }>([
     ...stages,
     { $sort: sort },
@@ -101,6 +105,12 @@ export async function listRecommendations(
         status: 1,
         createdAt: 1,
         recommendations: 1,
+        // Who reviewed it, not the reasons.
+        "timeline.kind": 1,
+        "timeline.actorId": 1,
+        "timeline.actorName": 1,
+        "timeline.state": 1,
+        "timeline.at": 1,
       },
     },
   ])
@@ -117,6 +127,7 @@ export async function listRecommendations(
       recommendedBy: document.recommendations.actorName,
       recommendedTo: document.recommendations.target,
       status: document.status,
+      reviewers: decisions(document.timeline ?? []),
       submittedAt: new Date(document.createdAt).toISOString(),
     })),
     total,
