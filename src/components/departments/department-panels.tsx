@@ -265,8 +265,8 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                   {/* The tab: the bar's label at its start, the header once open. */}
                   <span
                     className={cn(
-                      "flex w-(--bw) shrink-0 items-center gap-3 border-border bg-accent px-4 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width] sm:paragraph-xl",
-                      "max-lg:border-r lg:relative lg:w-full lg:justify-center lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
+                      "flex w-(--bw) shrink-0 items-center gap-2 border-border bg-accent px-3 paragraph-md text-accent-foreground uppercase motion-safe:transition-[width] sm:paragraph-xl",
+                      "max-lg:border-r lg:relative lg:w-full lg:justify-center lg:gap-3 lg:border-t lg:px-2 lg:py-2 lg:paragraph-xl",
                       transition,
                       isOpen && "w-full border-b max-lg:border-r-0 lg:border-b-0",
                     )}
@@ -276,8 +276,9 @@ export function DepartmentPanels({ panels }: { panels: DepartmentPanel[] }) {
                     <ChevronDownIcon
                       aria-hidden
                       className={cn(
-                        "ml-auto size-5 shrink-0 rotate-180 transition-opacity duration-300 ease-out-quart motion-reduce:transition-none lg:hidden",
-                        !isOpen && "opacity-0",
+                        "ml-auto size-4 shrink-0 motion-safe:transition-transform lg:hidden",
+                        transition,
+                        isOpen && "rotate-180",
                       )}
                     />
                     {/* From `lg`, the open card's tab shows it closes again when hovered. */}
