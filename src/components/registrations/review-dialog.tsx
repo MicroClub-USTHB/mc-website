@@ -29,6 +29,12 @@ const LABEL = "text-xs leading-5 font-medium text-muted-foreground uppercase"
 const VALUE = "text-sm leading-6 break-words text-foreground"
 /** Optional answers left empty. */
 const EMPTY = "text-sm leading-6 text-muted-foreground italic"
+/**
+ * On the applicant's own answers: a browser translator (Chrome's Google Translate) leaves them as
+ * typed, so the recap shows what will be sent (it turned the skill "react" into "réagir"). The
+ * labels and questions around them still translate.
+ */
+const AS_TYPED = { translate: "no" } as const
 
 /** Preview of the chosen student ID (images only), read as a data URL like the upload field. */
 function useImagePreview(file: File | null) {
@@ -166,7 +172,9 @@ export function ReviewDialog() {
               ].map(({ label, value }) => (
                 <div key={label} className="flex min-w-0 flex-col">
                   <dt className={LABEL}>{label}</dt>
-                  <dd className={VALUE}>{value}</dd>
+                  <dd {...AS_TYPED} className={VALUE}>
+                    {value}
+                  </dd>
                 </div>
               ))}
               <div className="flex min-w-0 flex-col gap-1.5 sm:col-span-2">
@@ -189,7 +197,11 @@ export function ReviewDialog() {
                       />
                     </span>
                   )}
-                  <span className={cn(VALUE, "min-w-0 truncate")} title={studentId?.name}>
+                  <span
+                    {...AS_TYPED}
+                    className={cn(VALUE, "min-w-0 truncate")}
+                    title={studentId?.name}
+                  >
                     {studentId?.name}
                   </span>
                 </dd>
@@ -202,7 +214,9 @@ export function ReviewDialog() {
               {ABOUT_QUESTIONS.map(({ field, label }) => (
                 <div key={field} className="flex flex-col gap-1 p-4">
                   <dt className="text-sm leading-5 font-medium text-muted-foreground">{label}</dt>
-                  <dd className={cn(VALUE, "whitespace-pre-wrap")}>{values[field]}</dd>
+                  <dd {...AS_TYPED} className={cn(VALUE, "whitespace-pre-wrap")}>
+                    {values[field]}
+                  </dd>
                 </div>
               ))}
             </dl>
@@ -222,7 +236,7 @@ export function ReviewDialog() {
                           rel="noopener noreferrer"
                           className="inline-flex max-w-full items-center gap-1 rounded-sm text-sm leading-6 text-primary underline underline-offset-2 outline-none hover:text-accent-foreground focus-visible:ring-4 focus-visible:ring-ring"
                         >
-                          <span className="truncate">
+                          <span {...AS_TYPED} className="truncate">
                             {values[field].replace(/^https?:\/\/(www\.)?/, "")}
                           </span>
                           <ExternalLinkIcon className="size-3.5 shrink-0" aria-hidden />
@@ -238,7 +252,7 @@ export function ReviewDialog() {
               <div className="flex flex-col gap-1.5 border-t border-border pt-3">
                 <dt className={LABEL}>Skills</dt>
                 <dd>
-                  <ul className="flex flex-wrap gap-1.5">
+                  <ul {...AS_TYPED} className="flex flex-wrap gap-1.5">
                     {values.skills.map((skill) => (
                       <li
                         key={skill}
