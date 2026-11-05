@@ -1,6 +1,6 @@
 "use client"
 
-import { format } from "date-fns"
+import { formatClubTime } from "@/lib/dates"
 import { UsersRoundIcon } from "lucide-react"
 
 import { CreateUserDialog } from "@/components/admin/create-user-dialog"
@@ -46,7 +46,7 @@ const columns = [
   column.accessor("createdAt", {
     header: "Created",
     sortFn: "datetime",
-    cell: ({ getValue }) => format(new Date(getValue()), "d MMM yyyy"),
+    cell: ({ getValue }) => formatClubTime(new Date(getValue()), "d MMM yyyy"),
   }),
   column.display({
     id: "actions",

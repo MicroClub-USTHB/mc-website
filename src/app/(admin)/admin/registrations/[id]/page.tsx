@@ -1,5 +1,5 @@
 import type { Metadata } from "next"
-import { differenceInYears, format } from "date-fns"
+import { differenceInYears } from "date-fns"
 import Link from "next/link"
 import { notFound } from "next/navigation"
 import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
@@ -14,6 +14,7 @@ import { McBadge } from "@/components/ui/mc-badge"
 import { adminRoutes } from "@/config/admin"
 import { ABOUT_QUESTIONS } from "@/const/registrations"
 import { requireStaff } from "@/lib/auth/session"
+import { formatCalendarDate, formatClubTime } from "@/lib/dates"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
 import {
   RECOMMENDATIONS_ORIGIN,
@@ -112,7 +113,7 @@ export default async function RegistrationPage({
         <p className="paragraph-md text-muted-foreground">
           Submitted on{" "}
           <time dateTime={submittedAt.toISOString()}>
-            {format(submittedAt, "d MMMM yyyy 'at' HH:mm")}
+            {formatClubTime(submittedAt, "d MMMM yyyy 'at' HH:mm")}
           </time>
         </p>
       </header>
@@ -185,7 +186,8 @@ export default async function RegistrationPage({
               {registration.discord}
             </Field>
             <Field label="Date of birth">
-              {format(birthDate, "d MMMM yyyy")} ({differenceInYears(new Date(), birthDate)} years)
+              {formatCalendarDate(birthDate, "d MMMM yyyy")} (
+              {differenceInYears(new Date(), birthDate)} years)
             </Field>
             <Field label="Field of study">{registration.fieldOfStudy}</Field>
             <Field label="Year of study">{registration.yearOfStudy}</Field>

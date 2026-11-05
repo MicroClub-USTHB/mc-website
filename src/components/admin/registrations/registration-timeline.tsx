@@ -1,4 +1,4 @@
-import { format } from "date-fns"
+import { formatClubTime } from "@/lib/dates"
 
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
 import type { ReviewState } from "@/lib/registrations/status"
@@ -39,7 +39,7 @@ export function RegistrationTimeline({ timeline }: { timeline: TimelineEntry[] }
             {describe(entry, timeline.slice(0, index))}
           </p>
           <time dateTime={entry.at.toISOString()} className="paragraph-sm text-muted-foreground">
-            {format(entry.at, "d MMMM yyyy 'at' HH:mm")}
+            {formatClubTime(entry.at, "d MMMM yyyy 'at' HH:mm")}
           </time>
         </li>
       ))}
