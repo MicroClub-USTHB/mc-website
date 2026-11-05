@@ -11,11 +11,12 @@ export type SignatureResult =
   | { status: "rate-limited" }
   | { status: "error" }
 
-const RATE_LIMIT = { limit: 10, windowMs: 60 * 60 * 1000 }
+/** Per IP, loose: many students share one address (campus network, CGNAT), and retries re-sign. */
+const RATE_LIMIT = { limit: 60, windowMs: 60 * 60 * 1000 }
 
 /**
  * Hands the browser a signed, short-lived permission to upload one student ID to Cloudinary.
- * Each IP gets 10 per hour, so the signature cannot be used to fill the storage.
+ * Each IP gets 60 per hour, so the signature cannot be used to fill the storage.
  */
 export async function createStudentIdUploadSignature(): Promise<SignatureResult> {
   if (!areRegistrationsOpen()) return { status: "error" }
