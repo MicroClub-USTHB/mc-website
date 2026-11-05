@@ -3,7 +3,7 @@
 import { headers } from "next/headers"
 
 import { PHONE_COUNTRIES, STUDENT_ID_RULES } from "@/const/registrations"
-import { deleteStudentId, getStudentIdUpload, type UploadedStudentId } from "@/lib/cloudinary"
+import { deleteStudentId, verifyStudentIdUpload, type UploadedStudentId } from "@/lib/cloudinary"
 import { connectToDatabase } from "@/lib/mongodb"
 import { clientIp, isRateLimited } from "@/lib/rate-limit"
 import { RegistrationModel } from "@/lib/registrations/model"
@@ -35,7 +35,12 @@ export type RegistrationResult =
   | { status: "rate-limited" }
   | { status: "error" }
 
-const RATE_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }
+/**
+ * Per IP, a loose backstop only: a campus network or a mobile carrier (CGNAT) puts many students
+ * behind one address. The real limit is per email, the one key a registration has.
+ */
+const IP_RATE_LIMIT = { limit: 30, windowMs: 60 * 60 * 1000 }
+const EMAIL_RATE_LIMIT = { limit: 5, windowMs: 60 * 60 * 1000 }
 const MONGO_DUPLICATE_KEY = 11000
 
 function readUploadReference(raw: FormDataEntryValue | null): StudentIdUpload | null {
@@ -44,7 +49,11 @@ function readUploadReference(raw: FormDataEntryValue | null): StudentIdUpload | 
     const valid =
       typeof upload.publicId === "string" &&
       STUDENT_ID_PUBLIC_ID.test(upload.publicId) &&
-      (upload.resourceType === "image" || upload.resourceType === "raw")
+      (upload.resourceType === "image" || upload.resourceType === "raw") &&
+      typeof upload.version === "number" &&
+      typeof upload.signature === "string" &&
+      typeof upload.format === "string" &&
+      typeof upload.bytes === "number"
     return valid ? (upload as StudentIdUpload) : null
   } catch {
     return null
@@ -63,8 +72,8 @@ function uploadProblem(stored: UploadedStudentId) {
  * Saves a registration: the form values (`values`, JSON), a reference to the student ID the browser
  * already uploaded to Cloudinary (`upload`, JSON) and the honeypot, as one `FormData`.
  *
- * Order: validate -> rate limit -> duplicate email -> read the upload back from Cloudinary ->
- * save in MongoDB. A rejected registration (invalid file, duplicate) deletes its upload; after a
+ * Order: validate -> rate limit (per IP and per email) -> duplicate email -> check Cloudinary's
+ * signature of the upload -> save in MongoDB. A rejected registration (invalid file, duplicate) deletes its upload; after a
  * failure that may pass (database down) the upload stays, so the retry reuses it. A filled
  * honeypot gets a fake success (bots learn nothing). Needs `MONGODB_URI` and the `CLOUDINARY_*`
  * variables (`.env.example`).
@@ -108,8 +117,12 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
 
   const requestHeaders = await headers()
   const ip = clientIp(requestHeaders)
-  if (await isRateLimited(`registration:${ip}`, RATE_LIMIT.limit, RATE_LIMIT.windowMs))
-    return { status: "rate-limited" }
+  const email = values.email.toLowerCase()
+  const [ipLimited, emailLimited] = await Promise.all([
+    isRateLimited(`registration:${ip}`, IP_RATE_LIMIT.limit, IP_RATE_LIMIT.windowMs),
+    isRateLimited(`registration-email:${email}`, EMAIL_RATE_LIMIT.limit, EMAIL_RATE_LIMIT.windowMs),
+  ])
+  if (ipLimited || emailLimited) return { status: "rate-limited" }
 
   const discard = () =>
     deleteStudentId(upload).catch((error) =>
@@ -119,13 +132,13 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
   try {
     await connectToDatabase()
 
-    const email = values.email.toLowerCase()
     if (await RegistrationModel.exists({ email })) {
       await discard()
       return { status: "duplicate" }
     }
 
-    const stored = await getStudentIdUpload(upload.publicId, upload.resourceType)
+    // A forged reference is refused without touching the file: it may not be this visitor's.
+    const stored = verifyStudentIdUpload(upload)
     const problem = stored ? uploadProblem(stored) : "Please upload your ID again."
     if (!stored || problem) {
       if (stored) await discard()
