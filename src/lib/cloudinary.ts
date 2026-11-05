@@ -63,30 +63,44 @@ export function signStudentIdUpload(): StudentIdUploadSignature {
   }
 }
 
+/** The SDK's check of an upload response's signature, missing from its type definitions. */
+const verifyApiResponseSignature = (
+  cloudinary.utils as unknown as {
+    verify_api_response_signature: (publicId: string, version: number, signature: string) => boolean
+  }
+).verify_api_response_signature
+
 /**
- * Reads an uploaded student ID back from Cloudinary, so the size and format that get stored are
- * the real ones, not what the browser claims. `null` when there is no such upload.
+ * Checks an upload the browser reports against Cloudinary's signature of its upload response
+ * (`public_id` and `version`, signed with the API secret), so no Admin API call is needed: the
+ * free plan allows 500 of those per hour, which would cap the registrations. The format was already
+ * enforced by Cloudinary (`allowed_formats` is part of the signed upload), the size by the plan's
+ * file limit; the stored URL is signed here. `null` when the signature does not match.
  */
-export async function getStudentIdUpload(
-  publicId: string,
-  resourceType: string,
-): Promise<UploadedStudentId | null> {
+export function verifyStudentIdUpload(upload: {
+  publicId: string
+  resourceType: string
+  version: number
+  signature: string
+  format: string
+  bytes: number
+}): UploadedStudentId | null {
   configure()
-  try {
-    const resource = await cloudinary.api.resource(publicId, {
+  if (!verifyApiResponseSignature(upload.publicId, upload.version, upload.signature)) return null
+
+  return {
+    url: cloudinary.url(upload.publicId, {
       type: "authenticated",
-      resource_type: resourceType,
-    })
-    return {
-      url: resource.secure_url,
-      publicId: resource.public_id,
-      resourceType: resource.resource_type,
-      format: resource.format,
-      bytes: resource.bytes,
-    }
-  } catch (error) {
-    if ((error as { error?: { http_code?: number } }).error?.http_code === 404) return null
-    throw error
+      resource_type: upload.resourceType,
+      version: upload.version,
+      format: upload.format,
+      sign_url: true,
+      secure: true,
+    }),
+    publicId: upload.publicId,
+    resourceType: upload.resourceType,
+    format: upload.format,
+    bytes: upload.bytes,
   }
 }
 
