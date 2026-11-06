@@ -6,21 +6,25 @@ import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { RegistrationPager } from "@/components/admin/registrations/registration-pager"
 import { RegistrationTimeline } from "@/components/admin/registrations/registration-timeline"
 import { ReviewActions } from "@/components/admin/registrations/review-actions"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import { StudentIdPreview } from "@/components/admin/registrations/student-id-preview"
 import { McBadge } from "@/components/ui/mc-badge"
-import { adminRoutes } from "@/config/admin"
+import { adminRoutes, registrationRoute } from "@/config/admin"
 import { ABOUT_QUESTIONS } from "@/const/registrations"
 import { requireStaff } from "@/lib/auth/session"
+import { listNavigation, type ListNeighbor } from "@/lib/registrations/list-navigation"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
+import { recommendationListOrder } from "@/lib/registrations/recommendation-list"
 import {
   RECOMMENDATIONS_ORIGIN,
   parseRecommendationParams,
+  recommendationOriginQuery,
   recommendationsQuery,
 } from "@/lib/registrations/recommendation-params"
-import { getRegistration } from "@/lib/registrations/review"
+import { getRegistration, registrationListOrder } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
 import {
   MAX_REVIEWERS,
@@ -67,7 +71,57 @@ function Field({
   )
 }
 
-/** One registration in full, as submitted. The back link returns to its list as it was. */
+/**
+ * The list the registration was opened from (the registrations or the recommendations list, with
+ * its search, filters and sort): the back link and the previous and next arrows, each link
+ * carrying the list page its registration is on.
+ */
+async function listContext(
+  id: string,
+  search: Awaited<PageProps<"/admin/registrations/[id]">["searchParams"]>,
+) {
+  if (search.from === RECOMMENDATIONS_ORIGIN) {
+    const params = parseRecommendationParams(search)
+    const { items, inList } = await recommendationListOrder(params, id)
+    const navigation = listNavigation(items, id, inList)
+    const target = (neighbor: ListNeighbor | null) =>
+      neighbor && {
+        name: neighbor.name,
+        href: registrationRoute(
+          neighbor.id,
+          recommendationOriginQuery({ ...params, page: neighbor.page }),
+        ),
+      }
+    return {
+      label: "recommendations",
+      back: `${adminRoutes.recommendations}${recommendationsQuery(params, { page: navigation.page })}`,
+      navigation,
+      previous: target(navigation.previous),
+      next: target(navigation.next),
+    }
+  }
+
+  const params = parseListParams(search)
+  const { items, inList } = await registrationListOrder(params, id)
+  const navigation = listNavigation(items, id, inList)
+  const target = (neighbor: ListNeighbor | null) =>
+    neighbor && {
+      name: neighbor.name,
+      href: registrationRoute(neighbor.id, listQuery(params, { page: neighbor.page })),
+    }
+  return {
+    label: "registrations",
+    back: `${adminRoutes.registrations}${listQuery(params, { page: navigation.page })}`,
+    navigation,
+    previous: target(navigation.previous),
+    next: target(navigation.next),
+  }
+}
+
+/**
+ * One registration in full, as submitted. The back link returns to its list as it was, and the
+ * arrows open the previous and next registrations of that list.
+ */
 export default async function RegistrationPage({
   params,
   searchParams,
@@ -78,11 +132,7 @@ export default async function RegistrationPage({
   const registration = await getRegistration(id)
   if (!registration) notFound()
 
-  const search = await searchParams
-  const fromRecommendations = search.from === RECOMMENDATIONS_ORIGIN
-  const back = fromRecommendations
-    ? `${adminRoutes.recommendations}${recommendationsQuery(parseRecommendationParams(search))}`
-    : `${adminRoutes.registrations}${listQuery(parseListParams(search))}`
+  const list = await listContext(id, await searchParams)
   const name = `${registration.firstName} ${registration.lastName}`
   const status = isRegistrationStatus(registration.status) ? registration.status : "pending"
   const submittedAt = new Date(registration.createdAt)
@@ -96,13 +146,21 @@ export default async function RegistrationPage({
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
-      <Link
-        href={back}
-        className="inline-flex w-fit items-center gap-1.5 rounded-sm paragraph-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
-      >
-        <ArrowLeftIcon className="size-4" aria-hidden />
-        Back to {fromRecommendations ? "recommendations" : "registrations"}
-      </Link>
+      <div className="flex flex-wrap items-center justify-between gap-3">
+        <Link
+          href={list.back}
+          className="inline-flex w-fit items-center gap-1.5 rounded-sm paragraph-sm font-medium text-muted-foreground outline-none hover:text-foreground focus-visible:ring-4 focus-visible:ring-ring"
+        >
+          <ArrowLeftIcon className="size-4" aria-hidden />
+          Back to {list.label}
+        </Link>
+        <RegistrationPager
+          previous={list.previous}
+          next={list.next}
+          position={list.navigation.position}
+          total={list.navigation.total}
+        />
+      </div>
 
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">

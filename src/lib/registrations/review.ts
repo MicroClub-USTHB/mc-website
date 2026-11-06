@@ -9,6 +9,7 @@ import {
   type RegistrationSort,
 } from "@/lib/registrations/list-params"
 import { RegistrationModel } from "@/lib/registrations/model"
+import type { ListItem } from "@/lib/registrations/list-navigation"
 import {
   REGISTRATION_STATUSES,
   type RegistrationFilter,
@@ -167,6 +168,29 @@ export async function countRegistrationsByStatus() {
     ...counts,
     "second-review": secondReview,
   }
+}
+
+/**
+ * The whole list the table shows (search, tab and sort), as ids and names, for the previous and
+ * next arrows of a registration. `id` is always in it, at its place in the order, even when it no
+ * longer matches (e.g. just reviewed out of its tab): `inList` tells.
+ */
+export async function registrationListOrder(params: RegistrationListParams, id: string) {
+  await connectToDatabase()
+  const filter = listFilter(params)
+  let query = RegistrationModel.find({ $or: [filter, { _id: id }] })
+    .select("firstName lastName")
+    .sort(listSort(params))
+  if (params.sort !== "submitted") query = query.collation(CASE_INSENSITIVE)
+  const [documents, matches] = await Promise.all([
+    query.lean(),
+    RegistrationModel.countDocuments({ ...filter, _id: id }),
+  ])
+  const items: ListItem[] = documents.map((document) => ({
+    id: String(document._id),
+    name: `${document.firstName} ${document.lastName}`,
+  }))
+  return { items, inList: matches > 0 }
 }
 
 /** A full registration, or `null` when the id is malformed or unknown. */
