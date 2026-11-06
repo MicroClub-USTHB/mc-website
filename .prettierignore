@@ -3,3 +3,6 @@ node_modules
 pnpm-lock.yaml
 next-env.d.ts
 src/components/ui
+
+# graphify output (generated)
+graphify-out

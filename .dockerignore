@@ -1,0 +1,29 @@
+# Installed and built inside the image
+node_modules
+.pnpm-store
+.next
+out
+*.tsbuildinfo
+
+# Secrets: anything left in the context is read by `next build` and can end up in the image.
+# Dokploy passes the environment variables to the container instead.
+.env
+.env*.local
+.env.development
+.env.test
+.env.production.local
+*.pem
+
+# Not needed to build or run the site
+.git
+.github
+.vscode
+.idea
+.claude
+graphify-out
+coverage
+Dockerfile
+.dockerignore
+docker-compose.yml
+*.log
+.DS_Store
