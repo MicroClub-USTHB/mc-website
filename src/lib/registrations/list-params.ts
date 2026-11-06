@@ -29,8 +29,9 @@ export const REGISTRATIONS_PER_PAGE = 20
 export const DEFAULT_LIST_PARAMS: RegistrationListParams = {
   q: "",
   status: null,
+  // Oldest first: the applications waiting the longest come first.
   sort: "submitted",
-  order: "desc",
+  order: "asc",
   page: 1,
 }
 

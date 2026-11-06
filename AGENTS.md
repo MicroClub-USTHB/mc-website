@@ -63,7 +63,7 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - Guard every admin page and Server Action with `requireStaff({ permissions })` from `src/lib/auth/session.ts`. `src/proxy.ts` only checks that a session cookie exists.
 - HR accounts are created from `/admin/users` with a generated password, emailed, and `mustChangePassword`, which locks the admin area until the user picks their own. Presidents are created and deactivated from the terminal only (`pnpm auth:create-president`, `pnpm auth:deactivate-president`): no role has `user:set-role`, and a `hooks.before` in `auth.ts` keeps a signed-in president from acting on non-HR accounts.
 - Deactivating uses the admin plugin's ban: it blocks sign-in and ends every session.
-- The registrations list is server-rendered from the URL (`?q=&status=&sort=&order=&page=`, see `list-params.ts`): search, filter, sort and page are links or GET forms, no client state. Links to a registration carry the list query, so its back link returns to the same view.
+- The registrations list is server-rendered from the URL (`?q=&status=&sort=&order=&page=`, see `list-params.ts`): search, filter, sort and page are links or GET forms, no client state. Links to a registration carry the list query, so its back link returns to the same view. Both lists show the oldest first by default.
 - Student IDs are served only by `/admin/registrations/[id]/student-id`, which checks the permission and streams the file from Cloudinary (`downloadStudentId`): never send a Cloudinary URL to the browser.
 
 ## Conventions

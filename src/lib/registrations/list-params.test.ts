@@ -21,6 +21,10 @@ describe("parseListParams", () => {
     )
   })
 
+  it("lists the oldest registrations first by default", () => {
+    expect(DEFAULT_LIST_PARAMS).toMatchObject({ sort: "submitted", order: "asc" })
+  })
+
   it("ignores the order of an unknown column", () => {
     expect(parseListParams({ sort: "nope", order: "asc" }).order).toBe(DEFAULT_LIST_PARAMS.order)
   })
