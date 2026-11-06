@@ -1,6 +1,15 @@
 import { describe, expect, it } from "vitest"
 
-import { CONTACT_LIMITS, readContactValues, validateContact } from "@/lib/contact/schema"
+import {
+  CONTACT_LIMITS,
+  HONEYPOT_FIELD,
+  readContactValues,
+  validateContact,
+} from "@/lib/contact/schema"
+
+/** Words browser autofill and password managers recognize in a field's name (Chrome's heuristics, simplified). */
+const AUTOFILL_WORDS =
+  /company|business|organi[sz]ation|firm|website|url|homepage|name|e-?mail|phone|tel|mobile|address|street|city|zip|postal|country|state|birth|card|user|login|password/i
 
 describe("readContactValues", () => {
   it("trims the fields and reads missing ones as empty", () => {
@@ -41,5 +50,12 @@ describe("validateContact", () => {
     })
     expect(errors.name).toBeDefined()
     expect(errors.message).toBeDefined()
+  })
+})
+
+describe("HONEYPOT_FIELD", () => {
+  // A decoy autofill fills drops real messages as a bot's.
+  it("is not a name browser autofill fills", () => {
+    expect(HONEYPOT_FIELD).not.toMatch(AUTOFILL_WORDS)
   })
 })

@@ -45,7 +45,8 @@ Guidelines for AI coding agents working on the official Micro Club website.
 - `src/actions/`: Server Actions (`"use server"`), in `admin/` (staff only, guarded by `requireStaff()`) or `public/` (site visitors, rate limited), kept thin: validate input, rate limit, then call a `server-only` module in `src/lib/` (e.g. `src/lib/microbot-api.ts`, `src/lib/cloudinary.ts`), the only place that reads its secrets from `process.env`. Never expose a secret with `NEXT_PUBLIC_`; document every variable in `.env.example`.
 - `src/config/`: site metadata, section anchors, menu links, admin routes (`admin.ts`).
 - `src/const/`: static content constants, one file per section named like the section file (e.g. `src/const/statistics.ts` exports `STATISTICS` and its types).
-- Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` (error boundary with menu/footer), `src/app/global-error.tsx` (root layout failures, no global styles).
+- Error UI: `src/app/not-found.tsx` (global 404), `src/app/(site)/error.tsx` and `src/app/(registrations)/error.tsx` (error boundaries inside their layout, both rendering `ErrorFallback` from `src/components/shared/`), `src/app/global-error.tsx` (root layout failures, no global styles).
+- `src/instrumentation-client.ts` runs before the app is interactive: it installs `guardDomAgainstTranslation()` (`src/lib/translate-dom-guard.ts`), which keeps React from crashing on pages Chrome's Google Translate rewrote. Keep it; mark the applicant's own text `translate="no"` where it must stay as typed (the registration recap).
 
 ## Local services
 
