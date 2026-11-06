@@ -25,6 +25,13 @@ function pageOf(index: number) {
  * Previous and next registrations of `currentId` in its list. `items` is the list in its order
  * with the current registration at its place, also when it left the list (`inList: false`, e.g.
  * reviewed out of its tab): the arrows then still lead to the registrations around that place.
+ *
+ * Scale: `items` is the whole list (ids and names, from `registrationListOrder` and
+ * `recommendationListOrder`), loaded on every registration page: about 5 ms for 500 registrations.
+ * If it ever gets slow, fetch only the neighbors instead: the first registration before and after
+ * the current one's sort values (keyset, `$lt` / `$gt` on each sort field then `_id`, with the
+ * list's collation), and the position as the count of those before it. More code per sort, which
+ * is why the whole list is loaded while it stays small.
  */
 export function listNavigation(
   items: ListItem[],
