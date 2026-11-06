@@ -1,4 +1,4 @@
-import { isRegistrationStatus, type RegistrationStatus } from "@/lib/registrations/status"
+import { isRegistrationFilter, type RegistrationFilter } from "@/lib/registrations/status"
 
 /** Columns of the admin registrations table the server can sort by. */
 export const REGISTRATION_SORTS = [
@@ -17,7 +17,8 @@ export type SortOrder = "asc" | "desc"
 export type RegistrationListParams = {
   /** Search words, all required (first name, last name, email or Discord). */
   q: string
-  status: RegistrationStatus | null
+  /** Status tab, `null` for all of them. */
+  status: RegistrationFilter | null
   sort: RegistrationSort
   order: SortOrder
   /** 1-based. */
@@ -54,7 +55,7 @@ export function parseListParams(searchParams: SearchParams): RegistrationListPar
 
   return {
     q: (first(searchParams.q) ?? "").trim().slice(0, MAX_QUERY_LENGTH),
-    status: isRegistrationStatus(status) ? status : null,
+    status: isRegistrationFilter(status) ? status : null,
     sort: validSort ? (sort as RegistrationSort) : DEFAULT_LIST_PARAMS.sort,
     order: validSort && (order === "asc" || order === "desc") ? order : DEFAULT_LIST_PARAMS.order,
     page: Number.isFinite(page) && page > 1 ? page : 1,

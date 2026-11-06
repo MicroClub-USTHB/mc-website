@@ -37,6 +37,56 @@ export function currentReviews(timeline: TimelineEntry[]) {
   return [...latest.values()].filter((review) => review.state !== "pending")
 }
 
+/** The review entries of a document's timeline, in a MongoDB expression. */
+const REVIEW_ENTRIES = {
+  $filter: {
+    input: { $ifNull: ["$timeline", []] },
+    as: "entry",
+    cond: { $eq: ["$$entry.kind", "review"] },
+  },
+}
+
+/**
+ * MongoDB filter: exactly one reviewer holds a place. The same rule as `currentReviews`, in the
+ * database's terms (change both together): the latest review of each person, unless pending.
+ */
+export const ONE_REVIEWER_FILTER = {
+  $expr: {
+    $eq: [
+      {
+        $size: {
+          $filter: {
+            input: { $setUnion: [{ $map: { input: REVIEW_ENTRIES, in: "$$this.actorId" } }] },
+            as: "actorId",
+            cond: {
+              $ne: [
+                {
+                  $let: {
+                    vars: {
+                      latest: {
+                        $last: {
+                          $filter: {
+                            input: REVIEW_ENTRIES,
+                            as: "review",
+                            cond: { $eq: ["$$review.actorId", "$$actorId"] },
+                          },
+                        },
+                      },
+                    },
+                    in: "$$latest.state",
+                  },
+                },
+                "pending",
+              ],
+            },
+          },
+        },
+      },
+      1,
+    ],
+  },
+}
+
 /**
  * Who decided on a registration, for the admin tables: each reviewer holding a place and their
  * decision, the latest decision first.

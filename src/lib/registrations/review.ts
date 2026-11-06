@@ -11,11 +11,12 @@ import {
 import { RegistrationModel } from "@/lib/registrations/model"
 import {
   REGISTRATION_STATUSES,
+  type RegistrationFilter,
   type RegistrationStatus,
   type ReviewState,
 } from "@/lib/registrations/status"
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
-import { decisions, type TimelineEntry } from "@/lib/registrations/timeline"
+import { ONE_REVIEWER_FILTER, decisions, type TimelineEntry } from "@/lib/registrations/timeline"
 
 /** One row of the admin registrations table. */
 export type RegistrationRow = {
@@ -84,20 +85,33 @@ export function searchFilter(query: string) {
   }
 }
 
+/** The registrations of a status tab: `second-review` is the pending ones with one reviewer. */
+function tabFilter(tab: RegistrationFilter | null) {
+  if (tab === "second-review") return { status: "pending" as const, ...ONE_REVIEWER_FILTER }
+  return tab ? { status: tab } : {}
+}
+
+function listFilter(params: RegistrationListParams) {
+  return { ...searchFilter(params.q), ...tabFilter(params.status) }
+}
+
+function listSort(params: RegistrationListParams) {
+  const direction: MongooseSortOrder = params.order === "asc" ? 1 : -1
+  return Object.fromEntries([
+    ...SORT_FIELDS[params.sort].map((field) => [field, direction]),
+    ["_id", direction],
+  ])
+}
+
 /** One page of the table, from the search, status filter, sort and page in the URL. */
 export async function listRegistrations(params: RegistrationListParams): Promise<RegistrationPage> {
   await connectToDatabase()
 
-  const filter = { ...searchFilter(params.q), ...(params.status && { status: params.status }) }
+  const filter = listFilter(params)
   const total = await RegistrationModel.countDocuments(filter)
   const pageCount = Math.max(1, Math.ceil(total / REGISTRATIONS_PER_PAGE))
   const page = Math.min(params.page, pageCount)
-
-  const direction: MongooseSortOrder = params.order === "asc" ? 1 : -1
-  const sort = Object.fromEntries([
-    ...SORT_FIELDS[params.sort].map((field) => [field, direction]),
-    ["_id", direction],
-  ])
+  const sort = listSort(params)
 
   let query = RegistrationModel.find(filter)
     .select(ROW_FIELDS)
@@ -132,11 +146,14 @@ export async function listRegistrations(params: RegistrationListParams): Promise
   }
 }
 
-/** How many registrations have each status, for the status filter (ignores the search). */
+/** How many registrations each status tab holds, for the status filter (ignores the search). */
 export async function countRegistrationsByStatus() {
   await connectToDatabase()
-  const groups = await RegistrationModel.aggregate<{ _id: RegistrationStatus; count: number }>([
-    { $group: { _id: "$status", count: { $sum: 1 } } },
+  const [groups, secondReview] = await Promise.all([
+    RegistrationModel.aggregate<{ _id: RegistrationStatus; count: number }>([
+      { $group: { _id: "$status", count: { $sum: 1 } } },
+    ]),
+    RegistrationModel.countDocuments(tabFilter("second-review")),
   ])
   const counts = Object.fromEntries(REGISTRATION_STATUSES.map((status) => [status, 0])) as Record<
     RegistrationStatus,
@@ -148,6 +165,7 @@ export async function countRegistrationsByStatus() {
   return {
     all: Object.values(counts).reduce((sum, count) => sum + count, 0),
     ...counts,
+    "second-review": secondReview,
   }
 }
 
