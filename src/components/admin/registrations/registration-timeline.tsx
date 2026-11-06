@@ -1,4 +1,4 @@
-import { format, formatDistanceToNow } from "date-fns"
+import { formatDistanceToNow } from "date-fns"
 import {
   CalendarClockIcon,
   CheckIcon,
@@ -10,6 +10,7 @@ import {
 } from "lucide-react"
 
 import { McBadge } from "@/components/ui/mc-badge"
+import { formatClubTime } from "@/lib/dates"
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
 import type { ReviewState } from "@/lib/registrations/status"
 import { currentRecommendation, type TimelineEntry } from "@/lib/registrations/timeline"
@@ -99,7 +100,7 @@ export function RegistrationTimeline({ timeline }: { timeline: TimelineEntry[] }
               {badge && <McBadge variant={tone}>{badge}</McBadge>}
               <time
                 dateTime={entry.at.toISOString()}
-                title={format(entry.at, "d MMMM yyyy 'at' HH:mm")}
+                title={formatClubTime(entry.at, "d MMMM yyyy 'at' HH:mm")}
                 className="paragraph-sm text-muted-foreground sm:ml-auto"
               >
                 {formatDistanceToNow(entry.at, { addSuffix: true })}
