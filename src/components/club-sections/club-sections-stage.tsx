@@ -6,6 +6,7 @@ import { ChevronLeftIcon } from "@/components/icons/chevron-left"
 import { ChevronRightIcon } from "@/components/icons/chevron-right"
 import { McButton } from "@/components/ui/mc-button"
 import type { ClubSectionId } from "@/const/club-sections"
+import { EASE_OUT_EXPO } from "@/lib/easing"
 import { cn } from "@/lib/utils"
 
 export type StageSection = {
@@ -76,6 +77,13 @@ const overviewLayouts: Record<ClubSectionId | "none", Record<ClubSectionId, Plac
     "game-dev": { x: 393, y: 265, tilt: 3.4 },
     robotics: { x: 643, y: 237, scale: 1.1235 },
   },
+}
+
+/** Where each icon comes from as the stage scrolls in, in stage pixels and degrees. */
+const ENTRANCES: Record<ClubSectionId, { x: number; y: number; turn: number }> = {
+  it: { x: -120, y: 40, turn: -25 },
+  "game-dev": { x: 0, y: 120, turn: 8 },
+  robotics: { x: 120, y: 40, turn: 20 },
 }
 
 /** How far the hidden carousel neighbours wait off-center, in stage pixels. */
@@ -151,6 +159,7 @@ export function ClubSectionsStage({
 }: ClubSectionsStageProps) {
   const isCarousel = selected !== null
   const stageRef = useRef<HTMLDivElement>(null)
+  const entranceRefs = useRef(new Map<ClubSectionId, HTMLDivElement>())
   // The active looks are invisible until someone interacts: render them once the section comes
   // near the screen, so they stay out of the page's first load and hydration.
   const [hasActiveLooks, setHasActiveLooks] = useState(false)
@@ -168,6 +177,47 @@ export function ClubSectionsStage({
     )
     observer.observe(stage)
     return () => observer.disconnect()
+  }, [])
+
+  // The icons fly in as the stage scrolls into view. Created paused, so they stay hidden until then.
+  useEffect(() => {
+    const stage = stageRef.current
+    if (!stage || window.matchMedia("(prefers-reduced-motion: reduce)").matches) return
+    const scale = stage.offsetWidth / STAGE.width
+    const animations = [...entranceRefs.current].map(([id, element], index) => {
+      const { x, y, turn } = ENTRANCES[id]
+      const animation = element.animate(
+        [
+          {
+            transform: `translate(${x * scale}px, ${y * scale}px) rotate(${turn}deg) scale(0.6)`,
+            opacity: 0,
+          },
+          { opacity: 1, offset: 0.4 },
+          { transform: "none", opacity: 1 },
+        ],
+        {
+          duration: 1000,
+          delay: index * 140,
+          easing: `cubic-bezier(${EASE_OUT_EXPO.join(",")})`,
+          fill: "backwards",
+        },
+      )
+      animation.pause()
+      return animation
+    })
+    const observer = new IntersectionObserver(
+      ([entry]) => {
+        if (!entry?.isIntersecting) return
+        observer.disconnect()
+        for (const animation of animations) animation.play()
+      },
+      { threshold: 0.4 },
+    )
+    observer.observe(stage)
+    return () => {
+      observer.disconnect()
+      for (const animation of animations) animation.cancel()
+    }
   }, [])
 
   return (
@@ -191,7 +241,7 @@ export function ClubSectionsStage({
             aria-label={isCarousel ? `${title}, back to all sections` : title}
             inert={!visible}
             className={cn(
-              "pointer-events-none absolute top-0 left-0 grid rounded-3xl outline-none *:col-start-1 *:row-start-1 focus-visible:outline-2 focus-visible:outline-ring",
+              "pointer-events-none absolute top-0 left-0 grid cursor-pointer rounded-3xl outline-none *:col-start-1 *:row-start-1 focus-visible:outline-2 focus-visible:outline-ring",
               "transition-[transform,opacity,visibility] ease-out-quart motion-reduce:transition-none",
               !visible && "invisible opacity-0",
             )}
@@ -209,28 +259,45 @@ export function ClubSectionsStage({
             onBlur={() => onHover(null)}
             onClick={() => (isCarousel ? onClose() : onSelect(index))}
           >
-            {/*
-              Both looks are rendered once and faded: animating the SVG colors would repaint
-              every filter on each frame. The active look fades over the resting one, which
-              hides once it is covered (the active look is partly translucent) and comes back
-              at once when the active look fades out. No `will-change`: it freezes the layers'
-              resolution, so scaled up icons would stay blurry. Only painted shapes react to the
-              pointer, as the icons' boxes overlap a lot.
-            */}
             <div
-              className={cn(
-                LOOK,
-                "transition-opacity duration-0 motion-reduce:transition-none",
-                isActive && hasActiveLooks && "opacity-0 delay-300",
-              )}
+              ref={(element) => {
+                if (element) entranceRefs.current.set(id, element)
+                else entranceRefs.current.delete(id)
+              }}
+              className="grid *:col-start-1 *:row-start-1"
             >
-              {looks.rest}
-            </div>
-            {hasActiveLooks && (
-              <div className={cn(LOOK, "transition-opacity", transition, !isActive && "opacity-0")}>
-                {looks.active}
+              {/*
+                Both looks are rendered once and faded: animating the SVG colors would repaint
+                every filter on each frame. The active look fades over the resting one, which
+                fades out a beat later (the active look is partly translucent): the two never
+                dip together to the background. Each look is isolated: otherwise the robot's
+                blended layers would blend with the other look whenever theirs is fully opaque,
+                and snap to a different color as a fade ends. No `will-change`: it freezes the layers'
+                resolution, so scaled up icons would stay blurry. Only painted shapes react to the
+                pointer, as the icons' boxes overlap a lot.
+              */}
+              <div
+                className={cn(
+                  LOOK,
+                  "isolate transition-opacity duration-200 ease-out-quart motion-reduce:transition-none",
+                  isActive && hasActiveLooks && "opacity-0 delay-100 duration-300",
+                )}
+              >
+                {looks.rest}
               </div>
-            )}
+              {hasActiveLooks && (
+                <div
+                  className={cn(
+                    LOOK,
+                    "isolate transition-opacity",
+                    transition,
+                    !isActive && "opacity-0",
+                  )}
+                >
+                  {looks.active}
+                </div>
+              )}
+            </div>
           </button>
         )
       })}
