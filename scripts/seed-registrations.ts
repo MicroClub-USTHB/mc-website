@@ -21,6 +21,7 @@ import {
   type TimelineEntry,
 } from "@/lib/registrations/timeline"
 
+import { assertLocalDatabase } from "./local-database"
 import { run } from "./run"
 
 const SEED_EMAIL = /@seed\.test$/
@@ -141,16 +142,6 @@ function random(seed: number) {
     let value = Math.imul(seed ^ (seed >>> 15), 1 | seed)
     value = (value + Math.imul(value ^ (value >>> 7), 61 | value)) ^ value
     return ((value ^ (value >>> 14)) >>> 0) / 4294967296
-  }
-}
-
-function assertLocalDatabase() {
-  const uri = process.env.MONGODB_URI ?? ""
-  const host = /^mongodb(?:\+srv)?:\/\/(?:[^@/]*@)?([^:/?,]+)/.exec(uri)?.[1]
-  if (host !== "localhost" && host !== "127.0.0.1") {
-    throw new Error(
-      `Refusing to seed ${host ?? "an unknown database"}: only a local MONGODB_URI is allowed.`,
-    )
   }
 }
 

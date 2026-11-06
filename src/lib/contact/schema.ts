@@ -4,8 +4,11 @@ export type ContactField = (typeof CONTACT_FIELDS)[number]
 export type ContactValues = Record<ContactField, string>
 export type ContactErrors = Partial<Record<ContactField, string>>
 
-/** Name of the hidden decoy field: real visitors never see it, bots fill it. */
-export const HONEYPOT_FIELD = "website"
+/**
+ * Name of the hidden decoy field: real visitors never see it, bots fill it. Like the registration
+ * one, it must mean nothing to browser autofill or password managers, or real messages are dropped.
+ */
+export const HONEYPOT_FIELD = "mc_trap"
 
 export const CONTACT_LIMITS = { name: 100, email: 254, message: 2000 } as const
 

@@ -1,8 +1,9 @@
 import "server-only"
 
-import type { PipelineStage } from "mongoose"
+import { Types, type PipelineStage } from "mongoose"
 
 import { connectToDatabase } from "@/lib/mongodb"
+import type { ListItem } from "@/lib/registrations/list-navigation"
 import { REGISTRATIONS_PER_PAGE } from "@/lib/registrations/list-params"
 import { RegistrationModel } from "@/lib/registrations/model"
 import type {
@@ -48,18 +49,31 @@ const SORT_FIELDS: Record<RecommendationSort, string[]> = {
   submitted: ["createdAt"],
 }
 
-/** One document per recommendation matching the search and the filters. */
-function matchingRecommendations(params: RecommendationListParams): PipelineStage[] {
-  const filters = {
+function recommendationFilters(params: RecommendationListParams) {
+  return {
     ...(params.to.length > 0 && { "recommendations.target": { $in: params.to } }),
     ...(params.by.length > 0 && { "recommendations.actorId": { $in: params.by } }),
   }
+}
+
+/** One document per recommendation matching the search and the filters. */
+function matchingRecommendations(params: RecommendationListParams): PipelineStage[] {
+  const filters = recommendationFilters(params)
   return [
     { $match: { ...searchFilter(params.q), ...filters } },
     { $unwind: "$recommendations" },
     // Again after unwinding: the first match keeps a registration if any recommendation fits.
     { $match: filters },
   ]
+}
+
+function recommendationSort(params: RecommendationListParams) {
+  const direction = params.order === "asc" ? 1 : -1
+  return Object.fromEntries(
+    [...SORT_FIELDS[params.sort], "_id", "recommendations.actorId"].map(
+      (field): [string, 1 | -1] => [field, direction],
+    ),
+  )
 }
 
 /** One page of the table, from the search, filters, sort and page in the URL. */
@@ -77,12 +91,7 @@ export async function listRecommendations(
   const pageCount = Math.max(1, Math.ceil(total / REGISTRATIONS_PER_PAGE))
   const page = Math.min(params.page, pageCount)
 
-  const direction = params.order === "asc" ? 1 : -1
-  const sort = Object.fromEntries(
-    [...SORT_FIELDS[params.sort], "_id", "recommendations.actorId"].map(
-      (field): [string, 1 | -1] => [field, direction],
-    ),
-  )
+  const sort = recommendationSort(params)
   const aggregation = RegistrationModel.aggregate<{
     _id: unknown
     firstName: string
@@ -134,6 +143,40 @@ export async function listRecommendations(
     page,
     pageCount,
   }
+}
+
+/**
+ * The whole list the table shows (search, filters and sort), as registration ids and names, for
+ * the previous and next arrows of a registration opened from it. `id` is always in it, at its
+ * place in the order, even when its recommendation was removed or no longer matches: `inList`
+ * tells.
+ */
+export async function recommendationListOrder(params: RecommendationListParams, id: string) {
+  await connectToDatabase()
+  const filters = recommendationFilters(params)
+  const current = { _id: new Types.ObjectId(id) }
+  const order = RegistrationModel.aggregate<{ _id: unknown; firstName: string; lastName: string }>([
+    { $match: { $or: [{ ...searchFilter(params.q), ...filters }, current] } },
+    // Kept without a recommendation, so the current registration stays in the order.
+    { $unwind: { path: "$recommendations", preserveNullAndEmptyArrays: true } },
+    { $match: { $or: [{ recommendations: { $exists: true }, ...filters }, current] } },
+    { $sort: recommendationSort(params) },
+    { $project: { firstName: 1, lastName: 1 } },
+  ])
+  if (params.sort !== "submitted") order.collation(CASE_INSENSITIVE)
+  const [documents, [match]] = await Promise.all([
+    order,
+    RegistrationModel.aggregate<{ total: number }>([
+      { $match: current },
+      ...matchingRecommendations(params),
+      { $count: "total" },
+    ]),
+  ])
+  const items: ListItem[] = documents.map((document) => ({
+    id: String(document._id),
+    name: `${document.firstName} ${document.lastName}`,
+  }))
+  return { items, inList: (match?.total ?? 0) > 0 }
 }
 
 /**

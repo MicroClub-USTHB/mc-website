@@ -47,8 +47,9 @@ export function ContactForm() {
     >
       {/* Honeypot: hidden from people and screen readers, filled by bots. */}
       <div aria-hidden className="sr-only">
+        {/* Autofill reads labels too: this one names no field it knows. */}
         <label>
-          Website
+          Leave this empty
           <input type="text" name={HONEYPOT_FIELD} tabIndex={-1} autoComplete="off" />
         </label>
       </div>

@@ -11,16 +11,17 @@ import {
   type RegistrationListParams,
 } from "@/lib/registrations/list-params"
 import {
-  REGISTRATION_STATUSES,
-  REGISTRATION_STATUS_LABELS,
-  type RegistrationStatus,
+  REGISTRATION_FILTERS,
+  REGISTRATION_FILTER_LABELS,
+  type RegistrationFilter,
 } from "@/lib/registrations/status"
 import { cn } from "@/lib/utils"
 
-type StatusCounts = Record<RegistrationStatus | "all", number>
+type StatusCounts = Record<RegistrationFilter | "all", number>
 
 /**
- * Search (submitted with Enter, back to page 1) and the status filter with its counts. Plain
+ * Search (submitted with Enter, back to page 1) and the status filter with its counts ("2nd
+ * Review" is the pending applications one HR member reviewed, also counted in Pending). Plain
  * links and a GET form: the server renders every state from the URL.
  */
 export function RegistrationsToolbar({
@@ -30,11 +31,11 @@ export function RegistrationsToolbar({
   params: RegistrationListParams
   counts: StatusCounts
 }) {
-  const filters: { status: RegistrationStatus | null; label: string; count: number }[] = [
+  const filters: { status: RegistrationFilter | null; label: string; count: number }[] = [
     { status: null, label: "All", count: counts.all },
-    ...REGISTRATION_STATUSES.map((status) => ({
+    ...REGISTRATION_FILTERS.map((status) => ({
       status,
-      label: REGISTRATION_STATUS_LABELS[status],
+      label: REGISTRATION_FILTER_LABELS[status],
       count: counts[status],
     })),
   ]

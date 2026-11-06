@@ -1,4 +1,4 @@
-import { format } from "date-fns"
+import { formatClubTime } from "@/lib/dates"
 import Link from "next/link"
 
 import { RecommendedBy } from "@/components/admin/registrations/recommended-by"
@@ -98,7 +98,7 @@ export function RegistrationsTable({
             </McTableCell>
             <McTableCell className="whitespace-nowrap">
               <time dateTime={row.submittedAt}>
-                {format(new Date(row.submittedAt), "d MMM yyyy")}
+                {formatClubTime(new Date(row.submittedAt), "d MMM yyyy")}
               </time>
             </McTableCell>
           </McTableRow>
