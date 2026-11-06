@@ -2,6 +2,7 @@ import type { NextConfig } from "next"
 
 const nextConfig: NextConfig = {
   /* config options here */
+  output: "standalone",
   reactCompiler: true,
   experimental: {
     // Tailwind's CSS is small (~6 KB gzipped): inlined in the HTML, it no longer blocks the first
