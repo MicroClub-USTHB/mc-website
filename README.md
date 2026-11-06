@@ -44,6 +44,8 @@ pnpm auth:deactivate-president --email old.president@example.com
 
 The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_FROM_EMAIL`) at production to act there. Without a Resend key, the generated password is printed in the terminal.
 
+For local testing, `pnpm db:seed-staff` creates `president@seed.test`, `hr1@seed.test` and `hr2@seed.test`, all with the password `microclub-dev` (local database only).
+
 ## Scripts
 
 | Command                          | Description                                         |
@@ -57,6 +59,7 @@ The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_
 | `pnpm format`                    | Format the codebase with Prettier                   |
 | `pnpm db:up` / `pnpm db:down`    | Start / stop the local MongoDB replica set (Docker) |
 | `pnpm db:seed-registrations`     | Fill the local database with fake registrations     |
+| `pnpm db:seed-staff`             | Create local test staff accounts (see Admin area)   |
 | `pnpm auth:create-president`     | Create a president account (see Admin area)         |
 | `pnpm auth:deactivate-president` | Deactivate a president account                      |
 
