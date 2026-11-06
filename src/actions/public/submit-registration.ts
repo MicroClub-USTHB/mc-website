@@ -60,6 +60,19 @@ function readUploadReference(raw: FormDataEntryValue | null): StudentIdUpload | 
   }
 }
 
+/**
+ * Deletes the student ID of a rejected or dropped submission, but only when Cloudinary's signature
+ * proves it is a real upload response, which only the visitor who uploaded the file received: a
+ * forged reference could name another applicant's file.
+ */
+async function discardUpload(upload: StudentIdUpload | null) {
+  try {
+    if (upload && verifyStudentIdUpload(upload)) await deleteStudentId(upload)
+  } catch (error) {
+    console.error("Registration: removing the uploaded student ID failed", error)
+  }
+}
+
 /** The ID Cloudinary really stored must be small enough and in an accepted format. */
 function uploadProblem(stored: UploadedStudentId) {
   if (stored.bytes > STUDENT_ID_RULES.maxBytes) return "This file is too large (5 MB max)."
@@ -73,13 +86,19 @@ function uploadProblem(stored: UploadedStudentId) {
  * already uploaded to Cloudinary (`upload`, JSON) and the honeypot, as one `FormData`.
  *
  * Order: validate -> rate limit (per IP and per email) -> duplicate email -> check Cloudinary's
- * signature of the upload -> save in MongoDB. A rejected registration (invalid file, duplicate) deletes its upload; after a
- * failure that may pass (database down) the upload stays, so the retry reuses it. A filled
- * honeypot gets a fake success (bots learn nothing). Needs `MONGODB_URI` and the `CLOUDINARY_*`
+ * signature of the upload -> save in MongoDB. A rejected registration (invalid file, duplicate)
+ * deletes its upload once its signature checks out; after a failure that may pass (database down)
+ * the upload stays, so the retry reuses it. A filled honeypot gets a fake success (bots learn
+ * nothing), is logged, and deletes its upload too. Needs `MONGODB_URI` and the `CLOUDINARY_*`
  * variables (`.env.example`).
  */
 export async function submitRegistration(formData: FormData): Promise<RegistrationResult> {
-  if (formData.get(REGISTRATION_HONEYPOT_FIELD)) return { status: "success" }
+  if (formData.get(REGISTRATION_HONEYPOT_FIELD)) {
+    // A bot, or a visitor whose autofill filled the decoy: the log shows how often it happens.
+    console.warn("Registration: honeypot filled, submission dropped")
+    await discardUpload(readUploadReference(formData.get("upload")))
+    return { status: "success" }
+  }
   // The window may have closed while the form was open.
   if (!areRegistrationsOpen()) return { status: "error" }
 
@@ -124,16 +143,11 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
   ])
   if (ipLimited || emailLimited) return { status: "rate-limited" }
 
-  const discard = () =>
-    deleteStudentId(upload).catch((error) =>
-      console.error("Registration: removing the uploaded student ID failed", error),
-    )
-
   try {
     await connectToDatabase()
 
     if (await RegistrationModel.exists({ email })) {
-      await discard()
+      await discardUpload(upload)
       return { status: "duplicate" }
     }
 
@@ -141,7 +155,7 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
     const stored = verifyStudentIdUpload(upload)
     const problem = stored ? uploadProblem(stored) : "Please upload your ID again."
     if (!stored || problem) {
-      if (stored) await discard()
+      await discardUpload(upload)
       return {
         status: "invalid",
         errors: {},
@@ -182,7 +196,7 @@ export async function submitRegistration(formData: FormData): Promise<Registrati
   } catch (error) {
     // Two submissions of one email at once: the unique index rejects the second one.
     if ((error as { code?: number }).code === MONGO_DUPLICATE_KEY) {
-      await discard()
+      await discardUpload(upload)
       return { status: "duplicate" }
     }
 
