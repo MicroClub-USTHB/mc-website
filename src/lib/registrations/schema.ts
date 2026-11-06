@@ -8,8 +8,13 @@ import {
   STUDENT_ID_RULES,
 } from "@/const/registrations"
 
-/** Name of the hidden decoy field: real visitors never see it, bots fill it. */
-export const REGISTRATION_HONEYPOT_FIELD = "company"
+/**
+ * Name of the hidden decoy field: real visitors never see it, bots fill it. It must mean nothing to
+ * browser autofill: Chrome fills a field named like one of its own (company, email, address...)
+ * from the visitor's saved address, even with `autocomplete="off"`, and the server then drops the
+ * registration as a bot's. `company` lost real applicants that way.
+ */
+export const REGISTRATION_HONEYPOT_FIELD = "mc_trap"
 
 const MIN_AGE = 14
 const MAX_AGE = 100
