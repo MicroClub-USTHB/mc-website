@@ -21,6 +21,14 @@ describe("parseListParams", () => {
     )
   })
 
+  it("reads the 2nd Review tab, which is not a status", () => {
+    expect(parseListParams({ status: "second-review" }).status).toBe("second-review")
+  })
+
+  it("lists the oldest registrations first by default", () => {
+    expect(DEFAULT_LIST_PARAMS).toMatchObject({ sort: "submitted", order: "asc" })
+  })
+
   it("ignores the order of an unknown column", () => {
     expect(parseListParams({ sort: "nope", order: "asc" }).order).toBe(DEFAULT_LIST_PARAMS.order)
   })

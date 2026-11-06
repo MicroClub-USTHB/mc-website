@@ -78,7 +78,7 @@ const registrationDocument = new Schema(
   { timestamps: true },
 )
 
-// The admin list: newest first by default, often filtered by status.
+// The admin list: by date (oldest first by default), often filtered by status.
 registrationDocument.index({ createdAt: -1 })
 registrationDocument.index({ status: 1, createdAt: -1 })
 // The recommendations page, filtered by where and by whom.

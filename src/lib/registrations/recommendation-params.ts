@@ -29,8 +29,9 @@ export const DEFAULT_RECOMMENDATION_PARAMS: RecommendationListParams = {
   q: "",
   to: [],
   by: [],
+  // Oldest first, like the registrations list.
   sort: "submitted",
-  order: "desc",
+  order: "asc",
   page: 1,
 }
 

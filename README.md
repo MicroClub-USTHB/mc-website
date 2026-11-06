@@ -33,7 +33,7 @@ The registrations and the admin area need MongoDB: copy `.env.example` to `.env.
 Staff sign in at `/admin` (Better Auth, email and password, no sign-up). Two roles, one per account:
 
 - **President**: manages the HR accounts on `/admin/users` (create, deactivate, reactivate, reset password, delete). Each new account gets a generated password by email, changed at first sign-in.
-- **HR**: reviews the registrations on `/admin/registrations`: a server-side list (search, status filter, sort, pages) and a page per registration with the student ID. Two HR members at most review an application, its status is computed from their reviews, and any HR member can recommend it to a section or department; both appear in its timeline. `/admin/recommendations` lists the recommendations, filtered by section, department and HR member.
+- **HR**: reviews the registrations on `/admin/registrations`: a server-side list (search, status filter, sort, pages, oldest first by default; "2nd Review" lists the pending applications one HR member reviewed) and a page per registration with the student ID, with previous and next arrows (or the ← → keys) through the list it was opened from. Two HR members at most review an application, its status is computed from their reviews, and any HR member can recommend it to a section or department; both appear in its timeline. `/admin/recommendations` lists the recommendations, filtered by section, department and HR member.
 
 The president's account is created from the terminal. The yearly handover: create the new president, then deactivate the old one.
 
@@ -43,6 +43,8 @@ pnpm auth:deactivate-president --email old.president@example.com
 ```
 
 The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_FROM_EMAIL`) at production to act there. Without a Resend key, the generated password is printed in the terminal.
+
+For local testing, `pnpm db:seed-staff` creates `president@seed.test`, `hr1@seed.test` and `hr2@seed.test`, all with the password `microclub-dev` (local database only).
 
 ## Scripts
 
@@ -57,6 +59,7 @@ The scripts read `.env.local`: point `MONGODB_URI` (and `RESEND_API_KEY`, `AUTH_
 | `pnpm format`                    | Format the codebase with Prettier                   |
 | `pnpm db:up` / `pnpm db:down`    | Start / stop the local MongoDB replica set (Docker) |
 | `pnpm db:seed-registrations`     | Fill the local database with fake registrations     |
+| `pnpm db:seed-staff`             | Create local test staff accounts (see Admin area)   |
 | `pnpm auth:create-president`     | Create a president account (see Admin area)         |
 | `pnpm auth:deactivate-president` | Deactivate a president account                      |
 
