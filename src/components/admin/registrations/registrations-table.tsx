@@ -1,12 +1,15 @@
 import { formatClubTime } from "@/lib/dates"
 import Link from "next/link"
 
+import { RecommendedBy } from "@/components/admin/registrations/recommended-by"
+import { Reviewers } from "@/components/admin/registrations/reviewers"
 import { SortHeader } from "@/components/admin/registrations/sort-header"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import {
   McTable,
   McTableBody,
   McTableCell,
+  McTableHead,
   McTableHeader,
   McTableRow,
 } from "@/components/ui/mc-data-table"
@@ -19,16 +22,23 @@ import {
 } from "@/lib/registrations/list-params"
 import type { RegistrationRow } from "@/lib/registrations/review"
 
-const COLUMNS: { sort: RegistrationSort; label: string }[] = [
+/** Columns: the sortable ones, and after Status who reviewed and who recommended (unsorted). */
+const COLUMNS: ({ sort: RegistrationSort; label: string } | { sort: null; label: string })[] = [
   { sort: "applicant", label: "Applicant" },
   { sort: "fieldOfStudy", label: "Field of study" },
   { sort: "yearOfStudy", label: "Year" },
   { sort: "university", label: "University" },
   { sort: "status", label: "Status" },
+  { sort: null, label: "Reviewed by" },
+  { sort: null, label: "Recommended by" },
   { sort: "submitted", label: "Submitted" },
 ]
 
-/** One page of registrations; the applicant's name opens their registration. */
+/**
+ * One page of registrations; the applicant's name opens their registration. "Reviewed by" names
+ * the HR members who decided and what they decided, latest first (see `Reviewers`); "Recommended
+ * by" its recommendation, by whom and where to (see `RecommendedBy`).
+ */
 export function RegistrationsTable({
   params,
   rows,
@@ -42,18 +52,22 @@ export function RegistrationsTable({
     <McTable>
       <McTableHeader>
         <McTableRow>
-          {COLUMNS.map((column) => (
-            <SortHeader
-              key={column.sort}
-              label={column.label}
-              order={params.sort === column.sort ? params.order : null}
-              href={`${adminRoutes.registrations}${listQuery(params, {
-                sort: column.sort,
-                order: nextOrder(params, column.sort),
-                page: 1,
-              })}`}
-            />
-          ))}
+          {COLUMNS.map((column) =>
+            column.sort === null ? (
+              <McTableHead key={column.label}>{column.label}</McTableHead>
+            ) : (
+              <SortHeader
+                key={column.sort}
+                label={column.label}
+                order={params.sort === column.sort ? params.order : null}
+                href={`${adminRoutes.registrations}${listQuery(params, {
+                  sort: column.sort,
+                  order: nextOrder(params, column.sort),
+                  page: 1,
+                })}`}
+              />
+            ),
+          )}
         </McTableRow>
       </McTableHeader>
       <McTableBody>
@@ -75,6 +89,12 @@ export function RegistrationsTable({
             <McTableCell>{row.university}</McTableCell>
             <McTableCell>
               <StatusBadge status={row.status} />
+            </McTableCell>
+            <McTableCell>
+              <Reviewers reviewers={row.reviewers} />
+            </McTableCell>
+            <McTableCell>
+              <RecommendedBy recommendation={row.recommendation} />
             </McTableCell>
             <McTableCell className="whitespace-nowrap">
               <time dateTime={row.submittedAt}>

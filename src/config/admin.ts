@@ -38,3 +38,10 @@ export const roleHome: Record<StaffRole, string> = {
   president: adminRoutes.users,
   hr: adminRoutes.registrations,
 }
+
+/** Themes of the admin area (the public site has only the light one). */
+export const ADMIN_THEMES = ["light", "dark"] as const
+export type AdminTheme = (typeof ADMIN_THEMES)[number]
+
+/** Cookie keeping each browser's admin theme, read by the admin layout for the first paint. */
+export const ADMIN_THEME_COOKIE = "mc-admin-theme"

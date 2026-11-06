@@ -1,9 +1,16 @@
 import type { StudentIdUploadSignature } from "@/lib/cloudinary"
 
-/** Reference to a student ID already stored in Cloudinary, sent with the registration. */
+/**
+ * Reference to a student ID already stored in Cloudinary, sent with the registration: Cloudinary's
+ * upload response, whose `signature` (over `publicId` and `version`) the server checks.
+ */
 export type StudentIdUpload = {
   publicId: string
   resourceType: string
+  version: number
+  signature: string
+  format: string
+  bytes: number
 }
 
 /** Public ids the server accepts: a file in the student ID folder, no path tricks. */
@@ -34,5 +41,12 @@ export async function uploadStudentId(
   if (!response.ok || !result?.public_id)
     throw new Error(result?.error?.message ?? `Upload failed (${response.status})`)
 
-  return { publicId: result.public_id, resourceType: result.resource_type }
+  return {
+    publicId: result.public_id,
+    resourceType: result.resource_type,
+    version: result.version,
+    signature: result.signature,
+    format: result.format,
+    bytes: result.bytes,
+  }
 }

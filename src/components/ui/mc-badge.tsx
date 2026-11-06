@@ -7,14 +7,23 @@ import { cloneElement, isValidElement } from 'react';
 import { cn } from '@/lib/utils';
 
 const McBadgeVariants = cva(
-  'group/badge inline-flex shrink-0 items-center justify-center gap-1 overflow-hidden rounded-[16px] border border-[#E6E9FF] text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:size-3 [&>svg]:shrink-0 [&>svg]:self-center',
+  'group/badge inline-flex shrink-0 items-center justify-center gap-1 overflow-hidden rounded-[16px] border border-border text-xs font-medium whitespace-nowrap transition-all focus-visible:border-ring focus-visible:ring-[3px] focus-visible:ring-ring/50 has-data-[icon=inline-end]:pr-1.5 has-data-[icon=inline-start]:pl-1.5 aria-invalid:border-destructive aria-invalid:ring-destructive/20 dark:aria-invalid:ring-destructive/40 [&>svg]:size-3 [&>svg]:shrink-0 [&>svg]:self-center',
   {
     variants: {
       variant: {
-        default: 'bg-primary-foreground text-primary [a]:hover:bg-primary-foreground/80',
-        secondary: 'bg-secondary text-secondary-foreground [a]:hover:bg-secondary/80',
+        default:
+          'bg-primary-foreground text-primary dark:border-primary/25 dark:bg-primary/10 [a]:hover:bg-primary-foreground/80',
+        secondary:
+          'bg-secondary text-secondary-foreground dark:border-transparent [a]:hover:bg-secondary/80',
+        // Dark: a faint tint of the tone with a lighter text, so the label stays readable on the
+        // dark surfaces (the light tints of the `*-foreground` tokens would glare).
         destructive:
-          'bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:bg-destructive/20 dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20',
+          'bg-destructive/10 text-destructive focus-visible:ring-destructive/20 dark:border-destructive/30 dark:bg-destructive/15 dark:text-[color-mix(in_srgb,var(--color-destructive)_55%,white)] dark:focus-visible:ring-destructive/40 [a]:hover:bg-destructive/20',
+        info: 'bg-info-foreground text-info dark:border-info/30 dark:bg-info/15 dark:text-[color-mix(in_srgb,var(--color-info)_55%,white)]',
+        warning:
+          'bg-warning-foreground text-warning dark:border-warning/30 dark:bg-warning/15 dark:text-[color-mix(in_srgb,var(--color-warning)_65%,white)]',
+        success:
+          'bg-success-foreground text-success dark:border-success/30 dark:bg-success/15 dark:text-[color-mix(in_srgb,var(--color-success)_70%,white)]',
         outline: 'border-border text-foreground [a]:hover:bg-muted [a]:hover:text-muted-foreground',
         ghost: 'hover:bg-muted hover:text-muted-foreground dark:hover:bg-muted/50',
         leading: 'bg-accent-foreground text-accent',
