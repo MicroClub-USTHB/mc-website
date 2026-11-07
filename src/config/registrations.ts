@@ -10,5 +10,5 @@
  */
 export const REGISTRATIONS_WINDOW: { opensAt: string | null; closesAt: string | null } = {
   opensAt: "2026-11-05T12:00:00+01:00",
-  closesAt: "2026-11-07T22:00:00+01:00",
+  closesAt: "2026-11-07T22:30:00+01:00",
 }
