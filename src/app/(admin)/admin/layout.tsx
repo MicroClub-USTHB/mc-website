@@ -22,7 +22,7 @@ export default async function AdminLayout({ children }: LayoutProps<"/admin">) {
     <AdminTheme initialTheme={theme}>
       <FeedbackModalProvider>
         <AdminHeader />
-        <main className="flex flex-1 flex-col bg-background">{children}</main>
+        <main className="flex flex-1 flex-col bg-background wrap-break-word">{children}</main>
       </FeedbackModalProvider>
     </AdminTheme>
   )

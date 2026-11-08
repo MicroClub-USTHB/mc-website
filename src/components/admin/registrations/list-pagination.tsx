@@ -1,6 +1,7 @@
 import Link from "next/link"
 import { ArrowLeftIcon, ArrowRightIcon } from "lucide-react"
 
+import { PageJump } from "@/components/admin/registrations/page-jump"
 import { McButton } from "@/components/ui/mc-button"
 import { REGISTRATIONS_PER_PAGE } from "@/lib/registrations/list-params"
 import { cn } from "@/lib/utils"
@@ -14,7 +15,10 @@ function pageItems(page: number, pageCount: number): (number | null)[] {
   return [1, null, page - 1, page, page + 1, null, pageCount]
 }
 
-/** "Showing 21–40 of 312", then Previous, the page numbers and Next, all as links. */
+/**
+ * "Showing 21–40 of 312", then Previous, the page numbers and Next, all as links, and a "Go to page"
+ * box once the numbers no longer all show.
+ */
 export function ListPagination({
   page,
   pageCount,
@@ -43,54 +47,57 @@ export function ListPagination({
         of <span className="font-medium text-foreground">{total}</span>
       </p>
       {pageCount > 1 && (
-        <div className="flex items-center gap-1">
-          <McButton
-            variant="secondary"
-            size="sm"
-            icon="leading"
-            iconDefinition={<ArrowLeftIcon className="size-4" />}
-            disabled={page === 1}
-            nativeButton={false}
-            render={page === 1 ? <span /> : <Link href={href(page - 1)} />}
-          >
-            Previous
-          </McButton>
-          <ol className="flex items-center gap-1">
-            {pageItems(page, pageCount).map((item, index) =>
-              item === null ? (
-                <li key={`gap-${index}`} aria-hidden className="px-2 text-muted-foreground">
-                  …
-                </li>
-              ) : (
-                <li key={item}>
-                  <Link
-                    href={href(item)}
-                    aria-current={item === page ? "page" : undefined}
-                    aria-label={`Page ${item}`}
-                    className={cn(
-                      "flex size-9 items-center justify-center rounded-lg paragraph-sm font-medium tabular-nums outline-none focus-visible:ring-4 focus-visible:ring-ring",
-                      item === page
-                        ? "bg-primary text-primary-foreground"
-                        : "text-muted-foreground hover:bg-muted hover:text-foreground",
-                    )}
-                  >
-                    {item}
-                  </Link>
-                </li>
-              ),
-            )}
-          </ol>
-          <McButton
-            variant="secondary"
-            size="sm"
-            icon="trailing"
-            iconDefinition={<ArrowRightIcon className="size-4" />}
-            disabled={page === pageCount}
-            nativeButton={false}
-            render={page === pageCount ? <span /> : <Link href={href(page + 1)} />}
-          >
-            Next
-          </McButton>
+        <div className="flex flex-wrap items-center justify-center gap-x-4 gap-y-3">
+          {pageCount > 7 && <PageJump page={page} pageCount={pageCount} />}
+          <div className="flex items-center gap-1">
+            <McButton
+              variant="secondary"
+              size="sm"
+              icon="leading"
+              iconDefinition={<ArrowLeftIcon className="size-4" />}
+              disabled={page === 1}
+              nativeButton={false}
+              render={page === 1 ? <span /> : <Link href={href(page - 1)} />}
+            >
+              Previous
+            </McButton>
+            <ol className="flex items-center gap-1">
+              {pageItems(page, pageCount).map((item, index) =>
+                item === null ? (
+                  <li key={`gap-${index}`} aria-hidden className="px-2 text-muted-foreground">
+                    …
+                  </li>
+                ) : (
+                  <li key={item}>
+                    <Link
+                      href={href(item)}
+                      aria-current={item === page ? "page" : undefined}
+                      aria-label={`Page ${item}`}
+                      className={cn(
+                        "flex size-9 items-center justify-center rounded-lg paragraph-sm font-medium tabular-nums outline-none focus-visible:ring-4 focus-visible:ring-ring",
+                        item === page
+                          ? "bg-primary text-primary-foreground"
+                          : "text-muted-foreground hover:bg-muted hover:text-foreground",
+                      )}
+                    >
+                      {item}
+                    </Link>
+                  </li>
+                ),
+              )}
+            </ol>
+            <McButton
+              variant="secondary"
+              size="sm"
+              icon="trailing"
+              iconDefinition={<ArrowRightIcon className="size-4" />}
+              disabled={page === pageCount}
+              nativeButton={false}
+              render={page === pageCount ? <span /> : <Link href={href(page + 1)} />}
+            >
+              Next
+            </McButton>
+          </div>
         </div>
       )}
     </nav>

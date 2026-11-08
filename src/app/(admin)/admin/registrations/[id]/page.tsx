@@ -165,7 +165,7 @@ export default async function RegistrationPage({
 
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
-          <h1 className="header-md font-heading text-foreground">{name}</h1>
+          <h1 className="min-w-0 header-md font-heading text-foreground">{name}</h1>
           <StatusBadge status={status} />
         </div>
         <p className="paragraph-md text-muted-foreground">
@@ -176,7 +176,7 @@ export default async function RegistrationPage({
         </p>
       </header>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Review">
           {reviews.length > 0 ? (
             <ul className="flex flex-col gap-2">
@@ -222,9 +222,9 @@ export default async function RegistrationPage({
         </Section>
       </div>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Personal information">
-          <dl className="grid gap-4 sm:grid-cols-2">
+          <dl className="grid grid-cols-1 gap-4 sm:grid-cols-2">
             <Field label="Email" copy={registration.email}>
               <a
                 href={`mailto:${registration.email}`}
@@ -280,7 +280,7 @@ export default async function RegistrationPage({
         </dl>
       </Section>
 
-      <div className="grid gap-6 lg:grid-cols-2">
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Links">
           {links.length > 0 ? (
             <ul className="flex flex-col gap-2">
@@ -307,8 +307,12 @@ export default async function RegistrationPage({
         <Section title="Skills">
           <ul className="flex flex-wrap gap-2">
             {registration.skills.map((skill) => (
-              <li key={skill}>
-                <McBadge variant="outline" size="md">
+              <li key={skill} className="min-w-0">
+                <McBadge
+                  variant="outline"
+                  size="md"
+                  className="h-auto max-w-full whitespace-normal"
+                >
                   {skill}
                 </McBadge>
               </li>

@@ -95,7 +95,9 @@ export function RegistrationTimeline({ timeline }: { timeline: TimelineEntry[] }
           </span>
           <div className="flex min-w-0 flex-1 flex-col gap-1.5 pt-1">
             <div className="flex flex-wrap items-center gap-x-2 gap-y-1">
-              <span className="paragraph-md font-medium text-foreground">{entry.actorName}</span>
+              <span className="min-w-0 paragraph-md font-medium text-foreground">
+                {entry.actorName}
+              </span>
               <span className="paragraph-sm text-muted-foreground">{verb}</span>
               {badge && <McBadge variant={tone}>{badge}</McBadge>}
               <time
