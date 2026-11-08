@@ -203,3 +203,21 @@ export async function getRegistration(id: string) {
     registration && { ...registration, timeline: (registration.timeline ?? []) as TimelineEntry[] }
   )
 }
+
+/**
+ * Every registration of the list as the table filters and sorts it (search, tab and sort, every
+ * page), in full, for the CSV export. Student IDs stay out: they are served one by one only.
+ */
+export async function exportRegistrations(params: RegistrationListParams) {
+  await connectToDatabase()
+  let query = RegistrationModel.find(listFilter(params))
+    .select("-studentId -recommendations")
+    .sort(listSort(params))
+  if (params.sort !== "submitted") query = query.collation(CASE_INSENSITIVE)
+  const documents = await query.lean()
+  return documents.map((document) => ({
+    ...document,
+    id: String(document._id),
+    timeline: (document.timeline ?? []) as TimelineEntry[],
+  }))
+}

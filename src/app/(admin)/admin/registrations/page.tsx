@@ -1,11 +1,12 @@
 import type { Metadata } from "next"
 import { redirect } from "next/navigation"
-import { InboxIcon, SearchXIcon } from "lucide-react"
+import { DownloadIcon, InboxIcon, SearchXIcon } from "lucide-react"
 
 import { ListPagination } from "@/components/admin/registrations/list-pagination"
 import { ResumeBanner } from "@/components/admin/registrations/resume-banner"
 import { RegistrationsTable } from "@/components/admin/registrations/registrations-table"
 import { RegistrationsToolbar } from "@/components/admin/registrations/registrations-toolbar"
+import { McButton } from "@/components/ui/mc-button"
 import { McDataTableCard, McDataTableEmpty, McDataTableHeader } from "@/components/ui/mc-data-table"
 import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
@@ -47,6 +48,24 @@ export default async function RegistrationsPage({
           title="Applications"
           badge={counts.all}
           description="Search with Enter. Click a column title to sort by it."
+          actions={
+            // Every page of the current search, tab and sort; a plain link, so the browser downloads.
+            <McButton
+              variant="secondary"
+              size="sm"
+              icon="leading"
+              iconDefinition={<DownloadIcon className="size-4" />}
+              nativeButton={false}
+              render={
+                <a
+                  href={`${adminRoutes.registrations}/export${listQuery(params, { page: 1 })}`}
+                  download
+                />
+              }
+            >
+              Export CSV{filtered ? ` (${page.total})` : ""}
+            </McButton>
+          }
         />
         <RegistrationsToolbar params={params} counts={counts} />
         {page.rows.length > 0 ? (
