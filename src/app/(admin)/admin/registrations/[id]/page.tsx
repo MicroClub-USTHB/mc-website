@@ -6,6 +6,7 @@ import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { MarkPlaceButton } from "@/components/admin/registrations/mark-place-button"
 import { RegistrationPager } from "@/components/admin/registrations/registration-pager"
 import { RegistrationTimeline } from "@/components/admin/registrations/registration-timeline"
 import { ReviewActions } from "@/components/admin/registrations/review-actions"
@@ -25,6 +26,7 @@ import {
   recommendationOriginQuery,
   recommendationsQuery,
 } from "@/lib/registrations/recommendation-params"
+import { isReviewPlace } from "@/lib/registrations/place-store"
 import { getRegistration, registrationListOrder } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
 import {
@@ -133,7 +135,10 @@ export default async function RegistrationPage({
   const registration = await getRegistration(id)
   if (!registration) notFound()
 
-  const list = await listContext(id, await searchParams)
+  const [list, marked] = await Promise.all([
+    listContext(id, await searchParams),
+    isReviewPlace(user.id, id),
+  ])
   const name = `${registration.firstName} ${registration.lastName}`
   const status = isRegistrationStatus(registration.status) ? registration.status : "pending"
   const submittedAt = new Date(registration.createdAt)
@@ -155,12 +160,15 @@ export default async function RegistrationPage({
           <ArrowLeftIcon className="size-4" aria-hidden />
           Back to {list.label}
         </Link>
-        <RegistrationPager
-          previous={list.previous}
-          next={list.next}
-          position={list.navigation.position}
-          total={list.navigation.total}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <MarkPlaceButton registrationId={id} marked={marked} />
+          <RegistrationPager
+            previous={list.previous}
+            next={list.next}
+            position={list.navigation.position}
+            total={list.navigation.total}
+          />
+        </div>
       </div>
 
       <header className="flex flex-col gap-2">

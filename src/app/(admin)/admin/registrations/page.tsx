@@ -3,6 +3,7 @@ import { redirect } from "next/navigation"
 import { InboxIcon, SearchXIcon } from "lucide-react"
 
 import { ListPagination } from "@/components/admin/registrations/list-pagination"
+import { ResumeBanner } from "@/components/admin/registrations/resume-banner"
 import { RegistrationsTable } from "@/components/admin/registrations/registrations-table"
 import { RegistrationsToolbar } from "@/components/admin/registrations/registrations-toolbar"
 import { McDataTableCard, McDataTableEmpty, McDataTableHeader } from "@/components/ui/mc-data-table"
@@ -17,7 +18,7 @@ export const metadata: Metadata = { title: "Registrations" }
 export default async function RegistrationsPage({
   searchParams,
 }: PageProps<"/admin/registrations">) {
-  await requireStaff({ permissions: { registration: ["review"] } })
+  const { user } = await requireStaff({ permissions: { registration: ["review"] } })
 
   const params = parseListParams(await searchParams)
   const [page, counts] = await Promise.all([
@@ -38,6 +39,8 @@ export default async function RegistrationsPage({
           Everyone who applied to join the club. Open a registration to read it in full.
         </p>
       </div>
+
+      <ResumeBanner userId={user.id} />
 
       <McDataTableCard>
         <McDataTableHeader

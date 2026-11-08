@@ -1,5 +1,6 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
 import { useState, useTransition, type FormEvent } from "react"
 
 import { reviewRegistration } from "@/actions/admin/review-registration"
@@ -47,6 +48,7 @@ export function ReviewActions({
   /** Only a person's first review of an application needs a reason. */
   reasonRequired: boolean
 }) {
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   // Kept after closing, so the dialog does not change while it fades out.
   const [action, setAction] = useState(ACTIONS[0])
@@ -79,7 +81,7 @@ export function ReviewActions({
     setReasonError(undefined)
 
     startTransition(async () => {
-      const result = await reviewRegistration(registrationId, parsed.data)
+      const result = await reviewRegistration(registrationId, parsed.data, searchParams.toString())
       if (result.status === "error") setMessage(result.message)
       else onOpenChange(false)
     })

@@ -10,6 +10,7 @@ export const adminRoutes = {
   users: "/admin/users",
   registrations: "/admin/registrations",
   recommendations: "/admin/recommendations",
+  team: "/admin/team",
 } as const
 
 /** Page of one registration, with the list state (`?q=...`) to return to. */
@@ -30,6 +31,7 @@ export const roleNav: Record<StaffRole, { href: string; label: string }[]> = {
   hr: [
     { href: adminRoutes.registrations, label: "Registrations" },
     { href: adminRoutes.recommendations, label: "Recommendations" },
+    { href: adminRoutes.team, label: "Team" },
   ],
 }
 

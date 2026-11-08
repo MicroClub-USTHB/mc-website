@@ -1,6 +1,7 @@
 "use client"
 
 import { StarIcon } from "lucide-react"
+import { useSearchParams } from "next/navigation"
 import { useState, useTransition, type FormEvent } from "react"
 
 import { recommendRegistration, removeRecommendation } from "@/actions/admin/review-registration"
@@ -48,6 +49,7 @@ export function RecommendDialog({
   /** The application's recommendation, and who made it ("you" for the signed-in member). */
   recommendation?: { target: string; note: string; by: string }
 }) {
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   const [target, setTarget] = useState<string | null>(recommendation?.target ?? null)
   const [note, setNote] = useState(recommendation?.note ?? "")
@@ -73,7 +75,11 @@ export function RecommendDialog({
     }
 
     startSaving(async () => {
-      const result = await recommendRegistration(registrationId, parsed.data)
+      const result = await recommendRegistration(
+        registrationId,
+        parsed.data,
+        searchParams.toString(),
+      )
       if (result.status === "error") setMessage(result.message)
       else setOpen(false)
     })
