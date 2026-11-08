@@ -58,14 +58,21 @@ async function append(id: string, timeline: TimelineEntry[], entry: TimelineEntr
 export async function recordReview(
   id: string,
   actor: TimelineActor,
-  { state, reason }: ReviewInput,
+  { state, reason, questions }: ReviewInput,
 ) {
   const timeline = await readTimeline(id)
   if (!timeline) return failure(NOT_FOUND)
 
   const reviews = currentReviews(timeline)
   const review = reviews.find((entry) => entry.actorId === actor.id)
-  if (state === (review?.state ?? "pending")) return failure(CHANGED)
+  // Staying in interview only changes its questions.
+  const interviewQuestions = state === "interview" ? questions : ""
+  if (
+    state === (review?.state ?? "pending") &&
+    (state !== "interview" || interviewQuestions === (review?.questions ?? ""))
+  ) {
+    return failure(CHANGED)
+  }
   if (!review && reviews.length >= MAX_REVIEWERS) {
     return failure("Two HR members are already reviewing this application.")
   }
@@ -80,6 +87,7 @@ export async function recordReview(
     at: new Date(),
     state,
     ...(reason && { reason }),
+    ...(interviewQuestions && { questions: interviewQuestions }),
   })
 }
 

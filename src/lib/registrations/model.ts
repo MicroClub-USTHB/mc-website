@@ -17,6 +17,8 @@ const timelineEntry = new Schema(
     at: { type: Date, required: true },
     state: { type: String, enum: REVIEW_STATES },
     reason: { type: String },
+    /** Questions to ask in the interview, on an `interview` review only. */
+    questions: { type: String },
     target: { type: String },
     note: { type: String },
   },

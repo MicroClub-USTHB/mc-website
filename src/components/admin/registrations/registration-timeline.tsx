@@ -1,5 +1,6 @@
 import { formatDistanceToNow } from "date-fns"
 import {
+  MessageCircleQuestionIcon,
   CalendarClockIcon,
   CheckIcon,
   RotateCcwIcon,
@@ -13,7 +14,11 @@ import { McBadge } from "@/components/ui/mc-badge"
 import { formatClubTime } from "@/lib/dates"
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
 import type { ReviewState } from "@/lib/registrations/status"
-import { currentRecommendation, type TimelineEntry } from "@/lib/registrations/timeline"
+import {
+  currentRecommendation,
+  currentReviews,
+  type TimelineEntry,
+} from "@/lib/registrations/timeline"
 import { cn } from "@/lib/utils"
 
 type Tone = "secondary" | "info" | "success" | "destructive" | "default"
@@ -40,7 +45,19 @@ const REVIEWS: Record<ReviewState, { label: string; tone: Tone; icon: LucideIcon
 function describe(entry: TimelineEntry, previous: TimelineEntry[]) {
   if (entry.kind === "review") {
     const { label, tone, icon } = REVIEWS[entry.state]
-    return { verb: "reviewed", badge: label, tone, icon, text: entry.reason }
+    // Staying in interview only changes its questions.
+    const before = currentReviews(previous).find((review) => review.actorId === entry.actorId)
+    if (entry.state === "interview" && before?.state === "interview") {
+      return { verb: "updated their interview questions", tone, icon, questions: entry.questions }
+    }
+    return {
+      verb: "reviewed",
+      badge: label,
+      tone,
+      icon,
+      text: entry.reason,
+      questions: entry.questions,
+    }
   }
   if (entry.kind === "recommendation-removed") {
     return { verb: "removed the recommendation", tone: "secondary" as const, icon: StarOffIcon }
@@ -61,6 +78,27 @@ function describe(entry: TimelineEntry, previous: TimelineEntry[]) {
   }
 }
 
+/** Questions to ask in the interview, one per line, under the review that asked for it. */
+export function InterviewQuestions({ questions }: { questions: string }) {
+  const lines = questions
+    .split("\n")
+    .map((line) => line.replace(/^\s*(?:[-*•]|\d+[.)])\s*/, "").trim())
+    .filter(Boolean)
+  return (
+    <div className="flex flex-col gap-1.5 rounded-lg border border-info/30 bg-info-foreground px-3 py-2 dark:bg-info/10">
+      <p className="flex items-center gap-1.5 paragraph-xs font-medium text-info dark:text-[color-mix(in_srgb,var(--color-info)_55%,white)]">
+        <MessageCircleQuestionIcon className="size-3.5" aria-hidden />
+        Questions to ask
+      </p>
+      <ol className="flex list-decimal flex-col gap-1 pl-5 paragraph-sm text-foreground marker:text-muted-foreground">
+        {lines.map((line, index) => (
+          <li key={index}>{line}</li>
+        ))}
+      </ol>
+    </div>
+  )
+}
+
 /**
  * Every review and recommendation of a registration, newest first: a marker per entry on a
  * vertical line (its icon and color tell the action at a glance), the person and the action, the
@@ -78,7 +116,7 @@ export function RegistrationTimeline({ timeline }: { timeline: TimelineEntry[] }
 
   return (
     <ol className="flex flex-col">
-      {entries.map(({ entry, verb, badge, tone, icon: Icon, text }, index) => (
+      {entries.map(({ entry, verb, badge, tone, icon: Icon, text, questions }, index) => (
         <li key={entries.length - index} className="relative flex gap-3 pb-5 last:pb-0">
           {/* The line down to the next (older) entry. */}
           {index < entries.length - 1 && (
@@ -113,6 +151,7 @@ export function RegistrationTimeline({ timeline }: { timeline: TimelineEntry[] }
                 {text}
               </blockquote>
             )}
+            {questions && <InterviewQuestions questions={questions} />}
           </div>
         </li>
       ))}

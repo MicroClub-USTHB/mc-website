@@ -13,9 +13,13 @@ describe("toCsv", () => {
     )
   })
 
+  it("keeps phone numbers as they are", () => {
+    expect(toCsv(["phone"], [["+213 555 12 34 56"]])).toBe("\uFEFFphone\r\n+213 555 12 34 56\r\n")
+  })
+
   it("neutralizes formulas and empties missing values", () => {
     expect(toCsv(["a", "b", "c"], [["=HYPERLINK(1)", null, "-2"]])).toBe(
-      "﻿a,b,c\r\n'=HYPERLINK(1),,'-2\r\n",
+      "﻿a,b,c\r\n'=HYPERLINK(1),,-2\r\n",
     )
   })
 })

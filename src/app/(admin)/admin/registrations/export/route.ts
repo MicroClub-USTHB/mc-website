@@ -8,7 +8,11 @@ import { parseListParams } from "@/lib/registrations/list-params"
 import { recommendationTargetName } from "@/lib/registrations/recommendations"
 import { exportRegistrations } from "@/lib/registrations/review"
 import { REGISTRATION_STATUS_LABELS, isRegistrationStatus } from "@/lib/registrations/status"
-import { currentRecommendation, currentReviews } from "@/lib/registrations/timeline"
+import {
+  currentRecommendation,
+  currentReviews,
+  interviewQuestions,
+} from "@/lib/registrations/timeline"
 
 /** Stored profile links (`links` on the registration), in the form's order. */
 const LINKS = [
@@ -41,6 +45,7 @@ export async function GET(request: NextRequest) {
     "University",
     "Status",
     "Reviews",
+    "Interview questions",
     "Recommended to",
     "Recommended by",
     "Recommendation note",
@@ -66,6 +71,9 @@ export async function GET(request: NextRequest) {
         ? REGISTRATION_STATUS_LABELS[registration.status]
         : registration.status,
       reviews.map((review) => `${review.actorName}: ${review.state}`).join("; "),
+      interviewQuestions(registration.timeline)
+        .map((entry) => `${entry.name}:\n${entry.questions}`)
+        .join("\n\n"),
       recommendation ? recommendationTargetName(recommendation.target) : "",
       recommendation?.actorName,
       recommendation?.note,

@@ -7,6 +7,7 @@ import {
   currentReviews,
   decisions,
   hasReviewed,
+  interviewQuestions,
   registrationStatus,
   type TimelineEntry,
 } from "@/lib/registrations/timeline"
@@ -137,5 +138,30 @@ describe("decisions", () => {
       { name: "b", state: "rejected" },
       { name: "a", state: "accepted" },
     ])
+  })
+})
+
+describe("interviewQuestions", () => {
+  const ask = (actorId: string, questions: string, minute: number): TimelineEntry => ({
+    kind: "review",
+    actorId,
+    actorName: actorId,
+    state: "interview",
+    at: new Date(at.getTime() + minute * 60_000),
+    questions,
+  })
+
+  it("lists the questions of each reviewer still asking for an interview, latest first", () => {
+    expect(interviewQuestions([ask("a", "Why us?", 1), ask("b", "Which project?", 2)])).toEqual([
+      { actorId: "b", name: "b", questions: "Which project?" },
+      { actorId: "a", name: "a", questions: "Why us?" },
+    ])
+  })
+
+  it("keeps a reviewer's latest questions and drops them once they decide", () => {
+    expect(interviewQuestions([ask("a", "Old", 1), ask("a", "New", 2)])).toEqual([
+      { actorId: "a", name: "a", questions: "New" },
+    ])
+    expect(interviewQuestions([ask("a", "Why us?", 1), review("a", "accepted")])).toEqual([])
   })
 })
