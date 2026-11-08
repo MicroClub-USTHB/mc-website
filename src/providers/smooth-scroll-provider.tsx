@@ -12,6 +12,10 @@ const HARD_STOP_MIN_SPEED = 50
 const HARD_STOP_MAX_DURATION = 0.5
 
 const linear = (t: number) => t
+
+/** Popups (dialogs, select lists, menus) scroll natively: Lenis would scroll the page instead. */
+const POPUP_SELECTOR = '[role="dialog"], [role="alertdialog"], [role="listbox"], [role="menu"]'
+const isPopup = (node: HTMLElement) => node.matches(POPUP_SELECTOR)
 /** Frames Lenis keeps running after it reports idle (its `onStart` lands on the next frame). */
 const IDLE_FRAMES = 3
 
@@ -81,6 +85,13 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
 
   /** Runs before Lenis handles each wheel event: `false` takes over the hard stop. */
   function virtualScroll({ deltaY, event }: VirtualScrollData) {
+    // A modal popup locks the page (`overflow: hidden` on the body), which Lenis does not see:
+    // outside the popup, the page stays still; inside, it scrolls natively (`prevent` below).
+    if (getComputedStyle(document.body).overflow === "hidden") {
+      const inPopup = event.target instanceof Element && event.target.closest(POPUP_SELECTOR)
+      if (!inPopup && event.cancelable) event.preventDefault()
+      return Boolean(inPopup)
+    }
     wakeRef.current()
     const lenis = lenisRef.current?.lenis
     if (!lenis || !event.type.includes("wheel") || deltaY <= 0) return true
@@ -105,7 +116,11 @@ export function SmoothScrollProvider({ children }: { children: React.ReactNode }
 
   return (
     <MotionConfig reducedMotion="user">
-      <ReactLenis root ref={lenisRef} options={{ autoRaf: false, anchors: true, virtualScroll }}>
+      <ReactLenis
+        root
+        ref={lenisRef}
+        options={{ autoRaf: false, anchors: true, virtualScroll, prevent: isPopup }}
+      >
         {children}
       </ReactLenis>
     </MotionConfig>

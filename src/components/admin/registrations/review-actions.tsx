@@ -104,7 +104,7 @@ export function ReviewActions({
       </div>
 
       <McDialog open={open} onOpenChange={onOpenChange}>
-        <McDialogContent className="wrap-anywhere sm:min-h-0">
+        <McDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto wrap-anywhere sm:min-h-0">
           <McDialogHeader>
             <McDialogTitle>{action.title(applicant)}</McDialogTitle>
             <McDialogDescription>

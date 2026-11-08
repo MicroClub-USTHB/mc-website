@@ -100,7 +100,7 @@ export function RecommendDialog({
           </McButton>
         }
       />
-      <McDialogContent className="wrap-anywhere sm:min-h-0">
+      <McDialogContent className="max-h-[calc(100dvh-2rem)] overflow-y-auto wrap-anywhere sm:min-h-0">
         <McDialogHeader>
           <McDialogTitle>Recommend {applicant}</McDialogTitle>
           <McDialogDescription>
