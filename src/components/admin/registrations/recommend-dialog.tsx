@@ -100,7 +100,7 @@ export function RecommendDialog({
           </McButton>
         }
       />
-      <McDialogContent className="sm:min-h-0">
+      <McDialogContent className="wrap-anywhere sm:min-h-0">
         <McDialogHeader>
           <McDialogTitle>Recommend {applicant}</McDialogTitle>
           <McDialogDescription>
@@ -122,9 +122,10 @@ export function RecommendDialog({
             <McSelectTrigger className="w-full" aria-label="Section or department">
               <McSelectValue placeholder="Choose one" />
             </McSelectTrigger>
-            {/* A visible scrollbar: the 11 sections and departments do not all fit. */}
+            {/* All 11 sections and departments, as far as the screen allows: past that, the list
+                scrolls with a visible scrollbar (Lenis leaves it alone). */}
             <McSelectContent
-              className="h-auto max-h-80 w-(--anchor-width)"
+              className="h-auto max-h-(--available-height) w-(--anchor-width)"
               alignItemWithTrigger={false}
               scrollbar
               data-lenis-prevent
