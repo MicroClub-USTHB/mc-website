@@ -72,14 +72,16 @@ export function RecommendationsTable({
         {rows.map((row) => (
           <McTableRow key={`${row.registrationId}-${row.actorId}`}>
             <McTableCell>
-              <div className="flex min-w-48 flex-col">
+              <div className="flex max-w-72 min-w-48 flex-col">
                 <Link
                   href={registrationRoute(row.registrationId, back)}
-                  className="w-fit rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring"
+                  className="w-fit max-w-full truncate rounded-sm font-medium text-foreground underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring"
                 >
                   {row.firstName} {row.lastName}
                 </Link>
-                <span className="text-muted-foreground">{row.email}</span>
+                <span className="truncate text-muted-foreground" title={row.email}>
+                  {row.email}
+                </span>
               </div>
             </McTableCell>
             <McTableCell>{row.recommendedBy}</McTableCell>
