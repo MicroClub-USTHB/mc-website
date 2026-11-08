@@ -14,6 +14,8 @@ export type ReviewEntry = TimelineAction & {
   kind: "review"
   state: ReviewState
   reason?: string
+  /** Questions to ask in the interview, on an `interview` review only. */
+  questions?: string
 }
 
 export type RecommendationEntry = TimelineAction & {
@@ -95,6 +97,21 @@ export function decisions(timeline: TimelineEntry[]) {
   return currentReviews(timeline)
     .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
     .map((review) => ({ name: review.actorName, state: review.state }))
+}
+
+/**
+ * The questions to ask in the interview: those of each reviewer currently asking for one, the
+ * latest first.
+ */
+export function interviewQuestions(timeline: TimelineEntry[]) {
+  return currentReviews(timeline)
+    .filter((review) => review.state === "interview" && review.questions)
+    .sort((a, b) => new Date(b.at).getTime() - new Date(a.at).getTime())
+    .map((review) => ({
+      actorId: review.actorId,
+      name: review.actorName,
+      questions: review.questions!,
+    }))
 }
 
 /** Whether this person ever reviewed the registration: only their first review needs a reason. */

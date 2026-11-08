@@ -1,5 +1,6 @@
 "use client"
 
+import { useSearchParams } from "next/navigation"
 import { useState, useTransition, type FormEvent } from "react"
 
 import { reviewRegistration } from "@/actions/admin/review-registration"
@@ -18,7 +19,9 @@ import { fieldErrors } from "@/lib/auth/schema"
 import { reviewSchema } from "@/lib/registrations/review-schema"
 import type { ReviewState } from "@/lib/registrations/status"
 
-const ACTIONS: { state: ReviewState; label: string; title: (applicant: string) => string }[] = [
+type Action = { state: ReviewState; label: string; title: (applicant: string) => string }
+
+const ACTIONS: Action[] = [
   {
     state: "interview",
     label: "To Interview",
@@ -33,12 +36,23 @@ const ACTIONS: { state: ReviewState; label: string; title: (applicant: string) =
   },
 ]
 
-/** The review buttons, without the reviewer's own state, and their confirmation dialog. */
+/** Shown instead of "To Interview" to a reviewer already asking for one: edits its questions. */
+const EDIT_QUESTIONS: Action = {
+  state: "interview",
+  label: "Edit interview questions",
+  title: (applicant) => `Interview questions for ${applicant}`,
+}
+
+/**
+ * The review buttons, without the reviewer's own state, and their confirmation dialog. Asking for
+ * an interview also takes the questions to ask in it, for whichever HR member hosts it.
+ */
 export function ReviewActions({
   registrationId,
   applicant,
   current,
   reasonRequired,
+  questions = "",
 }: {
   registrationId: string
   applicant: string
@@ -46,11 +60,15 @@ export function ReviewActions({
   current: ReviewState
   /** Only a person's first review of an application needs a reason. */
   reasonRequired: boolean
+  /** The reviewer's interview questions, when their review is `interview`. */
+  questions?: string
 }) {
+  const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
   // Kept after closing, so the dialog does not change while it fades out.
   const [action, setAction] = useState(ACTIONS[0])
   const [reasonError, setReasonError] = useState<string>()
+  const [questionsError, setQuestionsError] = useState<string>()
   const [message, setMessage] = useState<string>()
   const [pending, startTransition] = useTransition()
 
@@ -58,20 +76,26 @@ export function ReviewActions({
     setOpen(next)
     if (!next) {
       setReasonError(undefined)
+      setQuestionsError(undefined)
       setMessage(undefined)
     }
   }
 
   function handleSubmit(event: FormEvent<HTMLFormElement>) {
     event.preventDefault()
+    const form = new FormData(event.currentTarget)
     const parsed = reviewSchema.safeParse({
       state: action.state,
-      reason: new FormData(event.currentTarget).get("reason"),
+      reason: form.get("reason") ?? "",
+      questions: form.get("questions") ?? "",
     })
     if (!parsed.success) {
-      setReasonError(fieldErrors<"reason">(parsed.error).reason)
+      const errors = fieldErrors<"reason" | "questions">(parsed.error)
+      setReasonError(errors.reason)
+      setQuestionsError(errors.questions)
       return
     }
+    setQuestionsError(undefined)
     if (reasonRequired && !parsed.data.reason) {
       setReasonError("Give the reason for your first review.")
       return
@@ -79,7 +103,7 @@ export function ReviewActions({
     setReasonError(undefined)
 
     startTransition(async () => {
-      const result = await reviewRegistration(registrationId, parsed.data)
+      const result = await reviewRegistration(registrationId, parsed.data, searchParams.toString())
       if (result.status === "error") setMessage(result.message)
       else onOpenChange(false)
     })
@@ -88,9 +112,12 @@ export function ReviewActions({
   return (
     <>
       <div className="flex flex-wrap gap-2">
-        {ACTIONS.filter(({ state }) => state !== current).map((item) => (
+        {(current === "interview"
+          ? [EDIT_QUESTIONS, ...ACTIONS.filter(({ state }) => state !== current)]
+          : ACTIONS.filter(({ state }) => state !== current)
+        ).map((item) => (
           <McButton
-            key={item.state}
+            key={item.label}
             variant={item.state === "accepted" ? "primary" : "secondary"}
             destructive={item.state === "rejected"}
             onClick={() => {
@@ -108,19 +135,34 @@ export function ReviewActions({
           <McDialogHeader>
             <McDialogTitle>{action.title(applicant)}</McDialogTitle>
             <McDialogDescription>
-              {action.state === "pending"
-                ? "This withdraws your review: your place goes to the next HR member who reviews."
-                : "Every HR member can see your review and its reason."}
+              {action === EDIT_QUESTIONS
+                ? "Every HR member sees them, so whoever hosts the interview knows what to ask."
+                : action.state === "pending"
+                  ? "This withdraws your review: your place goes to the next HR member who reviews."
+                  : "Every HR member can see your review and its reason."}
             </McDialogDescription>
           </McDialogHeader>
           <form onSubmit={handleSubmit} noValidate className="flex flex-col gap-4">
-            <McTextarea
-              label={reasonRequired ? "Reason" : "Reason (optional)"}
-              name="reason"
-              rows={4}
-              error={reasonError}
-              required={reasonRequired}
-            />
+            {action !== EDIT_QUESTIONS && (
+              <McTextarea
+                label={reasonRequired ? "Reason" : "Reason (optional)"}
+                name="reason"
+                rows={action.state === "interview" ? 3 : 4}
+                error={reasonError}
+                required={reasonRequired}
+              />
+            )}
+            {action.state === "interview" && (
+              <McTextarea
+                label="Questions to ask (optional)"
+                name="questions"
+                rows={4}
+                defaultValue={questions}
+                placeholder={"One per line, e.g.\nWhich project are you proudest of?"}
+                description="Shown to every HR member, for whoever hosts the interview."
+                error={questionsError}
+              />
+            )}
             <FormMessage>{message}</FormMessage>
             <McDialogFooter className="pb-0">
               <McButton type="submit" isLoading={pending}>

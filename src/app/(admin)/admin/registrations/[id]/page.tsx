@@ -6,8 +6,12 @@ import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { MarkPlaceButton } from "@/components/admin/registrations/mark-place-button"
 import { RegistrationPager } from "@/components/admin/registrations/registration-pager"
-import { RegistrationTimeline } from "@/components/admin/registrations/registration-timeline"
+import {
+  InterviewQuestions,
+  RegistrationTimeline,
+} from "@/components/admin/registrations/registration-timeline"
 import { ReviewActions } from "@/components/admin/registrations/review-actions"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
 import { StudentIdPreview } from "@/components/admin/registrations/student-id-preview"
@@ -25,6 +29,7 @@ import {
   recommendationOriginQuery,
   recommendationsQuery,
 } from "@/lib/registrations/recommendation-params"
+import { isReviewPlace } from "@/lib/registrations/place-store"
 import { getRegistration, registrationListOrder } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
 import {
@@ -32,6 +37,7 @@ import {
   currentRecommendation,
   currentReviews,
   hasReviewed,
+  interviewQuestions,
 } from "@/lib/registrations/timeline"
 
 export const metadata: Metadata = { title: "Registration" }
@@ -133,7 +139,10 @@ export default async function RegistrationPage({
   const registration = await getRegistration(id)
   if (!registration) notFound()
 
-  const list = await listContext(id, await searchParams)
+  const [list, marked] = await Promise.all([
+    listContext(id, await searchParams),
+    isReviewPlace(user.id, id),
+  ])
   const name = `${registration.firstName} ${registration.lastName}`
   const status = isRegistrationStatus(registration.status) ? registration.status : "pending"
   const submittedAt = new Date(registration.createdAt)
@@ -144,6 +153,7 @@ export default async function RegistrationPage({
   const reviews = currentReviews(timeline)
   const ownReview = reviews.find((review) => review.actorId === user.id)
   const recommendation = currentRecommendation(timeline)
+  const questions = interviewQuestions(timeline)
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -155,12 +165,15 @@ export default async function RegistrationPage({
           <ArrowLeftIcon className="size-4" aria-hidden />
           Back to {list.label}
         </Link>
-        <RegistrationPager
-          previous={list.previous}
-          next={list.next}
-          position={list.navigation.position}
-          total={list.navigation.total}
-        />
+        <div className="flex flex-wrap items-center gap-3">
+          <MarkPlaceButton registrationId={id} marked={marked} />
+          <RegistrationPager
+            previous={list.previous}
+            next={list.next}
+            position={list.navigation.position}
+            total={list.navigation.total}
+          />
+        </div>
       </div>
 
       <header className="flex flex-col gap-2">
@@ -190,11 +203,24 @@ export default async function RegistrationPage({
           ) : (
             <p className="paragraph-sm text-muted-foreground">Nobody reviewed it yet.</p>
           )}
+          {questions.length > 0 && (
+            <div className="flex flex-col gap-3">
+              {questions.map((entry) => (
+                <div key={entry.actorId} className="flex flex-col gap-1">
+                  <p className="paragraph-sm text-muted-foreground">
+                    {entry.actorId === user.id ? "Your" : `${entry.name}'s`} interview questions
+                  </p>
+                  <InterviewQuestions questions={entry.questions} />
+                </div>
+              ))}
+            </div>
+          )}
           {ownReview || reviews.length < MAX_REVIEWERS ? (
             <ReviewActions
               registrationId={id}
               applicant={name}
               current={ownReview?.state ?? "pending"}
+              questions={ownReview?.state === "interview" ? ownReview.questions : undefined}
               reasonRequired={!hasReviewed(timeline, user.id)}
             />
           ) : (
