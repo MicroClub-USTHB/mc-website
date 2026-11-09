@@ -120,7 +120,7 @@ export function InterviewDialog({
             submit(event.currentTarget)
           }}
           noValidate
-          className="flex flex-col gap-4"
+          className="flex min-w-0 flex-col gap-4"
         >
           {shown?.kind === "slot" &&
             (items.length > 0 ? (
@@ -134,10 +134,10 @@ export function InterviewDialog({
               >
                 <McSelectLabel>Applicant waiting for a date</McSelectLabel>
                 <McSelectTrigger className="h-11 w-full rounded-lg" aria-label="Applicant">
-                  <McSelectValue placeholder="Choose one" />
+                  <McSelectValue placeholder="Choose one" className="min-w-0 truncate" />
                 </McSelectTrigger>
                 <McSelectContent
-                  className="h-auto max-h-(--available-height) w-(--anchor-width)"
+                  className="h-auto max-h-(--available-height) w-(--anchor-width) wrap-anywhere"
                   alignItemWithTrigger={false}
                   scrollbar
                   data-lenis-prevent
@@ -157,9 +157,9 @@ export function InterviewDialog({
             ))}
 
           {item && (
-            <div className="flex flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
-              <div className="flex min-w-0 items-center gap-2">
-                <span className="truncate paragraph-md font-medium text-foreground">
+            <div className="flex min-w-0 flex-wrap items-center justify-between gap-2 rounded-lg border border-border p-3">
+              <div className="flex min-w-0 flex-wrap items-center gap-2">
+                <span className="min-w-0 paragraph-md font-medium text-foreground">
                   {item.name}
                 </span>
                 <StatusBadge status={item.status} />
