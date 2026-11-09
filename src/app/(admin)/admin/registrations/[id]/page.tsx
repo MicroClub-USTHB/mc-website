@@ -30,6 +30,7 @@ import {
   recommendationsQuery,
 } from "@/lib/registrations/recommendation-params"
 import { interviewSchedule, listInterviewers } from "@/lib/registrations/interview-store"
+import { interviewEnd } from "@/lib/registrations/interview"
 import { isReviewPlace } from "@/lib/registrations/place-store"
 import { getRegistration, registrationListOrder } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
@@ -223,7 +224,7 @@ export default async function RegistrationPage({
               <p className="paragraph-sm text-muted-foreground">Interview</p>
               <p className="paragraph-md text-foreground">
                 {interview.at
-                  ? formatClubTime(interview.at, "EEEE d MMMM yyyy 'at' HH:mm")
+                  ? `${formatClubTime(interview.at, "EEEE d MMMM yyyy, HH:mm")} – ${formatClubTime(interviewEnd(interview.at, interview.endAt), "HH:mm")}`
                   : "No date yet"}
                 {" · "}
                 {interview.interviewerId === user.id

@@ -37,7 +37,7 @@ import {
   interviewEnd,
   minutesOfDay,
   monthWeeks,
-  toDateTimeInput,
+  scheduleParts,
   weekDays,
 } from "@/lib/registrations/interview"
 import { cn } from "@/lib/utils"
@@ -72,6 +72,16 @@ function dotTone(item: CalendarInterview, userId: string) {
   return item.interviewerId ? "bg-info" : "bg-muted-foreground"
 }
 
+/** An interview's length in minutes. */
+function lengthOf(item: CalendarInterview) {
+  return (interviewEnd(item.at!, item.endAt).getTime() - new Date(item.at!).getTime()) / 60_000
+}
+
+/** `10:00 – 10:30`, in club time. */
+function timeRange(item: CalendarInterview) {
+  return `${formatClubTime(item.at!, "HH:mm")} – ${formatClubTime(interviewEnd(item.at!, item.endAt), "HH:mm")}`
+}
+
 function interviewerLabel(item: CalendarInterview, userId: string) {
   if (item.interviewerId === userId) return "You"
   return item.interviewerName ?? "Nobody assigned"
@@ -103,9 +113,11 @@ export function InterviewCalendar({
   // Moves shown at once, before the server confirms them.
   const [shownItems, moveItem] = useOptimistic(
     items,
-    (current, move: { registrationId: string; at: string }) =>
+    (current, move: { registrationId: string; at: string; endAt: string }) =>
       current.map((item) =>
-        item.registrationId === move.registrationId ? { ...item, at: move.at } : item,
+        item.registrationId === move.registrationId
+          ? { ...item, at: move.at, endAt: move.endAt }
+          : item,
       ),
   )
 
@@ -116,10 +128,12 @@ export function InterviewCalendar({
   function move(registrationId: string, at: Date) {
     const item = shownItems.find((entry) => entry.registrationId === registrationId)
     if (!item) return
+    // A moved interview keeps its length; one waiting for a date gets the default.
+    const endAt = new Date(at.getTime() + (item.at ? lengthOf(item) : INTERVIEW_MINUTES) * 60_000)
     startTransition(async () => {
-      moveItem({ registrationId, at: at.toISOString() })
+      moveItem({ registrationId, at: at.toISOString(), endAt: endAt.toISOString() })
       const result = await scheduleInterview(registrationId, {
-        at: toDateTimeInput(at),
+        ...scheduleParts(at, endAt),
         interviewerId: item.interviewerId ?? "",
       })
       if (result.status === "error") showError({ title: "Not moved", description: result.message })
@@ -389,10 +403,10 @@ function WeekEvent({
         event.stopPropagation()
         onOpen()
       }}
-      title={`${item.name} · ${formatClubTime(item.at!, "HH:mm")} · ${interviewerLabel(item, userId)}`}
+      title={`${item.name} · ${timeRange(item)} · ${interviewerLabel(item, userId)}`}
       style={{
         top,
-        height: Math.max((INTERVIEW_MINUTES / 60) * HOUR_HEIGHT - 2, 22),
+        height: Math.max((lengthOf(item) / 60) * HOUR_HEIGHT - 2, 22),
         left: `calc(${(lane / lanes) * 100}% + 2px)`,
         width: `calc(${100 / lanes}% - 4px)`,
       }}
@@ -403,7 +417,7 @@ function WeekEvent({
     >
       <span className="truncate font-semibold">{item.name}</span>
       <span className="truncate opacity-80">
-        {formatClubTime(item.at!, "HH:mm")} · {interviewerLabel(item, userId)}
+        {timeRange(item)} · {interviewerLabel(item, userId)}
       </span>
     </button>
   )
@@ -441,7 +455,7 @@ function WeekView({
     if (!weekKeys.has(dayKey(item.at!))) continue
     const minutes = minutesOfDay(item.at!)
     start = Math.min(start, Math.floor(minutes / 60))
-    end = Math.max(end, Math.ceil((minutes + INTERVIEW_MINUTES) / 60))
+    end = Math.min(24, Math.max(end, Math.ceil((minutes + lengthOf(item)) / 60)))
   }
   const hours = Array.from({ length: end - start }, (_, index) => start + index)
   const todayKey = dayKey(now)
@@ -515,7 +529,12 @@ function WeekView({
           {days.map((day) => {
             const key = dayKey(day)
             const dayItems = byDay.get(key) ?? []
-            const lanes = dayLanes(dayItems.map((item) => minutesOfDay(item.at!)))
+            const lanes = dayLanes(
+              dayItems.map((item) => {
+                const itemStart = minutesOfDay(item.at!)
+                return { start: itemStart, end: itemStart + lengthOf(item) }
+              }),
+            )
             return (
               <div
                 key={key}
@@ -781,8 +800,7 @@ function AgendaView({
                         <span className="flex flex-wrap gap-x-3 paragraph-sm text-muted-foreground">
                           <span className="inline-flex items-center gap-1 tabular-nums">
                             <ClockIcon className="size-3.5" aria-hidden />
-                            {formatClubTime(item.at!, "HH:mm")} –{" "}
-                            {formatClubTime(interviewEnd(item.at!), "HH:mm")}
+                            {timeRange(item)}
                           </span>
                           <span className="inline-flex items-center gap-1">
                             <UserIcon className="size-3.5" aria-hidden />

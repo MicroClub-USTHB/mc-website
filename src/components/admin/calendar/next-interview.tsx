@@ -21,7 +21,9 @@ export function NextInterview({
   now: Date
 }) {
   const next = items
-    .filter((item) => item.at && item.interviewerId === userId && interviewEnd(item.at) > now)
+    .filter(
+      (item) => item.at && item.interviewerId === userId && interviewEnd(item.at, item.endAt) > now,
+    )
     .sort((a, b) => new Date(a.at!).getTime() - new Date(b.at!).getTime())[0]
   if (!next?.at) return null
 
@@ -40,7 +42,10 @@ export function NextInterview({
         </p>
         <p className="truncate header-xs font-heading text-foreground">{next.name}</p>
         <p className="paragraph-sm text-muted-foreground">
-          <time dateTime={next.at}>{formatClubTime(next.at, "EEEE d MMMM 'at' HH:mm")}</time>
+          <time dateTime={next.at}>
+            {formatClubTime(next.at, "EEEE d MMMM, HH:mm")} –{" "}
+            {formatClubTime(interviewEnd(next.at, next.endAt), "HH:mm")}
+          </time>
           {!started && ` · ${formatDistanceToNow(new Date(next.at), { addSuffix: true })}`}
         </p>
       </div>

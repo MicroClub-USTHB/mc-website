@@ -7,6 +7,7 @@ import { reviewRegistration } from "@/actions/admin/review-registration"
 import { FormMessage } from "@/components/admin/form-message"
 import {
   InterviewScheduleFields,
+  readSchedule,
   type Interviewer,
 } from "@/components/admin/registrations/interview-schedule-fields"
 import { McButton } from "@/components/ui/mc-button"
@@ -20,7 +21,7 @@ import {
 } from "@/components/ui/mc-dialog"
 import { McTextarea } from "@/components/ui/mc-textarea"
 import { fieldErrors } from "@/lib/auth/schema"
-import { interviewScheduleSchema, toDateTimeInput } from "@/lib/registrations/interview"
+import { interviewScheduleSchema, scheduleParts } from "@/lib/registrations/interview"
 import { reviewSchema } from "@/lib/registrations/review-schema"
 import type { ReviewState } from "@/lib/registrations/status"
 
@@ -72,7 +73,7 @@ export function ReviewActions({
   /** HR members who can host the interview. */
   interviewers: Interviewer[]
   /** The registration's interview date and host, whoever set them. */
-  interview: { at: string | null; interviewerId: string | null }
+  interview: { at: string | null; endAt: string | null; interviewerId: string | null }
 }) {
   const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
@@ -115,10 +116,7 @@ export function ReviewActions({
     }
     setReasonError(undefined)
 
-    const schedule = interviewScheduleSchema.safeParse({
-      at: form.get("interviewAt") ?? "",
-      interviewerId: form.get("interviewerId") ?? "",
-    })
+    const schedule = interviewScheduleSchema.safeParse(readSchedule(form))
     if (action.state === "interview" && !schedule.success) {
       setScheduleError(schedule.error.issues[0]?.message)
       return
@@ -198,7 +196,7 @@ export function ReviewActions({
             {action.state === "interview" && (
               <InterviewScheduleFields
                 interviewers={interviewers}
-                defaultAt={toDateTimeInput(interview.at)}
+                defaultSchedule={scheduleParts(interview.at, interview.endAt)}
                 defaultInterviewerId={interview.interviewerId ?? ""}
                 error={scheduleError}
               />

@@ -15,11 +15,6 @@ export function clubDate(date: Date | string | number) {
   return new TZDate(new Date(date), CLUB_TIME_ZONE)
 }
 
-/** A moment as a `datetime-local` value in club time, `""` for none. */
-export function toDateTimeInput(date: Date | string | null | undefined) {
-  return date ? format(clubDate(date), INPUT_FORMAT) : ""
-}
-
 /** A `datetime-local` value read as club time, `null` when empty or invalid. */
 export function fromDateTimeInput(value: string) {
   if (!value) return null
@@ -57,18 +52,64 @@ export function minutesOfDay(date: Date | string | number) {
   return day.getHours() * 60 + day.getMinutes()
 }
 
-/** Where an interview ends. */
-export function interviewEnd(date: Date | string | number) {
-  return addMinutes(new Date(date), INTERVIEW_MINUTES)
+/** Where an interview ends: its end time, or its default length after its start. */
+export function interviewEnd(at: Date | string | number, endAt?: Date | string | null) {
+  return endAt ? new Date(endAt) : addMinutes(new Date(at), INTERVIEW_MINUTES)
+}
+
+/** Choices of the time pickers: every quarter hour from 07:00 to 23:00. */
+export const TIME_OPTIONS = Array.from({ length: (23 - 7) * 4 + 1 }, (_, index) => {
+  const minutes = 7 * 60 + index * 15
+  return `${String(Math.floor(minutes / 60)).padStart(2, "0")}:${String(minutes % 60).padStart(2, "0")}`
+})
+
+/** Minutes of an `HH:mm` time. */
+export function timeMinutes(time: string) {
+  const [hours, minutes] = time.split(":").map(Number)
+  return hours * 60 + minutes
+}
+
+/** An `HH:mm` time moved by some minutes, kept within the day. */
+export function shiftTime(time: string, minutes: number) {
+  const total = Math.min(Math.max(timeMinutes(time) + minutes, 0), 23 * 60 + 59)
+  return `${String(Math.floor(total / 60)).padStart(2, "0")}:${String(total % 60).padStart(2, "0")}`
+}
+
+/** An interview's moments as the form's parts, in club time (`""` when not scheduled). */
+export function scheduleParts(at: Date | string | null | undefined, endAt?: Date | string | null) {
+  if (!at) return { date: "", start: "", end: "" }
+  return {
+    date: dayKey(at),
+    start: format(clubDate(at), "HH:mm"),
+    end: format(clubDate(interviewEnd(at, endAt)), "HH:mm"),
+  }
+}
+
+/** The form's parts as moments, `null` without a date. */
+export function scheduleMoments({
+  date,
+  start,
+  end,
+}: {
+  date: string
+  start: string
+  end: string
+}) {
+  if (!date) return null
+  const at = fromDateTimeInput(`${date}T${start}`)
+  const endAt = fromDateTimeInput(`${date}T${end}`)
+  return at && endAt ? { at, endAt } : null
 }
 
 /**
- * Side-by-side lanes of one day's interviews: overlapping ones share the width of their group.
+ * Side-by-side lanes of one day's interviews (minutes since midnight): overlapping ones share the width of their group.
  * Returns each item's lane and the lane count of its group, in the input order.
  */
-export function dayLanes(starts: number[], length = INTERVIEW_MINUTES) {
-  const order = starts.map((start, index) => ({ start, index })).sort((a, b) => a.start - b.start)
-  const result = starts.map(() => ({ lane: 0, lanes: 1 }))
+export function dayLanes(intervals: { start: number; end: number }[]) {
+  const order = intervals
+    .map((interval, index) => ({ ...interval, index }))
+    .sort((a, b) => a.start - b.start)
+  const result = intervals.map(() => ({ lane: 0, lanes: 1 }))
   let group: number[] = []
   let groupEnd = -Infinity
   let laneEnds: number[] = []
@@ -79,36 +120,54 @@ export function dayLanes(starts: number[], length = INTERVIEW_MINUTES) {
     laneEnds = []
   }
 
-  for (const { start, index } of order) {
+  for (const { start, end, index } of order) {
     if (start >= groupEnd) closeGroup()
     let lane = laneEnds.findIndex((end) => end <= start)
     if (lane === -1) lane = laneEnds.push(0) - 1
-    laneEnds[lane] = start + length
+    laneEnds[lane] = end
     result[index].lane = lane
     group.push(index)
-    groupEnd = Math.max(groupEnd, start + length)
+    groupEnd = Math.max(groupEnd, end)
   }
   closeGroup()
   return result
 }
 
+const TIME = /^([01]\d|2[0-3]):[0-5]\d$/
+
 /**
- * An interview's schedule as typed: a `datetime-local` value in club time and an HR member's id,
- * both optional (`""` clears it).
+ * An interview's schedule as picked: a club day (`yyyy-MM-dd`), its start and end times, and an
+ * HR member's id. All optional (`""` clears them), but a day needs both times, end after start.
  */
-export const interviewScheduleSchema = z.object({
-  at: z
-    .string()
-    .trim()
-    .refine((value) => !value || fromDateTimeInput(value) !== null, "Pick a valid date and time."),
-  interviewerId: z.string().trim().max(100),
-})
+export const interviewScheduleSchema = z
+  .object({
+    date: z
+      .string()
+      .trim()
+      .regex(/^(\d{4}-\d{2}-\d{2})?$/, "Pick a valid date."),
+    start: z.string().trim().regex(TIME).or(z.literal("")),
+    end: z.string().trim().regex(TIME).or(z.literal("")),
+    interviewerId: z.string().trim().max(100),
+  })
+  .superRefine((value, context) => {
+    if (!value.date) return
+    if (!value.start || !value.end) {
+      context.addIssue({
+        code: "custom",
+        path: ["start"],
+        message: "Pick when it starts and ends.",
+      })
+    } else if (timeMinutes(value.end) <= timeMinutes(value.start)) {
+      context.addIssue({ code: "custom", path: ["end"], message: "End after it starts." })
+    }
+  })
 
 export type InterviewScheduleInput = z.infer<typeof interviewScheduleSchema>
 
 /** A registration's interview as the admin pages read it. */
 export type InterviewSchedule = {
   at: string | null
+  endAt: string | null
   interviewerId: string | null
   interviewerName: string | null
   updatedByName: string | null

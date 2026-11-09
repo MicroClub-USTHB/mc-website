@@ -3,24 +3,35 @@ import { describe, expect, it } from "vitest"
 import {
   dayKey,
   dayLanes,
-  fromDateTimeInput,
   interviewScheduleSchema,
   monthWeeks,
-  toDateTimeInput,
+  scheduleMoments,
+  scheduleParts,
+  shiftTime,
   weekDays,
 } from "@/lib/registrations/interview"
 
-describe("datetime-local values", () => {
+describe("schedule parts", () => {
   it("reads and writes club time (UTC+1)", () => {
-    const date = fromDateTimeInput("2026-11-09T14:30")
-    expect(date?.toISOString()).toBe("2026-11-09T13:30:00.000Z")
-    expect(toDateTimeInput(date)).toBe("2026-11-09T14:30")
+    const moments = scheduleMoments({ date: "2026-11-09", start: "14:30", end: "15:15" })
+    expect(moments?.at.toISOString()).toBe("2026-11-09T13:30:00.000Z")
+    expect(moments?.endAt.toISOString()).toBe("2026-11-09T14:15:00.000Z")
+    expect(scheduleParts(moments?.at, moments?.endAt)).toEqual({
+      date: "2026-11-09",
+      start: "14:30",
+      end: "15:15",
+    })
   })
 
-  it("treats empty and invalid values as none", () => {
-    expect(fromDateTimeInput("")).toBeNull()
-    expect(fromDateTimeInput("tomorrow")).toBeNull()
-    expect(toDateTimeInput(null)).toBe("")
+  it("ends 30 minutes after the start by default, and is empty without a date", () => {
+    expect(scheduleParts("2026-11-09T13:30:00Z").end).toBe("15:00")
+    expect(scheduleParts(null)).toEqual({ date: "", start: "", end: "" })
+    expect(scheduleMoments({ date: "", start: "10:00", end: "10:30" })).toBeNull()
+  })
+
+  it("shifts times within the day", () => {
+    expect(shiftTime("10:45", 30)).toBe("11:15")
+    expect(shiftTime("23:45", 30)).toBe("23:59")
   })
 })
 
@@ -44,7 +55,8 @@ describe("calendar days", () => {
 
 describe("dayLanes", () => {
   it("puts overlapping interviews side by side and lone ones full width", () => {
-    expect(dayLanes([600, 610, 700])).toEqual([
+    const half = (start: number) => ({ start, end: start + 30 })
+    expect(dayLanes([half(600), half(610), half(700)])).toEqual([
       { lane: 0, lanes: 2 },
       { lane: 1, lanes: 2 },
       { lane: 0, lanes: 1 },
@@ -52,7 +64,8 @@ describe("dayLanes", () => {
   })
 
   it("reuses a lane once it is free", () => {
-    expect(dayLanes([600, 615, 630])).toEqual([
+    const half = (start: number) => ({ start, end: start + 30 })
+    expect(dayLanes([half(600), half(615), half(630)])).toEqual([
       { lane: 0, lanes: 2 },
       { lane: 1, lanes: 2 },
       { lane: 0, lanes: 2 },
@@ -61,8 +74,23 @@ describe("dayLanes", () => {
 })
 
 describe("interviewScheduleSchema", () => {
-  it("accepts an empty schedule and refuses a bad date", () => {
-    expect(interviewScheduleSchema.safeParse({ at: "", interviewerId: "" }).success).toBe(true)
-    expect(interviewScheduleSchema.safeParse({ at: "nope", interviewerId: "" }).success).toBe(false)
+  const parse = (value: Partial<Record<"date" | "start" | "end", string>>) =>
+    interviewScheduleSchema.safeParse({
+      date: "",
+      start: "",
+      end: "",
+      interviewerId: "",
+      ...value,
+    }).success
+
+  it("accepts an empty schedule or a day with an interval", () => {
+    expect(parse({})).toBe(true)
+    expect(parse({ date: "2026-11-09", start: "10:00", end: "10:30" })).toBe(true)
+  })
+
+  it("refuses a day without times, or an end before the start", () => {
+    expect(parse({ date: "2026-11-09" })).toBe(false)
+    expect(parse({ date: "2026-11-09", start: "10:30", end: "10:00" })).toBe(false)
+    expect(parse({ date: "nope", start: "10:00", end: "10:30" })).toBe(false)
   })
 })

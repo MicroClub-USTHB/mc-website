@@ -4,7 +4,7 @@ import { isValidObjectId } from "mongoose"
 
 import { connectToDatabase, getMongoClient } from "@/lib/mongodb"
 import {
-  fromDateTimeInput,
+  scheduleMoments,
   type InterviewSchedule,
   type InterviewScheduleInput,
 } from "@/lib/registrations/interview"
@@ -33,7 +33,7 @@ export async function listInterviewers() {
 export async function saveInterview(
   id: string,
   actor: TimelineActor,
-  { at, interviewerId }: InterviewScheduleInput,
+  { interviewerId, ...times }: InterviewScheduleInput,
 ): Promise<TimelineResult> {
   if (!isValidObjectId(id))
     return { status: "error", message: "This registration no longer exists." }
@@ -45,13 +45,13 @@ export async function saveInterview(
   }
 
   await connectToDatabase()
-  const date = fromDateTimeInput(at)
+  const moments = scheduleMoments(times)
   const { matchedCount } = await RegistrationModel.updateOne(
     { _id: id },
     {
       $set: {
         interview: {
-          ...(date && { at: date }),
+          ...moments,
           ...(interviewerName && { interviewerId, interviewerName }),
           updatedById: actor.id,
           updatedByName: actor.name,
@@ -69,6 +69,7 @@ export async function saveInterview(
 export function interviewSchedule(interview: unknown): InterviewSchedule {
   const value = (interview ?? {}) as {
     at?: Date
+    endAt?: Date
     interviewerId?: string
     interviewerName?: string
     updatedByName?: string
@@ -76,6 +77,7 @@ export function interviewSchedule(interview: unknown): InterviewSchedule {
   }
   return {
     at: value.at ? new Date(value.at).toISOString() : null,
+    endAt: value.endAt ? new Date(value.endAt).toISOString() : null,
     interviewerId: value.interviewerId ?? null,
     interviewerName: value.interviewerName ?? null,
     updatedByName: value.updatedByName ?? null,

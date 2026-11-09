@@ -79,6 +79,7 @@ const registrationDocument = new Schema(
     /** When and with whom the interview happens, set from the review dialog or the calendar. */
     interview: {
       at: { type: Date },
+      endAt: { type: Date },
       interviewerId: { type: String },
       interviewerName: { type: String },
       updatedById: { type: String },

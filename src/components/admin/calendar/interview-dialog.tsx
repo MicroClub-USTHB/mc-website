@@ -8,6 +8,7 @@ import { scheduleInterview } from "@/actions/admin/review-registration"
 import { FormMessage } from "@/components/admin/form-message"
 import {
   InterviewScheduleFields,
+  readSchedule,
   type Interviewer,
 } from "@/components/admin/registrations/interview-schedule-fields"
 import { StatusBadge } from "@/components/admin/registrations/status-badge"
@@ -31,7 +32,7 @@ import {
 import { registrationRoute } from "@/config/admin"
 import { formatClubTime } from "@/lib/dates"
 import type { CalendarInterview } from "@/lib/registrations/interview-store"
-import { interviewScheduleSchema, toDateTimeInput } from "@/lib/registrations/interview"
+import { interviewScheduleSchema, scheduleParts } from "@/lib/registrations/interview"
 
 /** What the dialog edits: one interview, or a free slot to give to a registration waiting for a date. */
 export type InterviewDialogTarget =
@@ -66,7 +67,8 @@ export function InterviewDialog({
     shown?.kind === "interview"
       ? shown.item
       : unscheduled.find((entry) => entry.registrationId === chosenId)
-  const defaultAt = shown?.kind === "slot" ? toDateTimeInput(shown.at) : toDateTimeInput(item?.at)
+  const defaultSchedule =
+    shown?.kind === "slot" ? scheduleParts(shown.at) : scheduleParts(item?.at, item?.endAt)
 
   function close() {
     onClose()
@@ -75,16 +77,12 @@ export function InterviewDialog({
     setMessage(undefined)
   }
 
-  function submit(formElement: HTMLFormElement, clear = false) {
+  function submit(formElement: HTMLFormElement) {
     if (!item) {
       setMessage("Choose who to interview.")
       return
     }
-    const form = new FormData(formElement)
-    const parsed = interviewScheduleSchema.safeParse({
-      at: clear ? "" : (form.get("interviewAt") ?? ""),
-      interviewerId: form.get("interviewerId") ?? "",
-    })
+    const parsed = interviewScheduleSchema.safeParse(readSchedule(new FormData(formElement)))
     if (!parsed.success) {
       setError(parsed.error.issues[0]?.message)
       return
@@ -135,7 +133,7 @@ export function InterviewDialog({
                 }}
               >
                 <McSelectLabel>Applicant waiting for a date</McSelectLabel>
-                <McSelectTrigger className="w-full" aria-label="Applicant">
+                <McSelectTrigger className="h-11 w-full rounded-lg" aria-label="Applicant">
                   <McSelectValue placeholder="Choose one" />
                 </McSelectTrigger>
                 <McSelectContent
@@ -179,7 +177,7 @@ export function InterviewDialog({
           {(item || shown?.kind === "interview") && (
             <InterviewScheduleFields
               interviewers={interviewers}
-              defaultAt={defaultAt}
+              defaultSchedule={defaultSchedule}
               defaultInterviewerId={item?.interviewerId ?? ""}
               error={error}
             />
@@ -187,19 +185,6 @@ export function InterviewDialog({
 
           <FormMessage>{message}</FormMessage>
           <McDialogFooter className="flex-row flex-wrap justify-end gap-2 pb-0">
-            {shown?.kind === "interview" && item?.at && (
-              <McButton
-                type="button"
-                variant="secondary"
-                disabled={pending}
-                onClick={(event) => {
-                  const form = event.currentTarget.form
-                  if (form) submit(form, true)
-                }}
-              >
-                Remove date
-              </McButton>
-            )}
             <McButton type="submit" isLoading={pending} disabled={!item}>
               Save
             </McButton>
