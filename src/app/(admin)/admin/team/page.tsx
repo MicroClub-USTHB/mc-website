@@ -44,7 +44,10 @@ const COUNTS = [
  */
 export default async function TeamPage() {
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
-  const [members, progress] = await Promise.all([getTeamActivity(), getReviewProgress(user.id)])
+  const [{ members, totals }, progress] = await Promise.all([
+    getTeamActivity(),
+    getReviewProgress(user.id),
+  ])
   const now = new Date()
 
   return (
@@ -123,6 +126,52 @@ export default async function TeamPage() {
                   </McTableRow>
                 ))}
               </McTableBody>
+              {/* Each registration counted once, by its overall status: two reviews of one
+                  registration make one reviewed registration, so it is not the column sums. */}
+              <tfoot className="border-t-2 border-border bg-secondary/50">
+                <McTableRow className="border-b-0 hover:bg-transparent">
+                  <McTableCell>
+                    <span className="flex flex-col">
+                      <span className="font-semibold text-foreground">Team total</span>
+                      <span className="paragraph-sm text-muted-foreground">
+                        Per registration, by its status
+                      </span>
+                    </span>
+                  </McTableCell>
+                  {COUNTS.map((count) => (
+                    <McTableCell
+                      key={count.key}
+                      className="text-right font-semibold text-foreground tabular-nums"
+                    >
+                      {totals[count.key]}
+                    </McTableCell>
+                  ))}
+                  <McTableCell className="text-right tabular-nums">
+                    <span className="flex flex-col items-end">
+                      <span className="font-semibold text-foreground">
+                        {totals.reviewed}
+                        <span className="font-normal text-muted-foreground">
+                          {" "}
+                          / {totals.registrations}
+                        </span>
+                      </span>
+                      {totals.conflict > 0 && (
+                        <span className="paragraph-sm text-muted-foreground">
+                          incl. {totals.conflict} conflict{totals.conflict > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </span>
+                  </McTableCell>
+                  <McTableCell className="text-right font-semibold text-foreground tabular-nums">
+                    {totals.recommended}
+                  </McTableCell>
+                  <McTableCell>
+                    {totals.lastActiveAt
+                      ? formatDistanceToNow(totals.lastActiveAt, { addSuffix: true })
+                      : "–"}
+                  </McTableCell>
+                </McTableRow>
+              </tfoot>
             </McTable>
           </div>
         ) : (

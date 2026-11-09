@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest"
 
-import { teamActivity } from "@/lib/registrations/team-activity"
+import { teamActivity, teamTotals } from "@/lib/registrations/team-activity"
 import type { TimelineEntry } from "@/lib/registrations/timeline"
 
 const at = (minute: number) => new Date(Date.UTC(2026, 10, 8, 10, minute))
@@ -51,5 +51,27 @@ describe("teamActivity", () => {
       ["b", 0, 1, 1],
       ["a", 1, 0, 0],
     ])
+  })
+})
+
+describe("teamTotals", () => {
+  it("counts each registration once, by its overall status", () => {
+    const totals = teamTotals([
+      // Two accepted reviews: one accepted registration.
+      [review("a", "accepted", 1), review("b", "accepted", 2)],
+      // One review only: still pending, not reviewed.
+      [review("a", "rejected", 3)],
+      [review("a", "accepted", 4), review("b", "rejected", 5)],
+      [],
+    ])
+    expect(totals).toMatchObject({
+      registrations: 4,
+      accepted: 1,
+      rejected: 0,
+      conflict: 1,
+      reviewed: 2,
+      recommended: 0,
+      lastActiveAt: at(5),
+    })
   })
 })
