@@ -1,5 +1,6 @@
 import type { Metadata } from "next"
 
+import { NextInterview } from "@/components/admin/calendar/next-interview"
 import { InterviewCalendar } from "@/components/admin/calendar/interview-calendar"
 import { requireStaff } from "@/lib/auth/session"
 import { listCalendarInterviews, listInterviewers } from "@/lib/registrations/interview-store"
@@ -13,6 +14,7 @@ export const metadata: Metadata = { title: "Calendar" }
 export default async function CalendarPage() {
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
   const [items, interviewers] = await Promise.all([listCalendarInterviews(), listInterviewers()])
+  const now = new Date()
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -23,11 +25,12 @@ export default async function CalendarPage() {
           to an applicant, or drag to move one.
         </p>
       </div>
+      <NextInterview items={items} userId={user.id} now={now} />
       <InterviewCalendar
         items={items}
         interviewers={interviewers}
         userId={user.id}
-        now={new Date().toISOString()}
+        now={now.toISOString()}
       />
     </div>
   )
