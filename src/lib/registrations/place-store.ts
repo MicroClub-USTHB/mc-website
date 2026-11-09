@@ -7,7 +7,7 @@ import { RegistrationModel } from "@/lib/registrations/model"
 import { placeListQuery, type PlaceSource } from "@/lib/registrations/place"
 import { isRegistrationStatus } from "@/lib/registrations/status"
 import { currentReviews, type TimelineEntry } from "@/lib/registrations/timeline"
-import { teamActivity } from "@/lib/registrations/team-activity"
+import { teamActivity, teamTotals } from "@/lib/registrations/team-activity"
 
 /** One place per HR member, replaced on each review, recommendation or mark (see `place.ts`). */
 const placeDocument = new Schema(
@@ -80,8 +80,9 @@ export async function isReviewPlace(userId: string, registrationId: string) {
 /** Every HR member's decisions, from all the timelines (a few hundred registrations at most). */
 export async function getTeamActivity() {
   await connectToDatabase()
-  const registrations = await RegistrationModel.find({ "timeline.0": { $exists: true } })
-    .select("timeline")
-    .lean()
-  return teamActivity(registrations.map((registration) => registration.timeline as TimelineEntry[]))
+  const registrations = await RegistrationModel.find().select("timeline").lean()
+  const timelines = registrations.map(
+    (registration) => (registration.timeline ?? []) as TimelineEntry[],
+  )
+  return { members: teamActivity(timelines), totals: teamTotals(timelines) }
 }

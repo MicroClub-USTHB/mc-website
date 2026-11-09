@@ -3,6 +3,11 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { UsersIcon } from "lucide-react"
 
+import { MilestoneBanner } from "@/components/admin/team/milestone-banner"
+import {
+  DecisionsProgressCard,
+  TeamProgressCard,
+} from "@/components/admin/team/review-progress-cards"
 import { McBadge } from "@/components/ui/mc-badge"
 import {
   McDataTableCard,
@@ -18,6 +23,8 @@ import {
 import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
 import { getTeamActivity } from "@/lib/registrations/place-store"
+import { reachedMilestone } from "@/lib/registrations/review-progress"
+import { getReviewProgress } from "@/lib/registrations/review-progress-store"
 import {
   recommendationsQuery,
   DEFAULT_RECOMMENDATION_PARAMS,
@@ -37,7 +44,11 @@ const COUNTS = [
  */
 export default async function TeamPage() {
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
-  const members = await getTeamActivity()
+  const [{ members, totals }, progress] = await Promise.all([
+    getTeamActivity(),
+    getReviewProgress(user.id),
+  ])
+  const now = new Date()
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -47,6 +58,13 @@ export default async function TeamPage() {
           Each HR member&apos;s decisions as they stand now: a changed review counts once, as its
           latest state.
         </p>
+      </div>
+
+      <MilestoneBanner milestone={reachedMilestone(progress.team.percent)} />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TeamProgressCard progress={progress} now={now} />
+        <DecisionsProgressCard progress={progress} now={now} />
       </div>
 
       <McDataTableCard>
@@ -108,6 +126,52 @@ export default async function TeamPage() {
                   </McTableRow>
                 ))}
               </McTableBody>
+              {/* Each registration counted once, by its overall status: two reviews of one
+                  registration make one reviewed registration, so it is not the column sums. */}
+              <tfoot className="border-t-2 border-border bg-secondary/50">
+                <McTableRow className="border-b-0 hover:bg-transparent">
+                  <McTableCell>
+                    <span className="flex flex-col">
+                      <span className="font-semibold text-foreground">Team total</span>
+                      <span className="paragraph-sm text-muted-foreground">
+                        Per registration, by its status
+                      </span>
+                    </span>
+                  </McTableCell>
+                  {COUNTS.map((count) => (
+                    <McTableCell
+                      key={count.key}
+                      className="text-right font-semibold text-foreground tabular-nums"
+                    >
+                      {totals[count.key]}
+                    </McTableCell>
+                  ))}
+                  <McTableCell className="text-right tabular-nums">
+                    <span className="flex flex-col items-end">
+                      <span className="font-semibold text-foreground">
+                        {totals.reviewed}
+                        <span className="font-normal text-muted-foreground">
+                          {" "}
+                          / {totals.registrations}
+                        </span>
+                      </span>
+                      {totals.conflict > 0 && (
+                        <span className="paragraph-sm text-muted-foreground">
+                          incl. {totals.conflict} conflict{totals.conflict > 1 ? "s" : ""}
+                        </span>
+                      )}
+                    </span>
+                  </McTableCell>
+                  <McTableCell className="text-right font-semibold text-foreground tabular-nums">
+                    {totals.recommended}
+                  </McTableCell>
+                  <McTableCell>
+                    {totals.lastActiveAt
+                      ? formatDistanceToNow(totals.lastActiveAt, { addSuffix: true })
+                      : "–"}
+                  </McTableCell>
+                </McTableRow>
+              </tfoot>
             </McTable>
           </div>
         ) : (

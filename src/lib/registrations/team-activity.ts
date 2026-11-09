@@ -1,6 +1,8 @@
+import type { RegistrationStatus } from "@/lib/registrations/status"
 import {
   currentRecommendation,
   currentReviews,
+  registrationStatus,
   type TimelineEntry,
 } from "@/lib/registrations/timeline"
 
@@ -61,4 +63,40 @@ export function teamActivity(timelines: TimelineEntry[][]): MemberActivity[] {
   return [...members.values()].sort(
     (a, b) => total(b) - total(a) || b.lastActiveAt.getTime() - a.lastActiveAt.getTime(),
   )
+}
+
+/** The team's totals, per registration: by its overall status, not by each member's review. */
+export type TeamTotals = Record<Exclude<RegistrationStatus, "pending">, number> & {
+  registrations: number
+  /** Registrations out of pending: two reviews on one registration count once. */
+  reviewed: number
+  recommended: number
+  lastActiveAt: Date | null
+}
+
+/** Totals of the team table: each registration counted once, by its status. */
+export function teamTotals(timelines: TimelineEntry[][]): TeamTotals {
+  const totals: TeamTotals = {
+    registrations: timelines.length,
+    interview: 0,
+    accepted: 0,
+    rejected: 0,
+    conflict: 0,
+    reviewed: 0,
+    recommended: 0,
+    lastActiveAt: null,
+  }
+  for (const timeline of timelines) {
+    const status = registrationStatus(timeline)
+    if (status !== "pending") {
+      totals[status] += 1
+      totals.reviewed += 1
+    }
+    if (currentRecommendation(timeline)) totals.recommended += 1
+    for (const entry of timeline) {
+      const at = new Date(entry.at)
+      if (!totals.lastActiveAt || at > totals.lastActiveAt) totals.lastActiveAt = at
+    }
+  }
+  return totals
 }
