@@ -3,6 +3,11 @@ import Link from "next/link"
 import { formatDistanceToNow } from "date-fns"
 import { UsersIcon } from "lucide-react"
 
+import { MilestoneBanner } from "@/components/admin/team/milestone-banner"
+import {
+  DecisionsProgressCard,
+  TeamProgressCard,
+} from "@/components/admin/team/review-progress-cards"
 import { McBadge } from "@/components/ui/mc-badge"
 import {
   McDataTableCard,
@@ -18,6 +23,8 @@ import {
 import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
 import { getTeamActivity } from "@/lib/registrations/place-store"
+import { reachedMilestone } from "@/lib/registrations/review-progress"
+import { getReviewProgress } from "@/lib/registrations/review-progress-store"
 import {
   recommendationsQuery,
   DEFAULT_RECOMMENDATION_PARAMS,
@@ -37,7 +44,8 @@ const COUNTS = [
  */
 export default async function TeamPage() {
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
-  const members = await getTeamActivity()
+  const [members, progress] = await Promise.all([getTeamActivity(), getReviewProgress(user.id)])
+  const now = new Date()
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -47,6 +55,13 @@ export default async function TeamPage() {
           Each HR member&apos;s decisions as they stand now: a changed review counts once, as its
           latest state.
         </p>
+      </div>
+
+      <MilestoneBanner milestone={reachedMilestone(progress.team.percent)} />
+
+      <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
+        <TeamProgressCard progress={progress} now={now} />
+        <DecisionsProgressCard progress={progress} now={now} />
       </div>
 
       <McDataTableCard>

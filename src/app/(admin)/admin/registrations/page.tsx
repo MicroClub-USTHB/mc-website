@@ -3,6 +3,8 @@ import { redirect } from "next/navigation"
 import { DownloadIcon, InboxIcon, SearchXIcon } from "lucide-react"
 
 import { ListPagination } from "@/components/admin/registrations/list-pagination"
+import { MilestoneBanner } from "@/components/admin/team/milestone-banner"
+import { NeedYouBanner } from "@/components/admin/team/need-you-banner"
 import { ResumeBanner } from "@/components/admin/registrations/resume-banner"
 import { RegistrationsTable } from "@/components/admin/registrations/registrations-table"
 import { RegistrationsToolbar } from "@/components/admin/registrations/registrations-toolbar"
@@ -12,6 +14,8 @@ import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
 import { countRegistrationsByStatus, listRegistrations } from "@/lib/registrations/review"
+import { reachedMilestone } from "@/lib/registrations/review-progress"
+import { getReviewProgress } from "@/lib/registrations/review-progress-store"
 
 export const metadata: Metadata = { title: "Registrations" }
 
@@ -22,9 +26,10 @@ export default async function RegistrationsPage({
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
 
   const params = parseListParams(await searchParams)
-  const [page, counts] = await Promise.all([
+  const [page, counts, progress] = await Promise.all([
     listRegistrations(params),
     countRegistrationsByStatus(),
+    getReviewProgress(user.id),
   ])
   // A page past the end (e.g. after a search) shows the last one, at its own URL.
   if (page.page !== params.page) {
@@ -41,7 +46,9 @@ export default async function RegistrationsPage({
         </p>
       </div>
 
+      <MilestoneBanner milestone={reachedMilestone(progress.team.percent)} />
       <ResumeBanner userId={user.id} />
+      <NeedYouBanner count={progress.team.needYou} />
 
       <McDataTableCard>
         <McDataTableHeader

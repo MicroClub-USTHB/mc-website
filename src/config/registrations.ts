@@ -12,3 +12,13 @@ export const REGISTRATIONS_WINDOW: { opensAt: string | null; closesAt: string | 
   opensAt: "2026-11-05T12:00:00+01:00",
   closesAt: "2026-11-07T22:30:00+01:00",
 }
+
+/**
+ * The HR team's deadlines (ISO 8601 with their offset), or `null`: two reviews on every
+ * registration, then every interview done so each registration is accepted or rejected. The Team
+ * page shows the daily pace each one needs.
+ */
+export const REVIEW_DEADLINES: { reviews: string | null; decisions: string | null } = {
+  reviews: "2026-11-10T23:59:59+01:00",
+  decisions: "2026-11-14T23:59:59+01:00",
+}
