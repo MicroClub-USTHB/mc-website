@@ -76,6 +76,15 @@ const registrationDocument = new Schema(
     timeline: { type: [timelineEntry], default: [] },
     /** Computed from `timeline` on every change, stored for the recommendations page to filter. */
     recommendations: { type: [recommendation], default: [] },
+    /** When and with whom the interview happens, set from the review dialog or the calendar. */
+    interview: {
+      at: { type: Date },
+      interviewerId: { type: String },
+      interviewerName: { type: String },
+      updatedById: { type: String },
+      updatedByName: { type: String },
+      updatedAt: { type: Date },
+    },
   },
   { timestamps: true },
 )
@@ -86,6 +95,8 @@ registrationDocument.index({ status: 1, createdAt: -1 })
 // The recommendations page, filtered by where and by whom.
 registrationDocument.index({ "recommendations.target": 1 })
 registrationDocument.index({ "recommendations.actorId": 1 })
+// The interviews calendar.
+registrationDocument.index({ "interview.at": 1 })
 
 export type RegistrationDocument = InferSchemaType<typeof registrationDocument>
 
