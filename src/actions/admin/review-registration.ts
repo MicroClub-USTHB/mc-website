@@ -5,6 +5,8 @@ import { z } from "zod"
 
 import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
+import { interviewScheduleSchema, type InterviewScheduleInput } from "@/lib/registrations/interview"
+import { saveInterview } from "@/lib/registrations/interview-store"
 import type { PlaceSource } from "@/lib/registrations/place"
 import { saveReviewPlace } from "@/lib/registrations/place-store"
 import {
@@ -53,6 +55,7 @@ async function applyChange(
     }
     revalidatePath(adminRoutes.registrations, "layout")
     revalidatePath(adminRoutes.recommendations)
+    revalidatePath(adminRoutes.calendar)
     return result
   } catch (error) {
     console.error("Registration timeline: saving failed", error)
@@ -60,17 +63,39 @@ async function applyChange(
   }
 }
 
-export async function reviewRegistration(id: string, input: ReviewInput, search = "") {
+/**
+ * Records a review. Asking for an interview can also set its date and host (`interview`); when
+ * only those change, the review itself is left as it is.
+ */
+export async function reviewRegistration(
+  id: string,
+  input: ReviewInput,
+  search = "",
+  interview?: InterviewScheduleInput & { scheduleOnly?: boolean },
+) {
   const actor = await reviewer()
   const parsedId = registrationIdSchema.safeParse(id)
   const parsed = reviewSchema.safeParse(input)
-  if (!parsedId.success || !parsed.success) return INVALID
-  return applyChange(() => recordReview(parsedId.data, actor, parsed.data), {
-    actor,
-    id: parsedId.data,
-    search,
-    source: "review",
-  })
+  const schedule = interview && interviewScheduleSchema.safeParse(interview)
+  if (!parsedId.success || !parsed.success || (schedule && !schedule.success)) return INVALID
+  const scheduleInput = parsed.data.state === "interview" ? schedule?.data : undefined
+  return applyChange(
+    async () => {
+      const result = interview?.scheduleOnly
+        ? ({ status: "success" } as const)
+        : await recordReview(parsedId.data, actor, parsed.data)
+      if (result.status === "success" && scheduleInput) {
+        return saveInterview(parsedId.data, actor, scheduleInput)
+      }
+      return result
+    },
+    {
+      actor,
+      id: parsedId.data,
+      search,
+      source: "review",
+    },
+  )
 }
 
 export async function recommendRegistration(id: string, input: RecommendationInput, search = "") {
@@ -84,6 +109,15 @@ export async function recommendRegistration(id: string, input: RecommendationInp
     search,
     source: "recommendation",
   })
+}
+
+/** Sets an interview's date and host from the calendar, whoever asked for the interview. */
+export async function scheduleInterview(id: string, input: InterviewScheduleInput) {
+  const actor = await reviewer()
+  const parsedId = registrationIdSchema.safeParse(id)
+  const parsed = interviewScheduleSchema.safeParse(input)
+  if (!parsedId.success || !parsed.success) return INVALID
+  return applyChange(() => saveInterview(parsedId.data, actor, parsed.data))
 }
 
 export async function removeRecommendation(id: string) {

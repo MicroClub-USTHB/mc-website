@@ -29,6 +29,8 @@ import {
   recommendationOriginQuery,
   recommendationsQuery,
 } from "@/lib/registrations/recommendation-params"
+import { interviewSchedule, listInterviewers } from "@/lib/registrations/interview-store"
+import { interviewEnd } from "@/lib/registrations/interview"
 import { isReviewPlace } from "@/lib/registrations/place-store"
 import { getRegistration, registrationListOrder } from "@/lib/registrations/review"
 import { isRegistrationStatus } from "@/lib/registrations/status"
@@ -139,10 +141,12 @@ export default async function RegistrationPage({
   const registration = await getRegistration(id)
   if (!registration) notFound()
 
-  const [list, marked] = await Promise.all([
+  const [list, marked, interviewers] = await Promise.all([
     listContext(id, await searchParams),
     isReviewPlace(user.id, id),
+    listInterviewers(),
   ])
+  const interview = interviewSchedule(registration.interview)
   const name = `${registration.firstName} ${registration.lastName}`
   const status = isRegistrationStatus(registration.status) ? registration.status : "pending"
   const submittedAt = new Date(registration.createdAt)
@@ -215,6 +219,28 @@ export default async function RegistrationPage({
               ))}
             </div>
           )}
+          {(interview.at || interview.interviewerId) && (
+            <div className="flex flex-col gap-1 rounded-lg border border-border bg-secondary/40 p-3">
+              <p className="paragraph-sm text-muted-foreground">Interview</p>
+              <p className="paragraph-md text-foreground">
+                {interview.at
+                  ? `${formatClubTime(interview.at, "EEEE d MMMM yyyy, HH:mm")} – ${formatClubTime(interviewEnd(interview.at, interview.endAt), "HH:mm")}`
+                  : "No date yet"}
+                {" · "}
+                {interview.interviewerId === user.id
+                  ? "with you"
+                  : interview.interviewerName
+                    ? `with ${interview.interviewerName}`
+                    : "nobody assigned"}
+              </p>
+              <Link
+                href={adminRoutes.calendar}
+                className="w-fit rounded-sm paragraph-sm font-medium text-primary underline-offset-4 outline-none hover:underline focus-visible:ring-4 focus-visible:ring-ring"
+              >
+                Open the calendar
+              </Link>
+            </div>
+          )}
           {ownReview || reviews.length < MAX_REVIEWERS ? (
             <ReviewActions
               registrationId={id}
@@ -222,6 +248,8 @@ export default async function RegistrationPage({
               current={ownReview?.state ?? "pending"}
               questions={ownReview?.state === "interview" ? ownReview.questions : undefined}
               reasonRequired={!hasReviewed(timeline, user.id)}
+              interviewers={interviewers}
+              interview={interview}
             />
           ) : (
             <p className="paragraph-sm text-muted-foreground">

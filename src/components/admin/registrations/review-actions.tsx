@@ -5,6 +5,11 @@ import { useState, useTransition, type FormEvent } from "react"
 
 import { reviewRegistration } from "@/actions/admin/review-registration"
 import { FormMessage } from "@/components/admin/form-message"
+import {
+  InterviewScheduleFields,
+  readSchedule,
+  type Interviewer,
+} from "@/components/admin/registrations/interview-schedule-fields"
 import { McButton } from "@/components/ui/mc-button"
 import {
   McDialog,
@@ -16,6 +21,7 @@ import {
 } from "@/components/ui/mc-dialog"
 import { McTextarea } from "@/components/ui/mc-textarea"
 import { fieldErrors } from "@/lib/auth/schema"
+import { interviewScheduleSchema, scheduleParts } from "@/lib/registrations/interview"
 import { reviewSchema } from "@/lib/registrations/review-schema"
 import type { ReviewState } from "@/lib/registrations/status"
 
@@ -36,11 +42,11 @@ const ACTIONS: Action[] = [
   },
 ]
 
-/** Shown instead of "To Interview" to a reviewer already asking for one: edits its questions. */
+/** Shown instead of "To Interview" to a reviewer already asking for one: edits its details. */
 const EDIT_QUESTIONS: Action = {
   state: "interview",
-  label: "Edit interview questions",
-  title: (applicant) => `Interview questions for ${applicant}`,
+  label: "Edit interview details",
+  title: (applicant) => `Interview with ${applicant}`,
 }
 
 /**
@@ -53,6 +59,8 @@ export function ReviewActions({
   current,
   reasonRequired,
   questions = "",
+  interviewers,
+  interview,
 }: {
   registrationId: string
   applicant: string
@@ -62,6 +70,10 @@ export function ReviewActions({
   reasonRequired: boolean
   /** The reviewer's interview questions, when their review is `interview`. */
   questions?: string
+  /** HR members who can host the interview. */
+  interviewers: Interviewer[]
+  /** The registration's interview date and host, whoever set them. */
+  interview: { at: string | null; endAt: string | null; interviewerId: string | null }
 }) {
   const searchParams = useSearchParams()
   const [open, setOpen] = useState(false)
@@ -69,6 +81,7 @@ export function ReviewActions({
   const [action, setAction] = useState(ACTIONS[0])
   const [reasonError, setReasonError] = useState<string>()
   const [questionsError, setQuestionsError] = useState<string>()
+  const [scheduleError, setScheduleError] = useState<string>()
   const [message, setMessage] = useState<string>()
   const [pending, startTransition] = useTransition()
 
@@ -77,6 +90,7 @@ export function ReviewActions({
     if (!next) {
       setReasonError(undefined)
       setQuestionsError(undefined)
+      setScheduleError(undefined)
       setMessage(undefined)
     }
   }
@@ -102,8 +116,24 @@ export function ReviewActions({
     }
     setReasonError(undefined)
 
+    const schedule = interviewScheduleSchema.safeParse(readSchedule(form))
+    if (action.state === "interview" && !schedule.success) {
+      setScheduleError(schedule.error.issues[0]?.message)
+      return
+    }
+    setScheduleError(undefined)
+    // Editing the details without touching the questions only changes the schedule.
+    const scheduleOnly = action === EDIT_QUESTIONS && parsed.data.questions === questions
+
     startTransition(async () => {
-      const result = await reviewRegistration(registrationId, parsed.data, searchParams.toString())
+      const result = await reviewRegistration(
+        registrationId,
+        parsed.data,
+        searchParams.toString(),
+        action.state === "interview" && schedule.success
+          ? { ...schedule.data, scheduleOnly }
+          : undefined,
+      )
       if (result.status === "error") setMessage(result.message)
       else onOpenChange(false)
     })
@@ -136,7 +166,7 @@ export function ReviewActions({
             <McDialogTitle>{action.title(applicant)}</McDialogTitle>
             <McDialogDescription>
               {action === EDIT_QUESTIONS
-                ? "Every HR member sees them, so whoever hosts the interview knows what to ask."
+                ? "Every HR member sees them, and the interview shows on the calendar once it has a date."
                 : action.state === "pending"
                   ? "This withdraws your review: your place goes to the next HR member who reviews."
                   : "Every HR member can see your review and its reason."}
@@ -161,6 +191,14 @@ export function ReviewActions({
                 placeholder={"One per line, e.g.\nWhich project are you proudest of?"}
                 description="Shown to every HR member, for whoever hosts the interview."
                 error={questionsError}
+              />
+            )}
+            {action.state === "interview" && (
+              <InterviewScheduleFields
+                interviewers={interviewers}
+                defaultSchedule={scheduleParts(interview.at, interview.endAt)}
+                defaultInterviewerId={interview.interviewerId ?? ""}
+                error={scheduleError}
               />
             )}
             <FormMessage>{message}</FormMessage>
