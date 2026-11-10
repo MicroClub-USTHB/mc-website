@@ -2,6 +2,7 @@ import Image from "next/image"
 import Link from "next/link"
 
 import { AdminNav } from "@/components/admin/admin-nav"
+import { ShortcutsHelp } from "@/components/admin/shortcuts/shortcuts-help"
 import { SignOutButton } from "@/components/admin/sign-out-button"
 import { ThemeSwitcher } from "@/components/admin/theme-switcher"
 import { McBadge } from "@/components/ui/mc-badge"
@@ -40,6 +41,7 @@ export async function AdminHeader() {
               )}
             </>
           )}
+          {links.length > 0 && <ShortcutsHelp />}
           <ThemeSwitcher />
           {user && <SignOutButton />}
         </div>

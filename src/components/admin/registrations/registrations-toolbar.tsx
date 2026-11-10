@@ -2,6 +2,8 @@ import Form from "next/form"
 import Link from "next/link"
 import { SearchIcon, XIcon } from "lucide-react"
 
+import { SearchShortcut } from "@/components/admin/registrations/search-shortcut"
+import { Kbd } from "@/components/admin/shortcuts/kbd"
 import { McButton } from "@/components/ui/mc-button"
 import { McInput } from "@/components/ui/mc-input"
 import { adminRoutes } from "@/config/admin"
@@ -19,10 +21,13 @@ import { cn } from "@/lib/utils"
 
 type StatusCounts = Record<RegistrationFilter | "all", number>
 
+/** The search field, focused with `/`. */
+const SEARCH_ID = "registrations-search"
+
 /**
  * Search (submitted with Enter, back to page 1) and the status filter with its counts ("2nd
  * Review" is the pending applications one HR member reviewed, also counted in Pending). Plain
- * links and a GET form: the server renders every state from the URL.
+ * links and a GET form: the server renders every state from the URL. `/` focuses the search.
  */
 export function RegistrationsToolbar({
   params,
@@ -80,9 +85,12 @@ export function RegistrationsToolbar({
             <input type="hidden" name="order" value={params.order} />
           </>
         )}
+        <SearchShortcut inputId={SEARCH_ID} />
         <McInput
+          id={SEARCH_ID}
           type="search"
           name="q"
+          aria-keyshortcuts="/"
           defaultValue={params.q}
           placeholder="Name, email or Discord"
           aria-label="Search registrations"
@@ -97,7 +105,9 @@ export function RegistrationsToolbar({
               >
                 <XIcon className="size-4" />
               </Link>
-            ) : undefined
+            ) : (
+              <Kbd className="hidden sm:inline-flex">/</Kbd>
+            )
           }
         />
         <McButton type="submit" variant="secondary">
