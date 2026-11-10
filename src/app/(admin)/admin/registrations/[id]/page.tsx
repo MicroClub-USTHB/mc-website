@@ -250,6 +250,7 @@ export default async function RegistrationPage({
               reasonRequired={!hasReviewed(timeline, user.id)}
               interviewers={interviewers}
               interview={interview}
+              next={list.next}
             />
           ) : (
             <p className="paragraph-sm text-muted-foreground">
