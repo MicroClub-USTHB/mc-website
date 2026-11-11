@@ -1,5 +1,7 @@
 import type { NextRequest } from "next/server"
 
+import { registrationRoute } from "@/config/admin"
+import { siteConfig } from "@/config/site"
 import { ABOUT_QUESTIONS } from "@/const/registrations"
 import { requireStaff } from "@/lib/auth/session"
 import { toCsv } from "@/lib/csv"
@@ -53,6 +55,7 @@ export async function GET(request: NextRequest) {
     ...LINKS.map((link) => link.label),
     ...ABOUT_QUESTIONS.map((question) => question.label),
     "Submitted at",
+    "Link",
   ]
   const rows = registrations.map((registration) => {
     const reviews = currentReviews(registration.timeline)
@@ -81,6 +84,8 @@ export async function GET(request: NextRequest) {
       ...LINKS.map((link) => registration.links?.[link.key]),
       ...ABOUT_QUESTIONS.map((question) => registration.answers?.[question.field]),
       date(registration.createdAt),
+      // The registration's admin page, to open it from the sheet.
+      `${siteConfig.url}${registrationRoute(registration.id)}`,
     ]
   })
 
