@@ -148,12 +148,11 @@ export function currentRecommendations(timeline: TimelineEntry[]) {
 }
 
 /**
- * State of a registration: `pending` until two people reviewed it, `interview` as soon as one of
- * them asks for it, otherwise their shared answer, or `conflict` when they disagree.
+ * State of a registration: `pending` until two people reviewed it, then their shared answer, or
+ * `conflict` as soon as they disagree (interview and rejected included).
  */
 export function registrationStatus(timeline: TimelineEntry[]): RegistrationStatus {
   const states = currentReviews(timeline).map((review) => review.state)
   if (states.length < MAX_REVIEWERS) return "pending"
-  if (states.includes("interview")) return "interview"
   return states[0] === states[1] ? states[0] : "conflict"
 }

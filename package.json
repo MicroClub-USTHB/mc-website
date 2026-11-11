@@ -14,6 +14,7 @@
     "db:up": "docker compose up -d mongodb",
     "db:down": "docker compose down",
     "db:seed-registrations": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-registrations.ts",
+    "db:recompute-statuses": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/recompute-statuses.ts",
     "db:seed-staff": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/seed-staff.ts",
     "auth:create-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/create-president.ts",
     "auth:deactivate-president": "tsx --conditions=react-server --env-file-if-exists=.env.local scripts/deactivate-president.ts"
