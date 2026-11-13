@@ -2,6 +2,7 @@ import type { Metadata } from "next"
 import { redirect } from "next/navigation"
 import { DownloadIcon, InboxIcon, SearchXIcon } from "lucide-react"
 
+import { AcceptanceEmailButtons } from "@/components/admin/registrations/acceptance-email-buttons"
 import { ListPagination } from "@/components/admin/registrations/list-pagination"
 import { MilestoneBanner } from "@/components/admin/team/milestone-banner"
 import { NeedYouBanner } from "@/components/admin/team/need-you-banner"
@@ -12,6 +13,7 @@ import { McButton } from "@/components/ui/mc-button"
 import { McDataTableCard, McDataTableEmpty, McDataTableHeader } from "@/components/ui/mc-data-table"
 import { adminRoutes } from "@/config/admin"
 import { requireStaff } from "@/lib/auth/session"
+import { countWaitingAcceptances } from "@/lib/registrations/acceptance-email"
 import { listQuery, parseListParams } from "@/lib/registrations/list-params"
 import { countRegistrationsByStatus, listRegistrations } from "@/lib/registrations/review"
 import { reachedMilestone } from "@/lib/registrations/review-progress"
@@ -26,10 +28,11 @@ export default async function RegistrationsPage({
   const { user } = await requireStaff({ permissions: { registration: ["review"] } })
 
   const params = parseListParams(await searchParams)
-  const [page, counts, progress] = await Promise.all([
+  const [page, counts, progress, waitingAcceptances] = await Promise.all([
     listRegistrations(params),
     countRegistrationsByStatus(),
     getReviewProgress(user.id),
+    countWaitingAcceptances(),
   ])
   // A page past the end (e.g. after a search) shows the last one, at its own URL.
   if (page.page !== params.page) {
@@ -56,22 +59,25 @@ export default async function RegistrationsPage({
           badge={counts.all}
           description="Search with Enter. Click a column title to sort by it."
           actions={
-            // Every page of the current search, tab and sort; a plain link, so the browser downloads.
-            <McButton
-              variant="secondary"
-              size="sm"
-              icon="leading"
-              iconDefinition={<DownloadIcon className="size-4" />}
-              nativeButton={false}
-              render={
-                <a
-                  href={`${adminRoutes.registrations}/export${listQuery(params, { page: 1 })}`}
-                  download
-                />
-              }
-            >
-              Export CSV{filtered ? ` (${page.total})` : ""}
-            </McButton>
+            <>
+              <AcceptanceEmailButtons waiting={waitingAcceptances} />
+              {/* Every page of the current search, tab and sort; a plain link, so the browser downloads. */}
+              <McButton
+                variant="secondary"
+                size="sm"
+                icon="leading"
+                iconDefinition={<DownloadIcon className="size-4" />}
+                nativeButton={false}
+                render={
+                  <a
+                    href={`${adminRoutes.registrations}/export${listQuery(params, { page: 1 })}`}
+                    download
+                  />
+                }
+              >
+                Export CSV{filtered ? ` (${page.total})` : ""}
+              </McButton>
+            </>
           }
         />
         <RegistrationsToolbar params={params} counts={counts} />
