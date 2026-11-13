@@ -194,7 +194,7 @@ export async function sendHrEmail(message: Omit<EmailMessage, "from">) {
 
   await hrTransport(user, pass).sendMail({
     ...message,
-    from: { name: `${siteConfig.name} HR`, address: user },
+    from: { name: `${siteConfig.name} Internal Relations`, address: user },
     attachments: [
       {
         filename: LOGO_ATTACHMENT.filename,
