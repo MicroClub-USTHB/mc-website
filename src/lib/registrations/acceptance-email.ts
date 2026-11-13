@@ -50,19 +50,8 @@ export function acceptanceEmail(fullName: string) {
   return { subject, html, text }
 }
 
-/**
- * Where the HR test goes: every active HR member, or `HR_EMAIL_TEST_TO` when set (local tests),
- * addressed with the sender's name.
- */
-async function testRecipients(senderName: string) {
-  const override = process.env.HR_EMAIL_TEST_TO
-  if (override) {
-    return override
-      .split(",")
-      .map((email) => email.trim())
-      .filter(Boolean)
-      .map((email) => ({ email, name: senderName }))
-  }
+/** Every active HR member with a real address: where the HR test goes. */
+async function testRecipients() {
   await connectToDatabase()
   const users = await getMongoClient()
     .db()
@@ -101,7 +90,7 @@ async function sendAll<T extends { email: string }>(
  * sending it to the applicants.
  */
 export async function sendAcceptanceTest(actor: TimelineActor & { email: string }) {
-  const recipients = await testRecipients(actor.name)
+  const recipients = await testRecipients()
   return sendAll(recipients, (recipient) => ({ fullName: recipient.name, replyTo: actor.email }))
 }
 
