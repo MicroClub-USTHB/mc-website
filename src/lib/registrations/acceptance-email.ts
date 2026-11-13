@@ -28,7 +28,7 @@ export function acceptanceEmail(fullName: string) {
         "Watch for the welcome session and your first activities, announced on Discord.",
       ]),
       emailParagraph(
-        `Questions? Just reply to this email and the HR team will answer you.<br><br>See you soon,<br><strong>The ${escapeHtml(siteConfig.name)} HR team</strong>`,
+        `Questions? Just reply to this email and the HR team will answer you.<br><br>See you soon,<br><strong>${escapeHtml(siteConfig.name)}</strong>`,
       ),
     ].join(""),
     action: { label: "Join the Discord server", href: discord },
@@ -45,7 +45,7 @@ export function acceptanceEmail(fullName: string) {
     "",
     `Join the Discord server: ${discord}`,
     "",
-    `Questions? Reply to this email. See you soon, the ${siteConfig.name} HR team.`,
+    `Questions? Reply to this email. See you soon, ${siteConfig.name}.`,
   ].join("\n")
   return { subject, html, text }
 }
