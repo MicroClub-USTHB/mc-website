@@ -86,6 +86,12 @@ const registrationDocument = new Schema(
       updatedByName: { type: String },
       updatedAt: { type: Date },
     },
+    /** When the acceptance email went out from the HR address, so it is sent once. */
+    acceptanceEmail: {
+      sentAt: { type: Date },
+      sentById: { type: String },
+      sentByName: { type: String },
+    },
   },
   { timestamps: true },
 )
