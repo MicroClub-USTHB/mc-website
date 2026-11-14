@@ -4,12 +4,17 @@ import { isValidObjectId } from "mongoose"
 
 import { connectToDatabase } from "@/lib/mongodb"
 import { RegistrationModel } from "@/lib/registrations/model"
-import type { RecommendationInput, ReviewInput } from "@/lib/registrations/review-schema"
+import type {
+  FinalDecisionInput,
+  RecommendationInput,
+  ReviewInput,
+} from "@/lib/registrations/review-schema"
 import {
   MAX_REVIEWERS,
   currentRecommendation,
   currentRecommendations,
   currentReviews,
+  finalDecision,
   hasReviewed,
   registrationStatus,
   type TimelineEntry,
@@ -128,5 +133,41 @@ export async function removeRecommendation(id: string, actor: TimelineActor) {
     actorId: actor.id,
     actorName: actor.name,
     at: new Date(),
+  })
+}
+
+/**
+ * Records the final decision after the interview, by any HR member: only on a registration in
+ * interview, or to change a final decision whose email has not gone out yet.
+ */
+export async function recordFinalDecision(
+  id: string,
+  actor: TimelineActor,
+  { state, note }: FinalDecisionInput,
+) {
+  if (!isValidObjectId(id)) return failure(NOT_FOUND)
+  await connectToDatabase()
+  const registration = await RegistrationModel.findById(id).select("timeline decisionEmail").lean()
+  if (!registration) return failure(NOT_FOUND)
+  const timeline = (registration.timeline ?? []) as TimelineEntry[]
+
+  const current = finalDecision(timeline)
+  if (registration.decisionEmail?.sentAt) {
+    return failure("Its decision email is already sent: the decision cannot change anymore.")
+  }
+  if (!current && registrationStatus(timeline) !== "interview") {
+    return failure(
+      "A final decision comes after the interview: this application is not in interview.",
+    )
+  }
+  if (current?.state === state && (current.note ?? "") === note) return SUCCESS
+
+  return append(id, timeline, {
+    kind: "final-decision",
+    actorId: actor.id,
+    actorName: actor.name,
+    at: new Date(),
+    state,
+    ...(note && { note }),
   })
 }

@@ -10,12 +10,15 @@ import { saveInterview } from "@/lib/registrations/interview-store"
 import type { PlaceSource } from "@/lib/registrations/place"
 import { saveReviewPlace } from "@/lib/registrations/place-store"
 import {
+  finalDecisionSchema,
   recommendationSchema,
   reviewSchema,
+  type FinalDecisionInput,
   type RecommendationInput,
   type ReviewInput,
 } from "@/lib/registrations/review-schema"
 import {
+  recordFinalDecision,
   recordRecommendation,
   recordReview,
   removeRecommendation as clearRecommendation,
@@ -125,4 +128,18 @@ export async function removeRecommendation(id: string) {
   const parsedId = registrationIdSchema.safeParse(id)
   if (!parsedId.success) return INVALID
   return applyChange(() => clearRecommendation(parsedId.data, actor))
+}
+
+/** The final decision after the interview, by any HR member: sets the registration's status. */
+export async function decideRegistration(id: string, input: FinalDecisionInput, search = "") {
+  const actor = await reviewer()
+  const parsedId = registrationIdSchema.safeParse(id)
+  const parsed = finalDecisionSchema.safeParse(input)
+  if (!parsedId.success || !parsed.success) return INVALID
+  return applyChange(() => recordFinalDecision(parsedId.data, actor, parsed.data), {
+    actor,
+    id: parsedId.data,
+    search,
+    source: "review",
+  })
 }

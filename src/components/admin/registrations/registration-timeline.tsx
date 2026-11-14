@@ -3,6 +3,7 @@ import {
   MessageCircleQuestionIcon,
   CalendarClockIcon,
   CheckIcon,
+  GavelIcon,
   RotateCcwIcon,
   StarIcon,
   StarOffIcon,
@@ -57,6 +58,16 @@ function describe(entry: TimelineEntry, previous: TimelineEntry[]) {
       icon,
       text: entry.reason,
       questions: entry.questions,
+    }
+  }
+  if (entry.kind === "final-decision") {
+    const changed = previous.some((earlier) => earlier.kind === "final-decision")
+    return {
+      verb: changed ? "changed the final decision to" : "made the final decision",
+      badge: entry.state === "accepted" ? "Accepted" : "Refused",
+      tone: REVIEWS[entry.state].tone,
+      icon: GavelIcon,
+      text: entry.note,
     }
   }
   if (entry.kind === "recommendation-removed") {

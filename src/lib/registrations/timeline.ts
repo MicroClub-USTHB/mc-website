@@ -27,8 +27,20 @@ export type RecommendationEntry = TimelineAction & {
 
 export type RecommendationRemovedEntry = TimelineAction & { kind: "recommendation-removed" }
 
+/** The answers a final decision can give, after the interview. */
+export const FINAL_DECISIONS = ["accepted", "rejected"] as const
+export type FinalDecision = (typeof FINAL_DECISIONS)[number]
+
+/** Any HR member's answer after the interview: it sets the registration's status for good. */
+export type FinalDecisionEntry = TimelineAction & {
+  kind: "final-decision"
+  state: FinalDecision
+  note?: string
+}
+
 /** One action on a registration: append-only, the source of truth of its reviews and status. */
-export type TimelineEntry = ReviewEntry | RecommendationEntry | RecommendationRemovedEntry
+export type TimelineEntry =
+  ReviewEntry | RecommendationEntry | RecommendationRemovedEntry | FinalDecisionEntry
 
 /** Latest review of each reviewer holding a place: going back to pending frees it. */
 export function currentReviews(timeline: TimelineEntry[]) {
@@ -125,7 +137,8 @@ export function hasReviewed(timeline: TimelineEntry[], actorId: string) {
  */
 export function currentRecommendation(timeline: TimelineEntry[]) {
   const latest = timeline.findLast(
-    (entry): entry is RecommendationEntry | RecommendationRemovedEntry => entry.kind !== "review",
+    (entry): entry is RecommendationEntry | RecommendationRemovedEntry =>
+      entry.kind === "recommendation" || entry.kind === "recommendation-removed",
   )
   return latest?.kind === "recommendation" ? latest : undefined
 }
@@ -147,11 +160,19 @@ export function currentRecommendations(timeline: TimelineEntry[]) {
     : []
 }
 
+/** The latest final decision, made after the interview, or `undefined` before it. */
+export function finalDecision(timeline: TimelineEntry[]) {
+  return timeline.findLast((entry): entry is FinalDecisionEntry => entry.kind === "final-decision")
+}
+
 /**
- * State of a registration: `pending` until two people reviewed it, then their shared answer, or
- * `conflict` as soon as they disagree (interview and rejected included).
+ * State of a registration: its final decision once an HR member made one after the interview;
+ * otherwise `pending` until two people reviewed it, then their shared answer, or `conflict` as
+ * soon as they disagree (interview and rejected included).
  */
 export function registrationStatus(timeline: TimelineEntry[]): RegistrationStatus {
+  const decision = finalDecision(timeline)
+  if (decision) return decision.state
   const states = currentReviews(timeline).map((review) => review.state)
   if (states.length < MAX_REVIEWERS) return "pending"
   return states[0] === states[1] ? states[0] : "conflict"

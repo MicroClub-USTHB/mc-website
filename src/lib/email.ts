@@ -1,5 +1,6 @@
 import "server-only"
 
+import nodemailer, { type Transporter } from "nodemailer"
 import { Resend } from "resend"
 
 import { siteConfig } from "@/config/site"
@@ -52,6 +53,28 @@ export function emailParagraph(content: string) {
   return `
         <tr><td style="padding:0 32px 16px">
           <p style="margin:0;font-family:${BODY_FONT};font-size:14px;line-height:20px;color:${COLOR.muted}">${content}</p>
+        </td></tr>`
+}
+
+/** Numbered steps in a tinted box, under a small title. Items are HTML: escape user input. */
+export function emailSteps(title: string, items: string[]) {
+  const rows = items
+    .map(
+      (item, index) => `
+            <tr>
+              <td width="28" valign="top" style="padding:0 0 12px">
+                <div style="width:24px;height:24px;border-radius:12px;background:${COLOR.primary};color:${COLOR.primaryForeground};font-family:${BODY_FONT};font-size:13px;line-height:24px;font-weight:600;text-align:center">${index + 1}</div>
+              </td>
+              <td valign="top" style="padding:2px 0 12px 10px;font-family:${BODY_FONT};font-size:15px;line-height:22px;color:${COLOR.foreground}">${item}</td>
+            </tr>`,
+    )
+    .join("")
+  return `
+        <tr><td style="padding:0 32px 24px">
+          <div style="background:${COLOR.background};border:1px solid ${COLOR.border};border-radius:12px;padding:20px 20px 8px">
+            <div style="font-family:${HEADING_FONT};font-size:16px;line-height:24px;font-weight:600;color:${COLOR.foreground};padding-bottom:14px">${escapeHtml(title)}</div>
+            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
+          </div>
         </td></tr>`
 }
 
@@ -149,4 +172,45 @@ export async function sendEmail(message: EmailMessage) {
     attachments: [LOGO_ATTACHMENT],
   })
   if (error) throw new Error(`${error.name}: ${error.message}`)
+}
+
+/**
+ * Sends an email from the HR Gmail account (`HR_EMAIL_USER`, `HR_EMAIL_APP_PASSWORD`: a Google
+ * App Password, see `.env.example`) over SMTP, throwing when it fails. Replies go to the HR member
+ * in `replyTo`. In development without a password, the email is printed to the console instead.
+ */
+export async function sendHrEmail(message: Omit<EmailMessage, "from">) {
+  const user = process.env.HR_EMAIL_USER
+  const pass = process.env.HR_EMAIL_APP_PASSWORD
+  if (!user || !pass) {
+    if (process.env.NODE_ENV === "development") {
+      console.info(
+        `\n--- HR email (HR_EMAIL_APP_PASSWORD is not set, not sent) ---\nTo: ${message.to}\nSubject: ${message.subject}\n\n${message.text}\n---\n`,
+      )
+      return
+    }
+    throw new Error("HR_EMAIL_USER or HR_EMAIL_APP_PASSWORD is missing")
+  }
+
+  await hrTransport(user, pass).sendMail({
+    ...message,
+    from: { name: `${siteConfig.name} Internal Relations`, address: user },
+    attachments: [
+      {
+        filename: LOGO_ATTACHMENT.filename,
+        content: LOGO_ATTACHMENT.content,
+        encoding: "base64",
+        contentType: LOGO_ATTACHMENT.contentType,
+        cid: LOGO_CID,
+      },
+    ],
+  })
+}
+
+let transport: Transporter | undefined
+
+/** One pooled Gmail SMTP connection, reused across emails of a batch. */
+function hrTransport(user: string, pass: string) {
+  transport ??= nodemailer.createTransport({ service: "gmail", pool: true, auth: { user, pass } })
+  return transport
 }
