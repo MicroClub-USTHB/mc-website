@@ -2,7 +2,7 @@ import type { Metadata } from "next"
 import { differenceInYears } from "date-fns"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeftIcon, ExternalLinkIcon } from "lucide-react"
+import { ArrowLeftIcon, ExternalLinkIcon, MailCheckIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
@@ -218,6 +218,14 @@ export default async function RegistrationPage({
                 </div>
               ))}
             </div>
+          )}
+          {registration.decisionEmail?.sentAt && (
+            <p className="flex items-center gap-2 paragraph-sm text-muted-foreground">
+              <MailCheckIcon className="size-4 shrink-0" aria-hidden />
+              {registration.decisionEmail.duplicate
+                ? "Not emailed: this address already got a decision email from another registration."
+                : `${registration.decisionEmail.kind === "accepted" ? "Acceptance" : "Refusal"} email sent ${formatClubTime(registration.decisionEmail.sentAt, "d MMMM yyyy, HH:mm")}${registration.decisionEmail.sentByName ? ` by ${registration.decisionEmail.sentByName}` : ""}.`}
+            </p>
           )}
           {(interview.at || interview.interviewerId) && (
             <div className="flex flex-col gap-1 rounded-lg border border-border bg-secondary/40 p-3">
