@@ -6,6 +6,7 @@ import {
   currentRecommendations,
   currentReviews,
   decisions,
+  finalDecision,
   hasReviewed,
   interviewQuestions,
   registrationStatus,
@@ -163,5 +164,34 @@ describe("interviewQuestions", () => {
       { actorId: "a", name: "a", questions: "New" },
     ])
     expect(interviewQuestions([ask("a", "Why us?", 1), review("a", "accepted")])).toEqual([])
+  })
+})
+
+describe("final decision", () => {
+  function decide(actorId: string, state: "accepted" | "rejected"): TimelineEntry {
+    return { kind: "final-decision", actorId, actorName: actorId, state, at }
+  }
+  const interview = [review("a", "interview"), review("b", "interview")]
+
+  it("sets the status after the interview, whatever the reviews", () => {
+    expect(registrationStatus(interview)).toBe("interview")
+    expect(registrationStatus([...interview, decide("c", "accepted")])).toBe("accepted")
+    expect(registrationStatus([...interview, decide("c", "rejected")])).toBe("rejected")
+  })
+
+  it("follows the latest final decision, even after later reviews", () => {
+    expect(
+      registrationStatus([
+        ...interview,
+        decide("c", "accepted"),
+        decide("a", "rejected"),
+        review("b", "accepted"),
+      ]),
+    ).toBe("rejected")
+    expect(finalDecision([...interview, decide("c", "accepted")])?.actorId).toBe("c")
+  })
+
+  it("is not a recommendation", () => {
+    expect(currentRecommendation([...interview, decide("c", "accepted")])).toBeUndefined()
   })
 })
