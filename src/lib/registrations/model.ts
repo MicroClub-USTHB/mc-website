@@ -86,6 +86,17 @@ const registrationDocument = new Schema(
       updatedByName: { type: String },
       updatedAt: { type: Date },
     },
+    /**
+     * The decision email (acceptance or refusal) sent from the HR address: set before sending, so
+     * nobody gets two. `duplicate` when another registration with the same address got it.
+     */
+    decisionEmail: {
+      kind: { type: String, enum: ["accepted", "rejected"] },
+      sentAt: { type: Date },
+      sentById: { type: String },
+      sentByName: { type: String },
+      duplicate: { type: Boolean },
+    },
   },
   { timestamps: true },
 )
@@ -98,6 +109,8 @@ registrationDocument.index({ "recommendations.target": 1 })
 registrationDocument.index({ "recommendations.actorId": 1 })
 // The interviews calendar.
 registrationDocument.index({ "interview.at": 1 })
+// Decision emails: what waits to be sent, and the daily limit.
+registrationDocument.index({ status: 1, "decisionEmail.sentAt": 1 })
 
 export type RegistrationDocument = InferSchemaType<typeof registrationDocument>
 
