@@ -9,7 +9,7 @@ const timelineEntry = new Schema(
   {
     kind: {
       type: String,
-      enum: ["review", "recommendation", "recommendation-removed"],
+      enum: ["review", "recommendation", "recommendation-removed", "final-decision"],
       required: true,
     },
     actorId: { type: String, required: true },

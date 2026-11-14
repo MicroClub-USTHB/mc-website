@@ -6,6 +6,7 @@ import { ArrowLeftIcon, ExternalLinkIcon, MailCheckIcon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { FinalDecisionDialog } from "@/components/admin/registrations/final-decision-dialog"
 import { MarkPlaceButton } from "@/components/admin/registrations/mark-place-button"
 import { RegistrationPager } from "@/components/admin/registrations/registration-pager"
 import {
@@ -38,6 +39,7 @@ import {
   MAX_REVIEWERS,
   currentRecommendation,
   currentReviews,
+  finalDecision,
   hasReviewed,
   interviewQuestions,
 } from "@/lib/registrations/timeline"
@@ -158,6 +160,9 @@ export default async function RegistrationPage({
   const ownReview = reviews.find((review) => review.actorId === user.id)
   const recommendation = currentRecommendation(timeline)
   const questions = interviewQuestions(timeline)
+  const decision = finalDecision(timeline)
+  // After the interview, until the decision email goes out.
+  const canDecide = !registration.decisionEmail?.sentAt && (status === "interview" || !!decision)
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -264,6 +269,31 @@ export default async function RegistrationPage({
             <p className="paragraph-sm text-muted-foreground">
               Two HR members are already reviewing this application.
             </p>
+          )}
+          {decision && (
+            <p className="paragraph-sm text-muted-foreground">
+              Final decision:{" "}
+              <span className="font-medium text-foreground">
+                {decision.state === "accepted" ? "Accepted" : "Refused"}
+              </span>{" "}
+              by {decision.actorId === user.id ? "you" : decision.actorName},{" "}
+              {formatClubTime(decision.at, "d MMMM yyyy, HH:mm")}.
+            </p>
+          )}
+          {canDecide && (
+            <div>
+              <FinalDecisionDialog
+                registrationId={id}
+                applicant={name}
+                current={
+                  decision && {
+                    state: decision.state,
+                    note: decision.note ?? "",
+                    by: decision.actorId === user.id ? "You" : decision.actorName,
+                  }
+                }
+              />
+            </div>
           )}
           <div>
             <RecommendDialog

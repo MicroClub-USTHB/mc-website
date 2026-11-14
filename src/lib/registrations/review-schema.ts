@@ -2,6 +2,7 @@ import { z } from "zod"
 
 import { isRecommendationTarget } from "@/lib/registrations/recommendations"
 import { REVIEW_STATES } from "@/lib/registrations/status"
+import { FINAL_DECISIONS } from "@/lib/registrations/timeline"
 
 /** Longest reason or note accepted on the timeline. */
 export const REVIEW_TEXT_MAX_LENGTH = 1000
@@ -26,5 +27,12 @@ export const recommendationSchema = z.object({
   note: reviewText,
 })
 
+/** The final decision after the interview, with an optional note for the team. */
+export const finalDecisionSchema = z.object({
+  state: z.enum(FINAL_DECISIONS, "Choose accepted or refused."),
+  note: reviewText,
+})
+
+export type FinalDecisionInput = z.infer<typeof finalDecisionSchema>
 export type ReviewInput = z.infer<typeof reviewSchema>
 export type RecommendationInput = z.infer<typeof recommendationSchema>
