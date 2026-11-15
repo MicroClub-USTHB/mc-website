@@ -56,28 +56,6 @@ export function emailParagraph(content: string) {
         </td></tr>`
 }
 
-/** Numbered steps in a tinted box, under a small title. Items are HTML: escape user input. */
-export function emailSteps(title: string, items: string[]) {
-  const rows = items
-    .map(
-      (item, index) => `
-            <tr>
-              <td width="28" valign="top" style="padding:0 0 12px">
-                <div style="width:24px;height:24px;border-radius:12px;background:${COLOR.primary};color:${COLOR.primaryForeground};font-family:${BODY_FONT};font-size:13px;line-height:24px;font-weight:600;text-align:center">${index + 1}</div>
-              </td>
-              <td valign="top" style="padding:2px 0 12px 10px;font-family:${BODY_FONT};font-size:15px;line-height:22px;color:${COLOR.foreground}">${item}</td>
-            </tr>`,
-    )
-    .join("")
-  return `
-        <tr><td style="padding:0 32px 24px">
-          <div style="background:${COLOR.background};border:1px solid ${COLOR.border};border-radius:12px;padding:20px 20px 8px">
-            <div style="font-family:${HEADING_FONT};font-size:16px;line-height:24px;font-weight:600;color:${COLOR.foreground};padding-bottom:14px">${escapeHtml(title)}</div>
-            <table role="presentation" width="100%" cellpadding="0" cellspacing="0">${rows}</table>
-          </div>
-        </td></tr>`
-}
-
 export function emailLink(label: string, href: string) {
   return `<a href="${escapeHtml(href)}" style="color:${COLOR.primary};text-decoration:none">${label}</a>`
 }
@@ -195,15 +173,18 @@ export async function sendHrEmail(message: Omit<EmailMessage, "from">) {
   await hrTransport(user, pass).sendMail({
     ...message,
     from: { name: `${siteConfig.name} Internal Relations`, address: user },
-    attachments: [
-      {
-        filename: LOGO_ATTACHMENT.filename,
-        content: LOGO_ATTACHMENT.content,
-        encoding: "base64",
-        contentType: LOGO_ATTACHMENT.contentType,
-        cid: LOGO_CID,
-      },
-    ],
+    // The logo is attached only for the layouts that reference it (`renderEmail`).
+    attachments: message.html.includes(`cid:${LOGO_CID}`)
+      ? [
+          {
+            filename: LOGO_ATTACHMENT.filename,
+            content: LOGO_ATTACHMENT.content,
+            encoding: "base64",
+            contentType: LOGO_ATTACHMENT.contentType,
+            cid: LOGO_CID,
+          },
+        ]
+      : [],
   })
 }
 

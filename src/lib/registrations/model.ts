@@ -97,9 +97,47 @@ const registrationDocument = new Schema(
       sentByName: { type: String },
       duplicate: { type: Boolean },
     },
+    /**
+     * Soft delete (a double, a mistake): the registration stays in the database but every query
+     * leaves it out, so nothing can review it, schedule it, email it or count it.
+     */
+    deleted: { type: Boolean, default: false },
+    deletion: {
+      at: { type: Date },
+      byId: { type: String },
+      byName: { type: String },
+      reason: { type: String },
+    },
   },
   { timestamps: true },
 )
+
+/** Leaves deleted registrations out, unless the query asks for them with `withDeleted`. */
+const NOT_DELETED = { deleted: { $ne: true } }
+
+// Every read and write query, so no code path can act on a deleted registration by mistake.
+registrationDocument.pre(
+  [
+    "find",
+    "findOne",
+    "countDocuments",
+    "distinct",
+    "updateOne",
+    "updateMany",
+    "findOneAndUpdate",
+    "replaceOne",
+    "deleteOne",
+    "deleteMany",
+  ],
+  function () {
+    if (this.getOptions().withDeleted) return
+    this.where(NOT_DELETED)
+  },
+)
+registrationDocument.pre("aggregate", function () {
+  if (this.options.withDeleted) return
+  this.pipeline().unshift({ $match: NOT_DELETED })
+})
 
 // The admin list: by date (oldest first by default), often filtered by status.
 registrationDocument.index({ createdAt: -1 })

@@ -2,10 +2,11 @@ import type { Metadata } from "next"
 import { differenceInYears } from "date-fns"
 import Link from "next/link"
 import { notFound } from "next/navigation"
-import { ArrowLeftIcon, ExternalLinkIcon, MailCheckIcon } from "lucide-react"
+import { ArrowLeftIcon, ExternalLinkIcon, MailCheckIcon, Trash2Icon } from "lucide-react"
 
 import { CopyButton } from "@/components/admin/registrations/copy-button"
 import { RecommendDialog } from "@/components/admin/registrations/recommend-dialog"
+import { DeleteRegistrationDialog } from "@/components/admin/registrations/delete-registration-dialog"
 import { FinalDecisionDialog } from "@/components/admin/registrations/final-decision-dialog"
 import { MarkPlaceButton } from "@/components/admin/registrations/mark-place-button"
 import { RegistrationPager } from "@/components/admin/registrations/registration-pager"
@@ -162,7 +163,10 @@ export default async function RegistrationPage({
   const questions = interviewQuestions(timeline)
   const decision = finalDecision(timeline)
   // After the interview, until the decision email goes out.
-  const canDecide = !registration.decisionEmail?.sentAt && (status === "interview" || !!decision)
+  // A deleted registration is read only: no review, decision, recommendation or place.
+  const deleted = registration.deleted === true
+  const emailed = !!registration.decisionEmail?.sentAt && !registration.decisionEmail.duplicate
+  const canDecide = !deleted && !emailed && (status === "interview" || !!decision)
 
   return (
     <div className="mx-auto flex w-full max-w-site flex-col gap-6 px-4 py-12 sm:px-8">
@@ -175,7 +179,7 @@ export default async function RegistrationPage({
           Back to {list.label}
         </Link>
         <div className="flex flex-wrap items-center gap-3">
-          <MarkPlaceButton registrationId={id} marked={marked} />
+          {!deleted && <MarkPlaceButton registrationId={id} marked={marked} />}
           <RegistrationPager
             previous={list.previous}
             next={list.next}
@@ -188,7 +192,11 @@ export default async function RegistrationPage({
       <header className="flex flex-col gap-2">
         <div className="flex flex-wrap items-center gap-3">
           <h1 className="min-w-0 header-md font-heading text-foreground">{name}</h1>
-          <StatusBadge status={status} />
+          {deleted ? (
+            <McBadge variant="destructive">Deleted</McBadge>
+          ) : (
+            <StatusBadge status={status} />
+          )}
         </div>
         <p className="paragraph-md text-muted-foreground">
           Submitted on{" "}
@@ -197,6 +205,30 @@ export default async function RegistrationPage({
           </time>
         </p>
       </header>
+
+      {deleted && (
+        <div
+          role="status"
+          className="flex items-start gap-3 rounded-xl border border-destructive/40 bg-destructive/5 p-4"
+        >
+          <Trash2Icon className="mt-0.5 size-5 shrink-0 text-destructive" aria-hidden />
+          <div className="flex min-w-0 flex-col gap-1">
+            <p className="paragraph-md font-medium text-foreground">
+              Deleted
+              {registration.deletion?.byName ? ` by ${registration.deletion.byName}` : ""}
+              {registration.deletion?.at
+                ? ` on ${formatClubTime(registration.deletion.at, "d MMMM yyyy, HH:mm")}`
+                : ""}
+              . Nothing can be done on it anymore.
+            </p>
+            {registration.deletion?.reason && (
+              <p className="paragraph-sm whitespace-pre-line text-muted-foreground">
+                {registration.deletion.reason}
+              </p>
+            )}
+          </div>
+        </div>
+      )}
 
       <div className="grid grid-cols-1 gap-6 lg:grid-cols-2">
         <Section title="Review">
@@ -254,7 +286,7 @@ export default async function RegistrationPage({
               </Link>
             </div>
           )}
-          {ownReview || reviews.length < MAX_REVIEWERS ? (
+          {deleted ? null : ownReview || reviews.length < MAX_REVIEWERS ? (
             <ReviewActions
               registrationId={id}
               applicant={name}
@@ -295,19 +327,24 @@ export default async function RegistrationPage({
               />
             </div>
           )}
-          <div>
-            <RecommendDialog
-              registrationId={id}
-              applicant={name}
-              recommendation={
-                recommendation && {
-                  target: recommendation.target,
-                  note: recommendation.note ?? "",
-                  by: recommendation.actorId === user.id ? "you" : recommendation.actorName,
+          {!deleted && (
+            <div className="flex flex-wrap items-center justify-between gap-3">
+              <RecommendDialog
+                registrationId={id}
+                applicant={name}
+                recommendation={
+                  recommendation && {
+                    target: recommendation.target,
+                    note: recommendation.note ?? "",
+                    by: recommendation.actorId === user.id ? "you" : recommendation.actorName,
+                  }
                 }
-              }
-            />
-          </div>
+              />
+              {!emailed && (
+                <DeleteRegistrationDialog registrationId={id} applicant={name} back={list.back} />
+              )}
+            </div>
+          )}
         </Section>
 
         <Section title="Timeline">

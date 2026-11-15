@@ -10,6 +10,7 @@ import { saveInterview } from "@/lib/registrations/interview-store"
 import type { PlaceSource } from "@/lib/registrations/place"
 import { saveReviewPlace } from "@/lib/registrations/place-store"
 import {
+  deletionSchema,
   finalDecisionSchema,
   recommendationSchema,
   reviewSchema,
@@ -18,6 +19,7 @@ import {
   type ReviewInput,
 } from "@/lib/registrations/review-schema"
 import {
+  softDeleteRegistration,
   recordFinalDecision,
   recordRecommendation,
   recordReview,
@@ -142,4 +144,19 @@ export async function decideRegistration(id: string, input: FinalDecisionInput, 
     search,
     source: "review",
   })
+}
+
+/** Soft deletes a registration: hidden everywhere, nothing can be done on it anymore. */
+export async function deleteRegistration(id: string, reason: string) {
+  const actor = await reviewer()
+  const parsedId = registrationIdSchema.safeParse(id)
+  const parsed = deletionSchema.safeParse({ reason })
+  if (!parsedId.success) return INVALID
+  if (!parsed.success) {
+    return {
+      status: "error" as const,
+      message: parsed.error.issues[0]?.message ?? "Check the form and try again.",
+    }
+  }
+  return applyChange(() => softDeleteRegistration(parsedId.data, actor, parsed.data.reason))
 }

@@ -33,6 +33,11 @@ export const finalDecisionSchema = z.object({
   note: reviewText,
 })
 
+/** Why a registration is deleted: required, shown on its page to every HR member. */
+export const deletionSchema = z.object({
+  reason: reviewText.min(1, "Say why it is deleted (e.g. a double of another registration)."),
+})
+
 export type FinalDecisionInput = z.infer<typeof finalDecisionSchema>
 export type ReviewInput = z.infer<typeof reviewSchema>
 export type RecommendationInput = z.infer<typeof recommendationSchema>
