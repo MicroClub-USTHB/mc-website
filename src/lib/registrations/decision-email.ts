@@ -1,8 +1,7 @@
 import "server-only"
 
 import { siteConfig } from "@/config/site"
-import { CONTACT } from "@/const/contact"
-import { emailParagraph, emailSteps, escapeHtml, renderEmail, sendHrEmail } from "@/lib/email"
+import { sendHrEmail } from "@/lib/email"
 import { connectToDatabase, getMongoClient } from "@/lib/mongodb"
 import {
   DAILY_EMAIL_LIMIT,
@@ -11,6 +10,11 @@ import {
   refusalsLocked,
   type DecisionKind,
 } from "@/lib/registrations/decision-email-rules"
+import {
+  DISCORD_INVITE,
+  acceptanceHtml,
+  rejectionHtml,
+} from "@/lib/registrations/decision-email-templates"
 import { RegistrationModel } from "@/lib/registrations/model"
 import type { TimelineActor } from "@/lib/registrations/timeline-store"
 
@@ -19,89 +23,63 @@ const FAKE_EMAIL = /\.test$/i
 
 type Sender = TimelineActor & { email: string }
 
-const SIGN_OFF = `Questions? Just reply to this email.<br><br>See you soon,<br><strong>${escapeHtml(siteConfig.name)}</strong>`
-
-/** The acceptance email sent to `fullName`, the same for the HR test and the applicants. */
-function acceptanceEmail(fullName: string) {
-  const discord = CONTACT.discord
+/** The acceptance email, as drafted by Internal Relations. */
+function acceptanceEmail(firstName: string, lastName: string) {
+  const name = `${lastName} ${firstName}`.trim()
   return {
-    subject: `Welcome to ${siteConfig.name}, ${fullName}!`,
-    html: renderEmail({
-      preheader: `Congratulations ${fullName}, your application to ${siteConfig.name} is accepted.`,
-      title: `Welcome aboard, ${fullName}!`,
-      intro: `Congratulations: the HR team is happy to tell you that you are accepted into ${siteConfig.name}.`,
-      rows: [
-        emailParagraph(
-          `You now join a community of students who build, learn and share in tech since 1985. We can't wait to see what you will create with us.`,
-        ),
-        emailSteps("What happens next", [
-          "Join our Discord server: it is where the club talks, plans and shares every announcement.",
-          "Introduce yourself there and meet the members of your section.",
-          "Watch for the welcome session and your first activities, announced on Discord.",
-        ]),
-        emailParagraph(SIGN_OFF),
-      ].join(""),
-      action: { label: "Join the Discord server", href: discord },
-    }),
+    subject: `${siteConfig.name}: access granted!`,
+    html: acceptanceHtml(firstName, lastName),
     text: [
-      `Welcome aboard, ${fullName}!`,
+      `DEAR, ${name}!`,
       "",
-      `Congratulations: the HR team is happy to tell you that you are accepted into ${siteConfig.name}.`,
+      "Your signal reached us!",
+      `First, thank you for your time, enthusiasm, and interest in becoming part of ${siteConfig.name} for the 2026/2027 academic year.`,
       "",
-      "What happens next:",
-      "1. Join our Discord server, where every announcement is shared.",
-      "2. Introduce yourself there and meet the members of your section.",
-      "3. Watch for the welcome session and your first activities.",
+      "ACCESS GRANTED! YOU'VE BEEN ACCEPTED!",
       "",
-      `Join the Discord server: ${discord}`,
+      "We are delighted to welcome you to our community and look forward to having you as part of the club.",
+      "Before you log in, read the Discord Guide: https://docs.google.com/document/d/1GlJGSv3PtZPeNiXc1k2ehkqaxDxCYAgBLLd4FSCCLMY/edit?tab=t.0",
       "",
-      `Questions? Reply to this email. See you soon, ${siteConfig.name}.`,
+      "ICE-BREAK EVENT: we will be holding our Ice-Break event on 23/11/2026, for our newly recruited members. More details will be shared on the Discord server.",
+      "",
+      "IMPORTANT: by not joining the members' server, you will not be considered an official member of Micro Club. This server is reserved exclusively for accepted members: sharing this link with anyone is strictly prohibited.",
+      `Join the server: ${DISCORD_INVITE}`,
+      "",
+      "LET'S EXPERIENCE IT!",
     ].join("\n"),
   }
 }
 
-/** The refusal email sent to `fullName`: kind, and the door left open to the community. */
-function refusalEmail(fullName: string) {
-  const discord = CONTACT.discord
+/** The refusal email, as drafted by Internal Relations. */
+function refusalEmail(firstName: string, lastName: string) {
+  const name = `${lastName} ${firstName}`.trim()
   return {
-    subject: `Your application to ${siteConfig.name}`,
-    html: renderEmail({
-      preheader: `Thank you for applying to ${siteConfig.name}, ${fullName}.`,
-      title: `Thank you, ${fullName}`,
-      intro: `Thank you for your interest in ${siteConfig.name} and for the time you gave to your application.`,
-      rows: [
-        emailParagraph(
-          `We received far more applications than we have places this year. After reading every one of them carefully, we are sorry to tell you that we cannot welcome you into the club this time.`,
-        ),
-        emailSteps("You are still part of the community", [
-          "Our events, workshops and hackathons are open to every student: join them.",
-          "Stay in touch on our Discord server, where every event is announced.",
-          "Keep building and apply again at the next recruitment: we would love to read you again.",
-        ]),
-        emailParagraph(SIGN_OFF),
-      ].join(""),
-      action: { label: "Join the Discord server", href: discord },
-    }),
+    subject: `${siteConfig.name}: application update`,
+    html: rejectionHtml(firstName, lastName),
     text: [
-      `Thank you, ${fullName}`,
+      `DEAR, ${name}!`,
       "",
-      `Thank you for your interest in ${siteConfig.name} and for the time you gave to your application.`,
-      "We received far more applications than we have places this year, and we are sorry to tell you that we cannot welcome you into the club this time.",
+      "Your signal reached us!",
+      `First, thank you for your time, enthusiasm, and interest in becoming part of ${siteConfig.name} for the 2026/2027 academic year.`,
       "",
-      "You are still part of the community:",
-      "1. Our events, workshops and hackathons are open to every student.",
-      "2. Stay in touch on our Discord server, where every event is announced.",
-      "3. Apply again at the next recruitment.",
+      "After carefully reviewing all applications, we regret to inform you that your application has not been selected this time.",
       "",
-      `Join the Discord server: ${discord}`,
+      "Even if you weren't selected for internal membership this round, you are always welcome to attend our public workshops, hackathons, and Open Days!",
+      `You can join our community Discord server: ${DISCORD_INVITE}`,
       "",
-      `Questions? Reply to this email. See you soon, ${siteConfig.name}.`,
+      `Thank you once again for your interest in ${siteConfig.name}, and we wish you the very best in your future endeavors!`,
+      "",
+      "Best regards,",
+      "Micro Club Internal Relations Management Department",
+      "USTHB – Algiers",
     ].join("\n"),
   }
 }
 
-function decisionEmail(kind: DecisionKind, fullName: string) {
-  return kind === "accepted" ? acceptanceEmail(fullName) : refusalEmail(fullName)
+function decisionEmail(kind: DecisionKind, firstName: string, lastName: string) {
+  return kind === "accepted"
+    ? acceptanceEmail(firstName, lastName)
+    : refusalEmail(firstName, lastName)
 }
 
 /** Registrations of `kind` that did not get their decision email yet. */
@@ -178,7 +156,7 @@ export async function sendDecisionTest(kind: DecisionKind, sender: Sender): Prom
       await sendHrEmail({
         to: member.email,
         replyTo: sender.email,
-        ...decisionEmail(kind, member.name),
+        ...decisionEmail(kind, member.name, ""),
       })
       result.sent += 1
     } catch (error) {
@@ -247,7 +225,7 @@ export async function sendDecisionWave(kind: DecisionKind, sender: Sender): Prom
       await sendHrEmail({
         to: email,
         replyTo: sender.email,
-        ...decisionEmail(kind, `${document.firstName} ${document.lastName}`),
+        ...decisionEmail(kind, String(document.firstName), String(document.lastName)),
       })
       emailed.add(email.toLowerCase())
       result.sent += 1
