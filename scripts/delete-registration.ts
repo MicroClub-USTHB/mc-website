@@ -7,11 +7,12 @@
  */
 import { parseArgs } from "node:util"
 
+import { v2 as cloudinary } from "cloudinary"
+import { ObjectId } from "mongodb"
 import { isValidObjectId } from "mongoose"
 
-import { deleteStudentId } from "@/lib/cloudinary"
-import { connectToDatabase, getMongoClient } from "@/lib/mongodb"
-import { RegistrationModel } from "@/lib/registrations/model"
+// The raw collections, not the app's model: it pulls in the form's icons, which a script cannot load.
+import { getMongoClient } from "@/lib/mongodb"
 
 import { run } from "./run"
 
@@ -22,13 +23,19 @@ run(async () => {
   const id = values.id ?? ""
   if (!isValidObjectId(id)) throw new Error("Usage: pnpm db:delete-registration --id <id> [--yes]")
 
-  await connectToDatabase()
-  const registration = await RegistrationModel.findById(id)
-    .select("firstName lastName email status createdAt studentId")
-    .lean()
+  const db = getMongoClient().db()
+  const registrations = db.collection<{
+    firstName: string
+    lastName: string
+    email: string
+    status: string
+    createdAt: Date
+    studentId?: { publicId: string; resourceType: string }
+  }>("registrations")
+  const registration = await registrations.findOne({ _id: new ObjectId(id) })
   if (!registration) throw new Error(`No registration has the id ${id}.`)
 
-  const others = await RegistrationModel.countDocuments({
+  const others = await registrations.countDocuments({
     email: registration.email,
     _id: { $ne: registration._id },
   })
@@ -41,16 +48,21 @@ run(async () => {
     return
   }
 
-  await RegistrationModel.deleteOne({ _id: registration._id })
-  const places = await getMongoClient()
-    .db()
-    .collection("review_places")
-    .deleteMany({ registrationId: id })
+  await registrations.deleteOne({ _id: registration._id })
+  const places = await db.collection("review_places").deleteMany({ registrationId: id })
   console.info(`Deleted the registration and ${places.deletedCount} HR place(s) pointing to it.`)
 
   if (registration.studentId?.publicId) {
     try {
-      await deleteStudentId(registration.studentId)
+      cloudinary.config({
+        cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+        api_key: process.env.CLOUDINARY_API_KEY,
+        api_secret: process.env.CLOUDINARY_API_SECRET,
+      })
+      await cloudinary.uploader.destroy(registration.studentId.publicId, {
+        type: "authenticated",
+        resource_type: registration.studentId.resourceType,
+      })
       console.info("Deleted its student ID file from Cloudinary.")
     } catch (error) {
       console.warn("Its student ID file could not be deleted from Cloudinary:", error)
