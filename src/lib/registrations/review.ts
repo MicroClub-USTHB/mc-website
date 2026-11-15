@@ -197,7 +197,8 @@ export async function registrationListOrder(params: RegistrationListParams, id: 
 export async function getRegistration(id: string) {
   if (!isValidObjectId(id)) return null
   await connectToDatabase()
-  const registration = await RegistrationModel.findById(id).lean()
+  // Deleted ones too: their page stays readable, without any action.
+  const registration = await RegistrationModel.findById(id).setOptions({ withDeleted: true }).lean()
   // Registrations submitted before the timeline existed have no such field.
   return (
     registration && { ...registration, timeline: (registration.timeline ?? []) as TimelineEntry[] }

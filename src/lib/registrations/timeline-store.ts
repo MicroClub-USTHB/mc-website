@@ -171,3 +171,29 @@ export async function recordFinalDecision(
     ...(note && { note }),
   })
 }
+
+/**
+ * Soft deletes a registration (a double, a mistake): it is flagged, with who did it and why, and
+ * every query leaves it out from then on (see `model.ts`). It cannot be reviewed, decided,
+ * scheduled or emailed anymore. Refused once its decision email is sent.
+ */
+export async function softDeleteRegistration(id: string, actor: TimelineActor, reason: string) {
+  if (!isValidObjectId(id)) return failure(NOT_FOUND)
+  await connectToDatabase()
+  const registration = await RegistrationModel.findById(id).select("decisionEmail").lean()
+  if (!registration) return failure(NOT_FOUND)
+  if (registration.decisionEmail?.sentAt && !registration.decisionEmail.duplicate) {
+    return failure("Its decision email is already sent: it cannot be deleted anymore.")
+  }
+  const { modifiedCount } = await RegistrationModel.updateOne(
+    { _id: id },
+    {
+      $set: {
+        deleted: true,
+        deletion: { at: new Date(), byId: actor.id, byName: actor.name, reason },
+        recommendations: [],
+      },
+    },
+  )
+  return modifiedCount > 0 ? SUCCESS : failure(NOT_FOUND)
+}
