@@ -5,6 +5,7 @@ import { sendHrEmail } from "@/lib/email"
 import { connectToDatabase, getMongoClient } from "@/lib/mongodb"
 import {
   DAILY_EMAIL_LIMIT,
+  failureReason,
   limitResetsAt,
   nextWaveSize,
   refusalsLocked,
@@ -132,7 +133,13 @@ export async function decisionEmailStatus() {
 
 export type DecisionEmailStatus = Awaited<ReturnType<typeof decisionEmailStatus>>
 
-export type SendResult = { sent: number; skipped: number; failed: string[] }
+export type SendResult = {
+  sent: number
+  skipped: number
+  failed: string[]
+  /** Why the sending stopped early: the rest is left untouched, for the next try. */
+  stopped?: string
+}
 
 /** Every active HR member with a real address: where the HR test goes. */
 async function hrMembers() {
@@ -163,6 +170,8 @@ export async function sendDecisionTest(kind: DecisionKind, sender: Sender): Prom
     } catch (error) {
       console.error(`Decision test email to ${member.email} failed:`, error)
       result.failed.push(member.email)
+      result.stopped = failureReason(error)
+      break
     }
   }
   return result
@@ -234,6 +243,8 @@ export async function sendDecisionWave(kind: DecisionKind, sender: Sender): Prom
       console.error(`Decision email to ${email} failed:`, error)
       await RegistrationModel.updateOne({ _id: document._id }, { $unset: { decisionEmail: 1 } })
       result.failed.push(email)
+      result.stopped = failureReason(error)
+      break
     }
   }
   return result

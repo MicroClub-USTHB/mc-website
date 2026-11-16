@@ -3,6 +3,7 @@ import { describe, expect, it } from "vitest"
 import {
   DAILY_EMAIL_LIMIT,
   WAVE_SIZE,
+  failureReason,
   limitResetsAt,
   nextWaveSize,
   refusalsLocked,
@@ -37,5 +38,20 @@ describe("refusalsLocked", () => {
   it("locks refusals while an acceptance waits", () => {
     expect(refusalsLocked(1)).toBe(true)
     expect(refusalsLocked(0)).toBe(false)
+  })
+})
+
+describe("failureReason", () => {
+  it("names the usual Gmail failures", () => {
+    expect(failureReason({ code: "EAUTH", responseCode: 535 })).toMatch(/APP_PASSWORD/)
+    expect(
+      failureReason({ responseCode: 550, response: "550 5.4.5 Daily user sending limit exceeded" }),
+    ).toMatch(/24 hours/)
+    expect(failureReason({ code: "ETIMEDOUT" })).toMatch(/did not answer/)
+  })
+  it("falls back to Gmail's own answer", () => {
+    expect(failureReason({ response: "552 5.3.4 Message too big" })).toBe(
+      "552 5.3.4 Message too big",
+    )
   })
 })
