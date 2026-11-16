@@ -11,7 +11,8 @@ import {
   type DecisionKind,
 } from "@/lib/registrations/decision-email-rules"
 import {
-  DISCORD_INVITE,
+  COMMUNITY_DISCORD_INVITE,
+  MEMBERS_DISCORD_INVITE,
   acceptanceHtml,
   rejectionHtml,
 } from "@/lib/registrations/decision-email-templates"
@@ -43,7 +44,7 @@ function acceptanceEmail(firstName: string, lastName: string) {
       "ICE-BREAK EVENT: we will be holding our Ice-Break event on 23/11/2026, for our newly recruited members. More details will be shared on the Discord server.",
       "",
       "IMPORTANT: by not joining the members' server, you will not be considered an official member of Micro Club. This server is reserved exclusively for accepted members: sharing this link with anyone is strictly prohibited.",
-      `Join the server: ${DISCORD_INVITE}`,
+      `Join the server: ${MEMBERS_DISCORD_INVITE}`,
       "",
       "LET'S EXPERIENCE IT!",
     ].join("\n"),
@@ -65,7 +66,7 @@ function refusalEmail(firstName: string, lastName: string) {
       "After carefully reviewing all applications, we regret to inform you that your application has not been selected this time.",
       "",
       "Even if you weren't selected for internal membership this round, you are always welcome to attend our public workshops, hackathons, and Open Days!",
-      `You can join our community Discord server: ${DISCORD_INVITE}`,
+      `You can join our community Discord server: ${COMMUNITY_DISCORD_INVITE}`,
       "",
       `Thank you once again for your interest in ${siteConfig.name}, and we wish you the very best in your future endeavors!`,
       "",

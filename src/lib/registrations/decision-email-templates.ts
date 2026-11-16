@@ -4,8 +4,10 @@
  */
 import { escapeHtml } from "@/lib/email"
 
-/** Discord server both emails link to: the community server for now. */
-const DISCORD_INVITE = "https://discord.com/invite/cRKWK5bX2y"
+/** The members' server, for accepted applicants only: never share it elsewhere. */
+const MEMBERS_DISCORD_INVITE = "https://discord.gg/6AqQRQgeg"
+/** The public community server, open to everyone, in the refusal email. */
+const COMMUNITY_DISCORD_INVITE = "https://discord.com/invite/cRKWK5bX2y"
 
 /** "LASTNAME FIRSTNAME", as the greeting expects, escaped for HTML. */
 function greetingName(firstName: string, lastName: string) {
@@ -163,7 +165,7 @@ export function acceptanceHtml(firstName: string, lastName: string) {
               <!-- bulletproof button -->
               <table role="presentation" align="right" cellpadding="0" cellspacing="0" border="0">
                 <tr><td bgcolor="#2a2ad8" style="background:#2a2ad8;border-top:2px solid #7c7cff;border-left:2px solid #7c7cff;border-right:2px solid #07073a;border-bottom:2px solid #07073a;">
-                  <a href="${DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
+                  <a href="${MEMBERS_DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
                 </td></tr>
               </table>
               <div style="clear:both;font-size:0;line-height:0;">&nbsp;</div>
@@ -329,7 +331,7 @@ export function rejectionHtml(firstName: string, lastName: string) {
               <!-- bulletproof button -->
               <table role="presentation" align="left" cellpadding="0" cellspacing="0" border="0">
                 <tr><td bgcolor="#2a2ad8" style="background:#2a2ad8;border-top:2px solid #7c7cff;border-left:2px solid #7c7cff;border-right:2px solid #07073a;border-bottom:2px solid #07073a;">
-                  <a href="${DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
+                  <a href="${COMMUNITY_DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
                 </td></tr>
               </table>
               <div style="clear:both;font-size:0;line-height:0;">&nbsp;</div>
@@ -357,4 +359,4 @@ export function rejectionHtml(firstName: string, lastName: string) {
 `
 }
 
-export { DISCORD_INVITE }
+export { COMMUNITY_DISCORD_INVITE, MEMBERS_DISCORD_INVITE }
