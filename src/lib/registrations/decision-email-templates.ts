@@ -5,7 +5,7 @@
 import { escapeHtml } from "@/lib/email"
 
 /** The members' server, for accepted applicants only: never share it elsewhere. */
-const MEMBERS_DISCORD_INVITE = "https://discord.gg/6AqQRQgeg"
+const MEMBERS_DISCORD_INVITE = "https://discord.gg/gVEUpsVb2"
 /** The public community server, open to everyone, in the refusal email. */
 const COMMUNITY_DISCORD_INVITE = "https://discord.com/invite/cRKWK5bX2y"
 
