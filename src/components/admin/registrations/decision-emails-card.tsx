@@ -64,17 +64,12 @@ export function DecisionEmailsCard({ status }: { status: DecisionEmailStatus }) 
           : `${plural(result.sent, COPY[kind].noun)} sent.`,
         result.skipped > 0 &&
           `${plural(result.skipped, "address", "addresses")} already got an email from another registration: skipped.`,
-        result.failed.length > 0 &&
-          `Failed: ${result.failed.join(", ")}. They stay in the queue for the next wave.`,
+        result.stopped &&
+          `Stopped at ${result.failed[0]}: ${result.stopped} Everyone not emailed stays waiting for the next wave.`,
       ].filter(Boolean)
-      const show = result.failed.length > 0 ? showWarning : showSuccess
+      const show = result.stopped ? showWarning : showSuccess
       show({
-        title:
-          result.failed.length > 0
-            ? "Some emails were not sent"
-            : mode === "test"
-              ? "Test sent"
-              : "Wave sent",
+        title: result.stopped ? "Sending stopped" : mode === "test" ? "Test sent" : "Wave sent",
         description: parts.join(" "),
         actionLabel: "Got it",
       })

@@ -192,6 +192,15 @@ let transport: Transporter | undefined
 
 /** One pooled Gmail SMTP connection, reused across emails of a batch. */
 function hrTransport(user: string, pass: string) {
-  transport ??= nodemailer.createTransport({ service: "gmail", pool: true, auth: { user, pass } })
+  transport ??= nodemailer.createTransport({
+    service: "gmail",
+    pool: true,
+    auth: { user, pass },
+    // Fail fast when Gmail does not answer (defaults: 2 min to connect, 10 min of silence), so a
+    // stuck connection ends the wave with its reason instead of hanging it.
+    connectionTimeout: 15_000,
+    greetingTimeout: 10_000,
+    socketTimeout: 30_000,
+  })
   return transport
 }

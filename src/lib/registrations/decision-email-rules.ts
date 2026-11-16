@@ -30,3 +30,26 @@ export function limitResetsAt(sentLast24h: Date[]) {
 export function refusalsLocked(acceptancesWaiting: number) {
   return acceptancesWaiting > 0
 }
+
+/**
+ * Gmail's reason for a failed email, for HR. Its failures are almost never about one recipient
+ * (wrong App Password, daily limit, lost connection), so a send stops at the first one.
+ */
+export function failureReason(error: unknown) {
+  const { code, responseCode, response, message } = (error ?? {}) as {
+    code?: string
+    responseCode?: number
+    response?: string
+    message?: string
+  }
+  if (code === "EAUTH") return "Gmail refused the HR address's login: check HR_EMAIL_APP_PASSWORD."
+  if (/5\.4\.5|4\.7\.0|limit/i.test(response ?? "")) {
+    return "Gmail's sending limit is reached: try again in 24 hours."
+  }
+  if (code === "ETIMEDOUT" || code === "ECONNECTION" || code === "ESOCKET") {
+    return "Gmail did not answer in time: try again in a few minutes."
+  }
+  return (
+    response ?? message ?? (responseCode ? `Gmail answered ${responseCode}.` : "Unknown error.")
+  )
+}
