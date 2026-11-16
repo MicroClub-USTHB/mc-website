@@ -87,7 +87,7 @@ export function acceptanceHtml(firstName: string, lastName: string) {
                 </td></tr>
               </table>
 
-              <!-- greeting: the applicant's last and first name -->
+              <!-- greeting (keep {{NOM}} / {{PRENOM}} for your mail-merge) -->
               <div class="hello" style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#111111;padding-bottom:14px;">DEAR, ${name}!</div>
 
               <p style="margin:0 0 16px;">Your signal reached us!</p>
@@ -98,11 +98,11 @@ export function acceptanceHtml(firstName: string, lastName: string) {
 
               <!-- readout box -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
-                <tr><td bgcolor="#f7f7ff" style="background:#f7f7ff;padding:12px 16px 14px;border:2px dashed #14149e;">
-                  <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:10px;line-height:14px;font-weight:bold;color:#14149e;padding-bottom:10px;">SYSTEM STATUS</div>
-                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#111111;">ACCESS GRANTED!</div>
-                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:22px;line-height:28px;font-weight:bold;color:#111111;">YOU'VE BEEN ACCEPTED!</div>
-                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:16px;line-height:22px;color:#14149e;padding-top:8px;">USER STATUS: NEW MICRO CLUB MEMBER</div>
+                <tr><td bgcolor="#eafbe9" style="background:#eafbe9;padding:12px 16px 14px;border:2px dashed #1a8f2e;">
+                  <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:10px;line-height:14px;font-weight:bold;color:#1a8f2e;padding-bottom:10px;">SYSTEM STATUS</div>
+                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#1a8f2e;">ACCESS GRANTED!</div>
+                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:22px;line-height:28px;font-weight:bold;color:#1a8f2e;">YOU'VE BEEN ACCEPTED!</div>
+                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:16px;line-height:22px;color:#1a8f2e;padding-top:8px;">USER STATUS: NEW MICRO CLUB MEMBER</div>
                 </td></tr>
               </table>
 
@@ -121,31 +121,8 @@ export function acceptanceHtml(firstName: string, lastName: string) {
       </table>
     </td></tr>
 
-    <!-- ===================== WINDOW 2: EVENTS ===================== -->
+    <!-- ===================== WINDOW 2: JOIN SERVER ===================== -->
     <tr><td style="padding:0 0 22px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
-        <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td bgcolor="#1c1cc0" style="background:#1c1cc0;background-image:linear-gradient(90deg,#14149e,#2a2ad8);border:1px solid #0a0a5c;padding:10px 14px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:11px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-transform:uppercase;">
-              Micro Club // EVENTS
-            </td></tr>
-          </table>
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
-            <tr><td class="pad" bgcolor="#ececec" style="background:#ececec;padding:20px 22px;border-top:2px solid #7a7a7a;border-left:2px solid #7a7a7a;border-right:2px solid #ffffff;border-bottom:2px solid #ffffff;font-family:'VT323','Courier New',Courier,monospace;font-size:18px;line-height:24px;color:#111111;">
-              <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:22px;font-weight:bold;color:#14149e;padding-bottom:16px;">ICE-BREAK EVENT &ndash; NOVEMBER 23TH</div>
-              <p style="margin:0 0 16px;">We will be holding our Ice-Break event on 23/11/2026. This event is specifically organized for our newly recruited members, giving you the opportunity to discover Micro Club in greater detail, learn about its departments, activities, and projects, and get to know the people you'll be working alongside.</p>
-              <p style="margin:0;">(More details will be shared on the discord server)</p>
-            </td></tr>
-          </table>
-
-        </td></tr>
-      </table>
-    </td></tr>
-
-    <!-- ===================== WINDOW 3: JOIN SERVER ===================== -->
-    <tr><td>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
         <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
 
@@ -165,10 +142,33 @@ export function acceptanceHtml(firstName: string, lastName: string) {
               <!-- bulletproof button -->
               <table role="presentation" align="right" cellpadding="0" cellspacing="0" border="0">
                 <tr><td bgcolor="#2a2ad8" style="background:#2a2ad8;border-top:2px solid #7c7cff;border-left:2px solid #7c7cff;border-right:2px solid #07073a;border-bottom:2px solid #07073a;">
-                  <a href="${MEMBERS_DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
+                                    <a href="${MEMBERS_DISCORD_INVITE}" target="_blank" style="display:inline-block;padding:12px 22px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-decoration:none;">JOIN SERVER</a>
                 </td></tr>
               </table>
               <div style="clear:both;font-size:0;line-height:0;">&nbsp;</div>
+            </td></tr>
+          </table>
+
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ===================== WINDOW 3: EVENTS ===================== -->
+    <tr><td>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
+        <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td bgcolor="#1c1cc0" style="background:#1c1cc0;background-image:linear-gradient(90deg,#14149e,#2a2ad8);border:1px solid #0a0a5c;padding:10px 14px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:11px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-transform:uppercase;">
+              Micro Club // EVENTS
+            </td></tr>
+          </table>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+            <tr><td class="pad" bgcolor="#ececec" style="background:#ececec;padding:20px 22px;border-top:2px solid #7a7a7a;border-left:2px solid #7a7a7a;border-right:2px solid #ffffff;border-bottom:2px solid #ffffff;font-family:'VT323','Courier New',Courier,monospace;font-size:18px;line-height:24px;color:#111111;">
+              <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:22px;font-weight:bold;color:#14149e;padding-bottom:16px;">ICE-BREAK EVENT &ndash; NOVEMBER 23TH</div>
+              <p style="margin:0 0 16px;">We will be holding our Ice-Break event on 23/11/2026. This event is specifically organized for our newly recruited members, giving you the opportunity to discover Micro Club in greater detail, learn about its departments, activities, and projects, and get to know the people you'll be working alongside.</p>
+              <p style="margin:0;">(More details will be shared on the discord server)</p>
             </td></tr>
           </table>
 
@@ -263,7 +263,7 @@ export function rejectionHtml(firstName: string, lastName: string) {
                 </td></tr>
               </table>
 
-              <!-- greeting: the applicant's last and first name -->
+              <!-- greeting (keep {{NOM}} / {{PRENOM}} for your mail-merge) -->
               <div class="hello" style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#111111;padding-bottom:14px;">DEAR, ${name}!</div>
 
               <p style="margin:0 0 16px;">Your signal reached us!</p>
@@ -274,10 +274,10 @@ export function rejectionHtml(firstName: string, lastName: string) {
 
               <!-- readout box -->
               <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin:0 0 20px;">
-                <tr><td bgcolor="#f7f7ff" style="background:#f7f7ff;padding:12px 16px 14px;border:2px dashed #14149e;">
-                  <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:10px;line-height:14px;font-weight:bold;color:#14149e;padding-bottom:10px;">SYSTEM STATUS</div>
-                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#111111;">NOT SELECTED THIS TIME</div>
-                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:16px;line-height:22px;color:#14149e;padding-top:8px;">CONNECTION STATUS: STILL POSSIBLE</div>
+                <tr><td bgcolor="#fdecec" style="background:#fdecec;padding:12px 16px 14px;border:2px dashed #c62828;">
+                  <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:10px;line-height:14px;font-weight:bold;color:#c62828;padding-bottom:10px;">SYSTEM STATUS</div>
+                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:28px;line-height:32px;font-weight:bold;color:#c62828;">NOT SELECTED THIS TIME</div>
+                  <div style="font-family:'VT323','Courier New',Courier,monospace;font-size:16px;line-height:22px;color:#c62828;padding-top:8px;">CONNECTION STATUS: STILL POSSIBLE</div>
                 </td></tr>
               </table>
 
@@ -290,30 +290,8 @@ export function rejectionHtml(firstName: string, lastName: string) {
       </table>
     </td></tr>
 
-    <!-- ===================== WINDOW 2: EVENTS ===================== -->
+    <!-- ===================== WINDOW 2: JOIN SERVER ===================== -->
     <tr><td style="padding:0 0 22px;">
-      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
-        <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
-            <tr><td bgcolor="#1c1cc0" style="background:#1c1cc0;background-image:linear-gradient(90deg,#14149e,#2a2ad8);border:1px solid #0a0a5c;padding:10px 14px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:11px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-transform:uppercase;">
-              Micro Club // OPEN EVENTS
-            </td></tr>
-          </table>
-
-          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
-            <tr><td class="pad" bgcolor="#ececec" style="background:#ececec;padding:20px 22px;border-top:2px solid #7a7a7a;border-left:2px solid #7a7a7a;border-right:2px solid #ffffff;border-bottom:2px solid #ffffff;font-family:'VT323','Courier New',Courier,monospace;font-size:18px;line-height:24px;color:#111111;">
-              <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:22px;font-weight:bold;color:#14149e;padding-bottom:16px;">STAY IN THE LOOP</div>
-              <p style="margin:0;">Even if you weren't selected for internal membership this round, you are always welcome to attend our public workshops, hackathons, and Open Days!</p>
-            </td></tr>
-          </table>
-
-        </td></tr>
-      </table>
-    </td></tr>
-
-    <!-- ===================== WINDOW 3: JOIN SERVER ===================== -->
-    <tr><td>
       <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
         <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
 
@@ -338,6 +316,28 @@ export function rejectionHtml(firstName: string, lastName: string) {
 
               <p style="margin:18px 0 16px;">Thank you once again for your interest in Micro Club, and we wish you the very best in your future endeavors!</p>
               <p style="margin:0;">Best regards,<br><br>Micro Club Internal Relations Management Department<br>USTHB &ndash; Algiers</p>
+            </td></tr>
+          </table>
+
+        </td></tr>
+      </table>
+    </td></tr>
+
+    <!-- ===================== WINDOW 3: EVENTS ===================== -->
+    <tr><td>
+      <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" bgcolor="#cfcfcf" style="background:#cfcfcf;border:2px solid #1a1a1a;">
+        <tr><td style="padding:8px;border-top:2px solid #ffffff;border-left:2px solid #ffffff;border-right:2px solid #7a7a7a;border-bottom:2px solid #7a7a7a;">
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0">
+            <tr><td bgcolor="#1c1cc0" style="background:#1c1cc0;background-image:linear-gradient(90deg,#14149e,#2a2ad8);border:1px solid #0a0a5c;padding:10px 14px;font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:11px;line-height:16px;font-weight:bold;letter-spacing:.5px;color:#ffffff;text-transform:uppercase;">
+              Micro Club // OPEN EVENTS
+            </td></tr>
+          </table>
+
+          <table role="presentation" width="100%" cellpadding="0" cellspacing="0" border="0" style="margin-top:6px;">
+            <tr><td class="pad" bgcolor="#ececec" style="background:#ececec;padding:20px 22px;border-top:2px solid #7a7a7a;border-left:2px solid #7a7a7a;border-right:2px solid #ffffff;border-bottom:2px solid #ffffff;font-family:'VT323','Courier New',Courier,monospace;font-size:18px;line-height:24px;color:#111111;">
+              <div style="font-family:'Press Start 2P','Courier New',Courier,monospace;font-size:12px;line-height:22px;font-weight:bold;color:#14149e;padding-bottom:16px;">STAY IN THE LOOP</div>
+              <p style="margin:0;">Even if you weren't selected for internal membership this round, you are always welcome to attend our public workshops, hackathons, and Open Days!</p>
             </td></tr>
           </table>
 
